@@ -1,10 +1,10 @@
 import { useForm } from 'react-hook-form';
-import FormInput from '@components/form/form-input';
-import Button from '@components/common/button';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRegisterMutation } from '@hooks/mutations';
 import { useRouter } from 'next/router';
+import FormInput from '../components/form/form-input';
+import Button from '../components/common/button';
+import { useRegisterMutation } from '../hooks/mutations/auth';
 
 const schema = z
   .object({

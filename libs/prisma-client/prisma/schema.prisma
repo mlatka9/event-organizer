@@ -11,7 +11,51 @@ datasource db {
 }
 
 model User {
-  id           String @id @default(cuid())
-  email        String @unique
-  hashPassword String
+  id                String             @id @default(cuid())
+  email             String             @unique
+  hashPassword      String
+  eventParticipants EventParticipant[]
+}
+
+model Event {
+  id            String             @id @default(cuid())
+  name          String
+  description   String
+  street        String
+  city          String
+  country       String
+  postCode      String
+  startDate     DateTime?
+  latitude      Decimal?
+  longitude     Decimal?
+  tags          EventTag[]
+  EventCategory EventCategory[]
+  UserEvents    EventParticipant[]
+}
+
+model EventParticipant {
+  role    EventRole @default(USER)
+  user    User      @relation(fields: [userId], references: [id])
+  userId  String
+  event   Event     @relation(fields: [eventId], references: [id])
+  eventId String
+
+  @@id([userId, eventId])
+}
+
+enum EventRole {
+  USER
+  ADMIN
+}
+
+model EventCategory {
+  id     String  @id @default(cuid())
+  name   String
+  events Event[]
+}
+
+model EventTag {
+  id     String  @id @default(cuid())
+  name   String  @unique
+  events Event[]
 }

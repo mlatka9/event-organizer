@@ -1,13 +1,7 @@
-import clsx from "clsx";
-import React from "react";
-import {
-  FieldError,
-  FieldValues,
-  Path,
-  RegisterOptions,
-  UseFormRegister,
-} from "react-hook-form";
-import FormErrorMessage from "@components/form/form-error-message";
+import clsx from 'clsx';
+import React from 'react';
+import { FieldError, FieldValues, Path, RegisterOptions, UseFormRegister } from 'react-hook-form';
+import FormErrorMessage from './form-error-message';
 
 type FormSelectOptionType = { value: string; label: string; disabled: boolean };
 
@@ -18,7 +12,7 @@ export type FormSelectProps<V extends FieldValues> = {
   register: UseFormRegister<V>;
   error?: FieldError;
   options: FormSelectOptionType[];
-} & React.ComponentProps<"select">;
+} & React.ComponentProps<'select'>;
 
 const FormSelect = <TFormValues extends FieldValues>({
   register,
@@ -49,7 +43,7 @@ const FormSelect = <TFormValues extends FieldValues>({
         <label
           htmlFor={label}
           className={clsx(
-            "pointer-events-none absolute top-5 left-1 z-10 origin-[0] -translate-y-5 scale-75 transform px-2 text-sm text-gray-500 duration-300"
+            'pointer-events-none absolute top-5 left-1 z-10 origin-[0] -translate-y-5 scale-75 transform px-2 text-sm text-gray-500 duration-300'
           )}
         >
           {label}

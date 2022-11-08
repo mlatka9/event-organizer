@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import authAPI from '../api/user';
+import authAPI from '../../api/user';
 
 export const useRegisterMutation = (onSuccess?: () => void) => {
   return useMutation(authAPI.register, {

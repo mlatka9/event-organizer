@@ -1,7 +1,7 @@
-import { useMeQuery } from '@hooks/query';
-import { useLogoutMutation } from '@hooks/mutations';
-import Button from '@components/common/button';
 import Link from 'next/link';
+import { useLogoutMutation } from '../hooks/mutations/auth';
+import { useMeQuery } from '../hooks/query/auth';
+import Button from './common/button';
 
 const Header = () => {
   const { data, isSuccess } = useMeQuery();

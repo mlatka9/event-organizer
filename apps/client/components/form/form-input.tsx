@@ -1,15 +1,8 @@
-import React from "react";
-import {
-  FieldError,
-  FieldValues,
-  Path,
-  RegisterOptions,
-  UseFormRegister,
-} from "react-hook-form";
-import FormErrorMessage from "@components/form/form-error-message";
+import React from 'react';
+import { FieldError, FieldValues, Path, RegisterOptions, UseFormRegister } from 'react-hook-form';
+import FormErrorMessage from './form-error-message';
 
-export interface FormInputProps<V extends FieldValues>
-  extends React.ComponentProps<"input"> {
+export interface FormInputProps<V extends FieldValues> extends React.ComponentProps<'input'> {
   label: string;
   name: Path<V>;
   rules?: RegisterOptions;
@@ -18,14 +11,7 @@ export interface FormInputProps<V extends FieldValues>
   error?: FieldError;
 }
 
-const FormInput = <V extends FieldValues>({
-  rules,
-  label,
-  name,
-  register,
-  error,
-  ...props
-}: FormInputProps<V>) => {
+const FormInput = <V extends FieldValues>({ rules, label, name, register, error, ...props }: FormInputProps<V>) => {
   return (
     <div>
       <div className="relative">

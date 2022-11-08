@@ -1,10 +1,17 @@
+import 'express-async-errors';
+
 import * as express from 'express';
 import * as path from 'path';
 import * as cors from 'cors';
 import authRoutes from './routes/auth';
+import eventsRoutes from './routes/event';
+import errorHandlerMiddleware from './middlewares/error-handler';
 import * as bodyParser from 'body-parser';
 import * as passport from 'passport';
 import { localStrategy } from './lib/password-local';
+import * as morgan from 'morgan';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 
@@ -18,14 +25,19 @@ app.use(
 app.use(bodyParser.json());
 app.use(passport.initialize());
 
-passport.use(localStrategy);
+app.use(morgan('tiny'));
 
-app.use('/assets', express.static(path.join(__dirname, 'assets')));
-app.use('/api/auth', authRoutes);
+passport.use(localStrategy);
 
 app.get('/', (req, res) => {
   res.send({ message: 'Welcome to server!' });
 });
+
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
+app.use('/api/auth', authRoutes);
+app.use('/api/events', eventsRoutes);
+
+app.use(errorHandlerMiddleware);
 
 const port = process.env.port || 3333;
 

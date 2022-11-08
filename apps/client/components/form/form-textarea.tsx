@@ -1,12 +1,6 @@
-import React from "react";
-import {
-  FieldError,
-  FieldValues,
-  Path,
-  RegisterOptions,
-  UseFormRegister,
-} from "react-hook-form";
-import FormErrorMessage from "@components/form/form-error-message";
+import React from 'react';
+import { FieldError, FieldValues, Path, RegisterOptions, UseFormRegister } from 'react-hook-form';
+import FormErrorMessage from './form-error-message';
 
 export type FormInputProps<V extends FieldValues> = {
   label: string;
@@ -14,7 +8,7 @@ export type FormInputProps<V extends FieldValues> = {
   rules?: RegisterOptions;
   register: UseFormRegister<V>;
   error?: FieldError;
-} & React.ComponentProps<"textarea">;
+} & React.ComponentProps<'textarea'>;
 
 const FormTextarea = <TFormValues extends FieldValues>({
   register,
