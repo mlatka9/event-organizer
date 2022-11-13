@@ -11,6 +11,7 @@ import * as passport from 'passport';
 import { localStrategy } from './lib/password-local';
 import * as morgan from 'morgan';
 import * as dotenv from 'dotenv';
+import { isLoggedMiddleware } from './middlewares/is-logged';
 dotenv.config();
 
 const app = express();
@@ -34,8 +35,11 @@ app.get('/', (req, res) => {
 });
 
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
+
 app.use('/api/auth', authRoutes);
-app.use('/api/events', eventsRoutes);
+
+app.use('/api/events', eventsRoutes.publicRouter);
+app.use('/api/events', isLoggedMiddleware, eventsRoutes.protectedRouter);
 
 app.use(errorHandlerMiddleware);
 

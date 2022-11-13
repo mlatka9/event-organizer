@@ -1,15 +1,29 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import authAPI from '../../api/user';
+import { AxiosError } from 'axios';
+import { APIError } from '../../api/types';
 
-export const useRegisterMutation = (onSuccess?: () => void) => {
+interface UseRegisterMutationProps {
+  onSuccess?: () => void;
+  onError?: (error: AxiosError) => void;
+}
+
+export const useRegisterMutation = ({ onError, onSuccess }: UseRegisterMutationProps) => {
   return useMutation(authAPI.register, {
     onSuccess,
+    onError,
   }).mutate;
 };
 
-export const useLoginMutation = (onSuccess?: () => void) => {
+interface UseLoginMutationProps {
+  onSuccess?: () => void;
+  onError?: (error: APIError) => void;
+}
+
+export const useLoginMutation = ({ onError, onSuccess }: UseLoginMutationProps) => {
   return useMutation(authAPI.login, {
     onSuccess,
+    onError,
   }).mutate;
 };
 

@@ -11,10 +11,12 @@
     "target": "es2015",
     "module": "esnext",
     "lib": ["es2017", "dom"],
+    "strict": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@event-organizer/auth": ["libs/auth/src/index.ts"],
       "@event-organizer/prisma-client": ["libs/prisma-client/src/index.ts"],
       "@event-organizer/shared-types": ["libs/shared-types/src/index.ts"]
     }

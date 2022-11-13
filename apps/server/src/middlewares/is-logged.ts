@@ -1,16 +1,19 @@
 import { Request, Response, NextFunction } from 'express';
-import { getLoginSession } from '../lib/auth';
+import { getLoginSession } from '@event-organizer/auth';
 
-const isLogged = async (req: Request, res: Response, next: NextFunction) => {
+export const isLoggedMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const session = await getLoginSession(req);
 
+  console.log(session);
+
   if (!session) {
+    console.log('BRAK SESJI');
     res.status(401).end('Authentication token is invalid, please log in');
     return;
   }
 
-  const userId = session.id;
+  console.log('MIDDLE END');
 
-  req.userId = userId;
+  req.userId = session.userId;
   next();
 };

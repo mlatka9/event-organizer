@@ -5,6 +5,10 @@ import { useRouter } from 'next/router';
 import FormInput from '../components/form/form-input';
 import Button from '../components/common/button';
 import { useRegisterMutation } from '../hooks/mutations/auth';
+import Header from '../components/common/header';
+import Link from 'next/link';
+import { useState } from 'react';
+import FormErrorMessage from '../components/form/form-error-message';
 
 const schema = z
   .object({
@@ -20,6 +24,7 @@ const schema = z
 type RegisterFormInput = z.infer<typeof schema>;
 
 const RegisterPage = () => {
+  const [APIErrorMessage, setAPIErrorMessage] = useState<undefined | string>(undefined);
   const router = useRouter();
   const {
     register,
@@ -34,44 +39,66 @@ const RegisterPage = () => {
     },
   });
 
-  const registerUser = useRegisterMutation(() => router.push('/login'));
+  const registerUser = useRegisterMutation({
+    onSuccess: () => router.push('/login'),
+    onError: (err) =>
+      setAPIErrorMessage(err.response?.status === 409 ? 'Użytkownik z takim adresem email już istnieje' : undefined),
+  });
 
-  const onSubmit = (data: RegisterFormInput) => {
-    registerUser({
+  const onSubmit = async (data: RegisterFormInput) => {
+    await registerUser({
       email: data.email,
       password: data.password,
     });
-    console.log(data);
   };
 
   return (
-    <div className={'max-w-[700px] mx-auto'}>
-      <h1 className={'text-3xl mb-5'}>Register</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className={'flex flex-col space-y-1'}>
-        <FormInput
-          label={'email'}
-          name={'email'}
-          register={register}
-          error={errors.email}
-          rules={{
-            pattern: {
-              value: /\S+@\S+\.\S+/,
-              message: 'Entered value does not match email format',
-            },
-          }}
-        />
-        <FormInput label={'hasło'} name={'password'} register={register} type={'password'} error={errors.password} />
-        <FormInput
-          label={'powtórz hasło'}
-          name={'confirmPassword'}
-          register={register}
-          type={'password'}
-          error={errors.confirmPassword}
-        />
-        <Button type={'submit'} className={'mx-auto'}>
-          Submit
-        </Button>
-      </form>
+    <div>
+      <Header hasLoginButtons={false} />
+      <div className={'grid grid-cols-2 h-screen pt-[80px]'}>
+        <img src={'/images/concert.jpg'} className={'w-full h-full object-cover'} />
+        <div className={'px-10 my-auto max-w-[600px] w-full mx-auto'}>
+          <h1 className={'text-3xl mb-3 font-semibold'}>Zarejestruj się</h1>
+          <p className={'mb-10'}>
+            Masz już konto
+            <Link href={'/login'} className={'text-blue-400 ml-1'}>
+              Zaloguj się
+            </Link>
+          </p>
+          <form onSubmit={handleSubmit(onSubmit)} className={'flex flex-col space-y-3'}>
+            <FormInput
+              label={'email'}
+              name={'email'}
+              register={register}
+              error={errors.email}
+              rules={{
+                pattern: {
+                  value: /\S+@\S+\.\S+/,
+                  message: 'Entered value does not match email format',
+                },
+              }}
+            />
+            <FormInput
+              label={'hasło'}
+              name={'password'}
+              register={register}
+              type={'password'}
+              error={errors.password}
+            />
+            <FormInput
+              label={'powtórz hasło'}
+              name={'confirmPassword'}
+              register={register}
+              type={'password'}
+              error={errors.confirmPassword}
+            />
+            {APIErrorMessage && <FormErrorMessage message={APIErrorMessage} />}
+            <Button type={'submit'} className={'ml-auto'}>
+              Potwierdź
+            </Button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

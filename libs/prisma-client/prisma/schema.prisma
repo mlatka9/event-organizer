@@ -18,19 +18,25 @@ model User {
 }
 
 model Event {
-  id            String             @id @default(cuid())
-  name          String
-  description   String
-  street        String
-  city          String
-  country       String
-  postCode      String
-  startDate     DateTime?
-  latitude      Decimal?
-  longitude     Decimal?
-  tags          EventTag[]
-  EventCategory EventCategory[]
-  UserEvents    EventParticipant[]
+  id                    String                @id @default(cuid())
+  name                  String
+  description           String
+  street                String?
+  city                  String?
+  normalizedCity        NormalizedCity?       @relation(fields: [normalizedCityId], references: [id])
+  normalizedCityId      String?
+  country               String?
+  postCode              String?
+  startDate             DateTime?
+  latitude              Decimal?
+  longitude             Decimal?
+  bannerImage           String?
+  tags                  EventTag[]
+  eventParticipants     EventParticipant[]
+  eventVisibilityStatus EventVisibilityStatus
+  eventLocationStatus   EventLocationStatus
+  eventCategoryId       String
+  eventCategory         EventCategory         @relation(fields: [eventCategoryId], references: [id])
 }
 
 model EventParticipant {
@@ -43,9 +49,25 @@ model EventParticipant {
   @@id([userId, eventId])
 }
 
+model NormalizedCity {
+  id     String  @id @default(cuid())
+  name   String  @unique
+  events Event[]
+}
+
 enum EventRole {
   USER
   ADMIN
+}
+
+enum EventVisibilityStatus {
+  PRIVATE
+  PUBLIC
+}
+
+enum EventLocationStatus {
+  STATIONARY
+  ONLINE
 }
 
 model EventCategory {

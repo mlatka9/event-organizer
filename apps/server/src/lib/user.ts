@@ -1,5 +1,6 @@
-import prisma from './prisma';
+import { prisma } from '@event-organizer/prisma-client';
 import * as bcrypt from 'bcryptjs';
+import { ConflictError } from '../errors/conflict';
 
 export const createUser = async (email: string, password: string) => {
   const duplicatedUser = await prisma.user.findUnique({
@@ -9,7 +10,7 @@ export const createUser = async (email: string, password: string) => {
   });
 
   if (duplicatedUser) {
-    throw new Error('User with provided email already exists');
+    throw new ConflictError('User with provided email already exists');
   }
 
   const salt = await bcrypt.genSalt(10);

@@ -3,7 +3,7 @@ import React from 'react';
 import { FieldError, FieldValues, Path, RegisterOptions, UseFormRegister } from 'react-hook-form';
 import FormErrorMessage from './form-error-message';
 
-type FormSelectOptionType = { value: string; label: string; disabled: boolean };
+type FormSelectOptionType = { value: string; label: string };
 
 export type FormSelectProps<V extends FieldValues> = {
   label: string;
@@ -21,6 +21,7 @@ const FormSelect = <TFormValues extends FieldValues>({
   name,
   error,
   options,
+
   ...props
 }: FormSelectProps<TFormValues>) => {
   return (
@@ -29,13 +30,13 @@ const FormSelect = <TFormValues extends FieldValues>({
         <select
           id={label}
           className="bg-primary-100 peer block w-full appearance-none rounded-lg border-2 border-gray-300 px-2 pb-2.5 pt-4 text-sm focus:border-blue-300 focus:outline-none"
-          placeholder="category"
+          defaultValue={''}
           {...(register && register(name, rules))}
           {...props}
-          defaultValue=""
         >
+          <option value="" disabled hidden></option>
           {options.map((o) => (
-            <option key={o.value} value={o.value} disabled={o.disabled}>
+            <option key={o.value} value={o.value}>
               {o.label}
             </option>
           ))}

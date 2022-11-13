@@ -1,11 +1,7 @@
-import Header from '../components/header';
+import MainLayout from '../components/layouts/main-layout';
 
 export function Index() {
-  return (
-    <div>
-      <Header />
-    </div>
-  );
+  return <MainLayout>main content</MainLayout>;
 }
 
 export default Index;
