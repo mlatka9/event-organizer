@@ -4,8 +4,6 @@ import { getLoginSession } from '@event-organizer/auth';
 export const isLoggedMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const session = await getLoginSession(req);
 
-  console.log(session);
-
   if (!session) {
     console.log('BRAK SESJI');
     res.status(401).end('Authentication token is invalid, please log in');

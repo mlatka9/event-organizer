@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import authAPI from '../../api/user';
+import authAPI from '../../api/auth';
 import { AxiosError } from 'axios';
 import { APIError } from '../../api/types';
 

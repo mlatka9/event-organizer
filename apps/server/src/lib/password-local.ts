@@ -14,7 +14,7 @@ export const localStrategy = new Local.Strategy(
         email,
       },
     });
-    console.log('localStrategy user', user);
+    console.log('localStrategy users', user);
     if (!user) {
       done(new Error('Invalid username and password combination'));
       return;

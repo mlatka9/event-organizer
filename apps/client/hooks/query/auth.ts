@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import authAPI from '../../api/user';
+import authAPI from '../../api/auth';
 import { useRouter } from 'next/router';
 
 interface UseMeQueryProps {

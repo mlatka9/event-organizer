@@ -1,6 +1,6 @@
 import api from '../lib/api';
 import { CreateEventInputType, EventShowcaseType } from '@event-organizer/shared-types';
-import type { EventCategory } from '@prisma/client';
+import { CategoryType } from '@event-organizer/shared-types';
 
 const createEvent = async (registerData: CreateEventInputType) => {
   const { data } = await api.post('/events', registerData, {
@@ -22,7 +22,6 @@ const getEvents = async (args: {
   category?: string;
   timeRange?: string;
 }): Promise<{ events: EventShowcaseType[]; currentPage: number; pageCount: number }> => {
-  console.log();
   const { data } = await api.get('/events', {
     withCredentials: true,
     params: {
@@ -37,7 +36,7 @@ const getEvents = async (args: {
   return data;
 };
 
-const getCategories = async (): Promise<EventCategory[]> => {
+const getCategories = async (): Promise<CategoryType[]> => {
   const { data } = await api.get('/events/categories');
   return data;
 };

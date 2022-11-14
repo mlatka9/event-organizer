@@ -12,7 +12,7 @@ import FormSelect from '../../components/form/form-select';
 import { createEventSchema } from '@event-organizer/shared-types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useEventsCategoriesQuery } from '../../hooks/query/events';
+import { useCategoriesQuery } from '../../hooks/query/events';
 import Heading from '../../components/common/heading';
 import React from 'react';
 import FileIcon from '../../components/icons/file-icon';
@@ -76,7 +76,7 @@ const CreateEventPage = () => {
 
   console.log('form data', watch());
 
-  const { data, isSuccess } = useEventsCategoriesQuery();
+  const { data, isSuccess } = useCategoriesQuery();
 
   const date = watch('startDate');
   console.log('date', date);

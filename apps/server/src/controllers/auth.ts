@@ -5,6 +5,7 @@ import { removeTokenCookie } from '@event-organizer/auth';
 import { prisma } from '@event-organizer/prisma-client';
 import { createUser } from '../lib/user';
 import { UnauthenticatedError } from '../errors';
+import { MeType } from '@event-organizer/shared-types';
 
 const authenticate = (method: string, req: Request, res: Response) =>
   new Promise<{ userId: string }>((resolve, reject) => {
@@ -64,7 +65,7 @@ const me = async (req: Request, res: Response) => {
     return;
   }
 
-  const formattedUser = { userId: user.id };
+  const formattedUser: MeType = { userId: user.id, name: user.name, image: user.image };
 
   res.status(200).json(formattedUser);
 };

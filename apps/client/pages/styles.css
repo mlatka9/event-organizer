@@ -6,5 +6,7 @@
 
 html {
   font-family: 'Poppins', sans-serif;
+  @apply text-neutral-800;
+  @apply bg-blue-50;
 }
 

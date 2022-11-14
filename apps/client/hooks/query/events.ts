@@ -42,6 +42,6 @@ export const useEventInfoQuery = (id: string, enabled = true) => {
   });
 };
 
-export const useEventsCategoriesQuery = () => {
-  return useQuery(['eventsCategories'], eventsAPI.getCategories);
+export const useCategoriesQuery = () => {
+  return useQuery(['categories'], eventsAPI.getCategories);
 };

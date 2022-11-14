@@ -11,10 +11,24 @@ datasource db {
 }
 
 model User {
-  id                String             @id @default(cuid())
-  email             String             @unique
-  hashPassword      String
-  eventParticipants EventParticipant[]
+  id                  String                    @id @default(cuid())
+  email               String                    @unique
+  name                String
+  hashPassword        String
+  eventParticipants   EventParticipant[]
+  image               String?
+  groups              UsersInGroup[]
+  favouriteCategories UserFavouriteCategories[]
+  joinedAt            DateTime                  @default(now())
+}
+
+model UserFavouriteCategories {
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String
+
+  @@id([userId, categoryId])
 }
 
 model Event {
@@ -35,8 +49,28 @@ model Event {
   eventParticipants     EventParticipant[]
   eventVisibilityStatus EventVisibilityStatus
   eventLocationStatus   EventLocationStatus
-  eventCategoryId       String
-  eventCategory         EventCategory         @relation(fields: [eventCategoryId], references: [id])
+  categoryId            String
+  category              Category              @relation(fields: [categoryId], references: [id])
+}
+
+model Group {
+  id          String         @id @default(cuid())
+  name        String
+  description String
+  memebrs     UsersInGroup[]
+  categoryId  String
+  category    Category       @relation(fields: [categoryId], references: [id])
+}
+
+model UsersInGroup {
+  group    Group     @relation(fields: [groupId], references: [id])
+  groupId  String
+  user     User      @relation(fields: [userId], references: [id])
+  userId   String
+  role     GroupRole @default(USER)
+  joinedAt DateTime  @default(now())
+
+  @@id([groupId, userId])
 }
 
 model EventParticipant {
@@ -60,6 +94,11 @@ enum EventRole {
   ADMIN
 }
 
+enum GroupRole {
+  USER
+  ADMIN
+}
+
 enum EventVisibilityStatus {
   PRIVATE
   PUBLIC
@@ -70,10 +109,12 @@ enum EventLocationStatus {
   ONLINE
 }
 
-model EventCategory {
-  id     String  @id @default(cuid())
-  name   String
-  events Event[]
+model Category {
+  id                String                    @id @default(cuid())
+  name              String
+  events            Event[]
+  favouritedByUsers UserFavouriteCategories[]
+  group             Group[]
 }
 
 model EventTag {

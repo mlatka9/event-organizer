@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import MainLayout from '../../components/layouts/main-layout';
-import { useEventsCategoriesQuery, useEventsQuery } from '../../hooks/query/events';
+import { useCategoriesQuery, useEventsQuery } from '../../hooks/query/events';
 import EventCard from '../../components/event/event-card';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
@@ -11,6 +11,7 @@ import FiltersModal from '../../components/event/filters-modal';
 import FilterTile from '../../components/event/filter-tile';
 import FilterIcon from '../../components/icons/filter-icon';
 import Link from 'next/link';
+import Pagination from '../../components/common/pagination';
 
 const MapWithNoSSR = dynamic(() => import('../../components/map'), {
   ssr: false,
@@ -40,7 +41,7 @@ const EventsPage = () => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const router = useRouter();
   const [focusedMarkerId, setFocusedMarkerId] = useState<undefined | string>(undefined);
-  const { data: categories, isSuccess: isCategoriesSuccess } = useEventsCategoriesQuery();
+  const { data: categories, isSuccess: isCategoriesSuccess } = useCategoriesQuery();
 
   console.log('categories', categories);
 
@@ -197,21 +198,11 @@ const EventsPage = () => {
           <MapWithNoSSR markers={locationMarker} focusedMarkerId={focusedMarkerId} mapHeight={'100%'} />
         </div>
       </div>
-      <div className={'flex items-center justify-center py-5'}>
-        <button
-          className={'flex w-10 h-10 justify-center items-center ring-1 rounded-full font-semibold text-lg'}
-          onClick={() => updateParam('page', `${eventsData.currentPage - 1}`)}
-        >
-          {'<'}
-        </button>
-        <div className={'mx-10 text-2xl'}>{eventsData.currentPage}</div>
-        <button
-          className={'flex w-10 h-10 justify-center items-center ring-1 rounded-full font-semibold text-lg'}
-          onClick={() => updateParam('page', `${eventsData.currentPage + 1}`)}
-        >
-          {'>'}
-        </button>
-      </div>
+      <Pagination
+        pageCount={eventsData.pageCount}
+        currentPage={eventsData.currentPage}
+        changePage={(pageNumber) => updateParam('page', pageNumber === 1 ? undefined : `${pageNumber}`)}
+      />
     </MainLayout>
   );
 };

@@ -1,49 +1,20 @@
+import { UpdateUserInputType, UserType } from '@event-organizer/shared-types';
 import api from '../lib/api';
 
-interface RegisterDataType {
-  email: string;
-  password: string;
-}
-
-interface LoginDataType {
-  email: string;
-  password: string;
-}
-
-interface MeType {
-  userId: string;
-}
-
-const register = async (registerData: RegisterDataType) => {
-  const { data } = await api.post('/auth/register', registerData);
-  return data;
-};
-
-const login = async (registerData: LoginDataType) => {
-  const { data } = await api.post('/auth/login', registerData, {
+const getUser = async (id: string): Promise<UserType> => {
+  const { data } = await api.get(`/users/${id}`, {
     withCredentials: true,
   });
   return data;
 };
 
-const logout = async () => {
-  const { data } = await api.get('/auth/logout', {
+const updateUser = async (updateUserData: UpdateUserInputType & { userId: string }) => {
+  const { data } = await api.patch(`/users/${updateUserData.userId}`, updateUserData, {
     withCredentials: true,
   });
   return data;
 };
 
-const me = async (): Promise<MeType> => {
-  const { data } = await api.get('/auth/me', {
-    withCredentials: true,
-  });
-  return data;
-};
+const userAPI = { getUser, updateUser };
 
-const authAPI = {
-  register,
-  login,
-  logout,
-  me,
-};
-export default authAPI;
+export default userAPI;

@@ -31,8 +31,6 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     throw new ValidationError(errorMessage);
   }
 
-  console.log('req.userId', req.userId);
-
   if (!req.userId) {
     throw new Error('Bad middleware order');
   }
@@ -50,7 +48,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       country: body.country,
       postCode: body.postCode,
       startDate: body.startDate,
-      eventCategoryId: body.categoryId,
+      categoryId: body.categoryId,
       longitude: body.longitude,
       latitude: body.latitude,
       normalizedCityId: normalizedCityId,
@@ -94,7 +92,7 @@ const getEventInfo = async (req: Request, res: Response) => {
           eventParticipants: true,
         },
       },
-      eventCategory: true,
+      category: true,
       tags: true,
     },
   });
@@ -114,8 +112,8 @@ const getEventInfo = async (req: Request, res: Response) => {
       startDate: event.startDate ? event.startDate.toISOString() : undefined,
       latitude: event.latitude ? Number(event.latitude) : undefined,
       longitude: event.longitude ? Number(event.longitude) : undefined,
-      categoryName: event.eventCategory.name,
-      categoryId: event.eventCategory.id,
+      categoryName: event.category.name,
+      categoryId: event.category.id,
       bannerImage: event.bannerImage || undefined,
     };
     res.json(formattedEvent);
@@ -170,7 +168,7 @@ const getAll = async (req: Request, res: Response) => {
             gte: currentDate,
           }
         : undefined,
-      eventCategory: {
+      category: {
         name: category,
       },
       normalizedCity: {
@@ -197,7 +195,7 @@ const getAll = async (req: Request, res: Response) => {
             gte: currentDate,
           }
         : undefined,
-      eventCategory: {
+      category: {
         name: category,
       },
       normalizedCity: {
@@ -218,7 +216,7 @@ const getAll = async (req: Request, res: Response) => {
           eventParticipants: true,
         },
       },
-      eventCategory: true,
+      category: true,
       tags: true,
     },
   });
@@ -232,8 +230,8 @@ const getAll = async (req: Request, res: Response) => {
     startDate: event.startDate ? event.startDate.toISOString() : undefined,
     latitude: event.latitude ? Number(event.latitude) : undefined,
     longitude: event.longitude ? Number(event.longitude) : undefined,
-    categoryName: event.eventCategory.name,
-    categoryId: event.eventCategory.id,
+    categoryName: event.category.name,
+    categoryId: event.category.id,
     bannerImage: event.bannerImage || undefined,
   }));
 
@@ -241,7 +239,7 @@ const getAll = async (req: Request, res: Response) => {
 };
 
 const getAllCategories = async (req: Request, res: Response) => {
-  const categories = await prisma.eventCategory.findMany();
+  const categories = await prisma.category.findMany();
   res.status(200).json(categories);
 };
 

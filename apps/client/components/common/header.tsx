@@ -14,26 +14,24 @@ interface HeaderProps {
 const Header = ({ hasLoginButtons = true }: HeaderProps) => {
   const [isDownDownOpen, setIsDownDownOpen] = useState(false);
   const router = useRouter();
-  const user = useMeQuery();
-
-  console.log(user.data, user.status);
+  const { data: user, isSuccess } = useMeQuery();
 
   const toggleDownDownOpen = () => {
     setIsDownDownOpen(!isDownDownOpen);
   };
 
   return (
-    <div className={'bg-white h-[80px] px-10 flex justify-between shadow-md items-center fixed top-0 z-[99] w-full'}>
+    <div className={'bg-white h-[80px] px-10 flex justify-between shadow-md items-center fixed top-0 z-[999] w-full'}>
       <Link href={'/'}>
         <div className={'text-xl font-semibold'}>Organizator wydarzeń</div>
       </Link>
 
-      {user.isSuccess ? (
+      {isSuccess ? (
         <div className={'flex justify-between items-center cursor-pointer relative'} onClick={toggleDownDownOpen}>
-          {user.data.userId}
-          <img src={'/images/avatar-fallback.svg'} className={'w-10 h-10 rounded-full mr-3'} />
+          <p className={'mr-3'}>{user.name}</p>
+          <img src={user.image || '/images/avatar-fallback.svg'} className={'w-10 h-10 rounded-full mr-3'} />
           <ChevronDownIcon className={'fill-gray-800'} width={18} height={18} />
-          {isDownDownOpen && <MenuDropdown />}
+          {isDownDownOpen && <MenuDropdown userId={user.userId} />}
         </div>
       ) : (
         hasLoginButtons && (

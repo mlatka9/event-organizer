@@ -44,7 +44,7 @@ type MarkerType = {
 interface MapProps {
   focusedMarkerId?: string;
   markers: MarkerType[];
-  mapHeight: string;
+  mapHeight?: string;
 }
 
 const Map = ({ markers, focusedMarkerId, mapHeight = '300px' }: MapProps) => {
@@ -53,9 +53,9 @@ const Map = ({ markers, focusedMarkerId, mapHeight = '300px' }: MapProps) => {
       style={{ height: mapHeight }}
       zoom={1}
       center={[0, 0]}
-      // dragging={false}
-      // zoomControl={false}
-      // scrollWheelZoom={false}
+      dragging={false}
+      zoomControl={false}
+      scrollWheelZoom={false}
     >
       <TileLayer
         attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
