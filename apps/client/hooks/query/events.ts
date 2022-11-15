@@ -1,8 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import eventsAPI from '../../api/events';
-import { boolean } from 'zod';
-import { EventShowcaseType } from '@event-organizer/shared-types';
-import { AxiosError } from 'axios';
+import { EventDetailsType } from '@event-organizer/shared-types';
 import { APIError } from '../../api/types';
 
 interface UseEventsQueryProps {
@@ -36,12 +34,8 @@ export const useEventsQuery = ({
 };
 
 export const useEventInfoQuery = (id: string, enabled = true) => {
-  return useQuery<EventShowcaseType, APIError>(['event', id], () => eventsAPI.getEventInfo(id), {
+  return useQuery<EventDetailsType, APIError>(['event', id], () => eventsAPI.getEventInfo(id), {
     enabled,
     retry: false,
   });
-};
-
-export const useCategoriesQuery = () => {
-  return useQuery(['categories'], eventsAPI.getCategories);
 };

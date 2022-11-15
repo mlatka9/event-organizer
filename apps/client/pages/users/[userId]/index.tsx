@@ -13,8 +13,6 @@ const UserProfilePage = () => {
 
   const { data: user, isSuccess } = useUserQuery(userId, router.isReady);
 
-  console.log('user', user);
-
   if (!isSuccess) return <UserLayout>{'loading'}</UserLayout>;
 
   const toggleIsModalOpen = () => setIsUpdateModalOpen(!isUpdateModalOpen);
@@ -30,7 +28,7 @@ const UserProfilePage = () => {
           currentName={user.name}
         />
       )}
-      <div className={'flex'}>
+      <div className={'flex justify-center'}>
         <img src={user.image || '/images/avatar-fallback.svg'} className={'block w-72 h-72 rounded-full'} />
         <div className={'flex flex-col justify-center ml-5'}>
           <h1 className={'text-5xl font-semibold mb-5'}>{user.name}</h1>

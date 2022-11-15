@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import MainLayout from '../../components/layouts/main-layout';
-import { useCategoriesQuery, useEventsQuery } from '../../hooks/query/events';
+import { useCategoriesQuery } from '../../hooks/query/categories';
 import EventCard from '../../components/event/event-card';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
@@ -12,6 +12,7 @@ import FilterTile from '../../components/event/filter-tile';
 import FilterIcon from '../../components/icons/filter-icon';
 import Link from 'next/link';
 import Pagination from '../../components/common/pagination';
+import { useEventsQuery } from '../../hooks/query/events';
 
 const MapWithNoSSR = dynamic(() => import('../../components/map'), {
   ssr: false,
@@ -43,10 +44,7 @@ const EventsPage = () => {
   const [focusedMarkerId, setFocusedMarkerId] = useState<undefined | string>(undefined);
   const { data: categories, isSuccess: isCategoriesSuccess } = useCategoriesQuery();
 
-  console.log('categories', categories);
-
   const updateParam = (key: string, value: string | undefined) => {
-    // console.log('updateParam', key, value);
     const currentParams = { ...router.query };
 
     if (!value) {

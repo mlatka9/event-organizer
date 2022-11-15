@@ -1,14 +1,4 @@
-import { CategoryType } from './category-types';
 import { z } from 'zod';
-
-export interface UserType {
-  joinedAt: string;
-  image: string | null;
-  id: string;
-  name: string;
-  favouriteCategories: CategoryType[];
-  isMe: boolean;
-}
 
 export const updateUserSchema = z.object({
   name: z
@@ -19,5 +9,3 @@ export const updateUserSchema = z.object({
   image: z.string().url().optional(),
   favouriteCategories: z.array(z.string()).optional(),
 });
-
-export type UpdateUserInputType = z.infer<typeof updateUserSchema>;

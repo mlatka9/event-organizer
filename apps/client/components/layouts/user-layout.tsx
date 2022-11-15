@@ -27,7 +27,7 @@ const UserLayout = ({ children }: UserLayoutProps) => {
   return (
     <div className={'min-h-screen pt-[80px]'}>
       <Header />
-      <div className={'grid grid-cols-[300px_1fr] h-full items-start max-w-[1200px] mx-auto mt-20'}>
+      <div className={'grid grid-cols-[300px_1fr] h-full items-start max-w-[1200px] mx-auto mt-20 gap-10'}>
         <nav className={'bg-white rounded-lg shadow flex flex-col relative'}>
           <ul>
             <li className={'p-5'}>
@@ -59,7 +59,7 @@ const UserLayout = ({ children }: UserLayoutProps) => {
             <div className={'w-full h-[45px] top-1/2 relative -translate-y-1/2 bg-blue-500 rounded-r'} />
           </div>
         </nav>
-        <main className={'justify-self-center'}>{children}</main>
+        <main>{children}</main>
       </div>
     </div>
   );

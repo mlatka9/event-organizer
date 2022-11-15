@@ -1,4 +1,4 @@
-import { UpdateUserInputType, UserType } from '@event-organizer/shared-types';
+import { EventShowcaseType, UpdateUserInputType, UserType } from '@event-organizer/shared-types';
 import api from '../lib/api';
 
 const getUser = async (id: string): Promise<UserType> => {
@@ -15,6 +15,11 @@ const updateUser = async (updateUserData: UpdateUserInputType & { userId: string
   return data;
 };
 
-const userAPI = { getUser, updateUser };
+const getUserEvents = async (userId: string): Promise<EventShowcaseType[]> => {
+  const { data } = await api.get(`/users/${userId}/events`);
+  return data;
+};
+
+const userAPI = { getUser, updateUser, getUserEvents };
 
 export default userAPI;

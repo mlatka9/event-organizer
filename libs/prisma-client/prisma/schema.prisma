@@ -11,15 +11,16 @@ datasource db {
 }
 
 model User {
-  id                  String                    @id @default(cuid())
-  email               String                    @unique
-  name                String
-  hashPassword        String
-  eventParticipants   EventParticipant[]
-  image               String?
-  groups              UsersInGroup[]
-  favouriteCategories UserFavouriteCategories[]
-  joinedAt            DateTime                  @default(now())
+  id                      String                    @id @default(cuid())
+  email                   String                    @unique
+  name                    String
+  hashPassword            String
+  eventParticipants       EventParticipant[]
+  image                   String?
+  groups                  UsersInGroup[]
+  favouriteCategories     UserFavouriteCategories[]
+  joinedAt                DateTime                  @default(now())
+  pendingEventInvitations EventInvitaion[]
 }
 
 model UserFavouriteCategories {
@@ -32,25 +33,26 @@ model UserFavouriteCategories {
 }
 
 model Event {
-  id                    String                @id @default(cuid())
-  name                  String
-  description           String
-  street                String?
-  city                  String?
-  normalizedCity        NormalizedCity?       @relation(fields: [normalizedCityId], references: [id])
-  normalizedCityId      String?
-  country               String?
-  postCode              String?
-  startDate             DateTime?
-  latitude              Decimal?
-  longitude             Decimal?
-  bannerImage           String?
-  tags                  EventTag[]
-  eventParticipants     EventParticipant[]
-  eventVisibilityStatus EventVisibilityStatus
-  eventLocationStatus   EventLocationStatus
-  categoryId            String
-  category              Category              @relation(fields: [categoryId], references: [id])
+  id                            String                @id @default(cuid())
+  name                          String
+  description                   String
+  street                        String?
+  city                          String?
+  normalizedCity                NormalizedCity?       @relation(fields: [normalizedCityId], references: [id])
+  normalizedCityId              String?
+  country                       String?
+  postCode                      String?
+  startDate                     DateTime?
+  latitude                      Decimal?
+  longitude                     Decimal?
+  bannerImage                   String?
+  tags                          EventTag[]
+  eventParticipants             EventParticipant[]
+  eventVisibilityStatus         EventVisibilityStatus
+  eventLocationStatus           EventLocationStatus
+  categoryId                    String
+  category                      Category              @relation(fields: [categoryId], references: [id])
+  pendingParticipantInvitations EventInvitaion[]
 }
 
 model Group {
@@ -115,6 +117,18 @@ model Category {
   events            Event[]
   favouritedByUsers UserFavouriteCategories[]
   group             Group[]
+}
+
+model EventInvitaion {
+  id              String  @id @default(cuid())
+  user            User    @relation(fields: [userId], references: [id])
+  userId          String
+  event           Event   @relation(fields: [eventId], references: [id])
+  eventId         String
+  isUserAccepted  Boolean
+  isAdminAccepted Boolean
+
+  @@unique([userId, eventId])
 }
 
 model EventTag {

@@ -2,9 +2,10 @@ import { Request, Response } from 'express';
 import { prisma } from '@event-organizer/prisma-client';
 import { NotFoundError } from '../errors/not-found';
 import { getLoginSession } from '@event-organizer/auth';
-import { UpdateUserInputType, updateUserSchema, UserType } from '@event-organizer/shared-types';
+import { EventShowcaseType, UpdateUserInputType, updateUserSchema, UserType } from '@event-organizer/shared-types';
 import { UnauthenticatedError, ValidationError } from '../errors';
 import { generateErrorMessage } from 'zod-error';
+import { formatDisplayAddress } from '../lib/format-display-address';
 
 const getById = async (req: Request, res: Response) => {
   const session = await getLoginSession(req);
@@ -98,7 +99,62 @@ const updateUser = async (req: Request, res: Response) => {
   res.json(200).end();
 };
 
+const getUserEvents = async (req: Request, res: Response) => {
+  const userId = req.params.userId;
+
+  const userCount = await prisma.user.count({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!userCount) {
+    throw new NotFoundError(`User with id ${userId} dose not exists`);
+  }
+
+  const events = await prisma.event.findMany({
+    where: {
+      eventParticipants: {
+        some: {
+          userId,
+        },
+      },
+    },
+    include: {
+      _count: {
+        select: {
+          eventParticipants: true,
+        },
+      },
+      eventParticipants: {
+        select: {
+          role: true,
+          userId: true,
+        },
+      },
+      category: true,
+      tags: true,
+    },
+  });
+
+  const formattedEvents: EventShowcaseType[] = events.map((event) => ({
+    id: event.id,
+    name: event.name,
+    displayAddress: formatDisplayAddress([event.street, event.city, event.country, event.postCode]),
+    participantsCount: event._count.eventParticipants,
+    startDate: event.startDate ? event.startDate.toISOString() : undefined,
+    latitude: event.latitude ? Number(event.latitude) : undefined,
+    longitude: event.longitude ? Number(event.longitude) : undefined,
+    bannerImage: event.bannerImage || undefined,
+  }));
+
+  console.log('formattedEvents', formattedEvents);
+
+  res.status(200).json(formattedEvents);
+};
+
 export default {
   getById,
   updateUser,
+  getUserEvents,
 };

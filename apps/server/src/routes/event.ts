@@ -5,11 +5,16 @@ const publicRouter = Router();
 const protectedRouter = Router();
 
 publicRouter.get('/', eventsRouter.getAll);
-publicRouter.get('/categories', eventsRouter.getAllCategories);
 publicRouter.get('/normalized-cities', eventsRouter.getNormalizedCities);
 publicRouter.get('/:id', eventsRouter.getEventInfo);
 
 protectedRouter.post('/', eventsRouter.create);
+protectedRouter.post('/:eventId/user/:userId', eventsRouter.addParticipant);
+protectedRouter.delete('/:eventId/user/:userId', eventsRouter.removeParticipant);
+protectedRouter.post('/:eventId/invitation', eventsRouter.createEventInvitation);
+protectedRouter.post('/:eventId/invitation/:invitationId/accept', eventsRouter.acceptEventInvitation);
+protectedRouter.delete('/:eventId/invitation/:invitationId', eventsRouter.declineEventInvitation);
+protectedRouter.get('/:eventId/invitation', eventsRouter.getAllEventInvitation);
 
 const router = {
   publicRouter,

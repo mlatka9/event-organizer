@@ -1,12 +1,5 @@
 import { z } from 'zod';
-
-const isoDateRegExp = new RegExp(
-  /(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))|(\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d([+-][0-2]\d:[0-5]\d|Z))/
-);
-
-export const isISODate = (str: string) => {
-  return isoDateRegExp.test(str);
-};
+import { isISODate } from '../utils';
 
 export const createEventSchema = z.object({
   name: z
@@ -35,18 +28,11 @@ export const createEventSchema = z.object({
   categoryId: z.string().min(1, { message: 'Kategoria jest wymagana' }),
 });
 
-export type CreateEventInputType = z.infer<typeof createEventSchema>;
-
-export interface EventShowcaseType {
-  id: string;
-  name: string;
-  description: string;
-  displayAddress?: string;
-  participantsCount: number;
-  startDate?: string;
-  latitude?: number;
-  longitude?: number;
-  bannerImage?: string;
-  categoryName: string;
-  categoryId: string;
-}
+export const getAllEventsSchema = z.object({
+  page: z.preprocess((val) => val && Number(val), z.number().min(1).optional()),
+  limit: z.preprocess((val) => val && Number(val), z.number().min(1).optional()),
+  city: z.string().optional(),
+  category: z.string().optional(),
+  locationStatus: z.enum(['STATIONARY', 'ONLINE']).optional(),
+  timeRange: z.enum(['TODAY', 'THISWEEK', 'THISMONTH']).optional(),
+});

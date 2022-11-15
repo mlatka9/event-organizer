@@ -6,6 +6,7 @@ import * as cors from 'cors';
 import authRoutes from './routes/auth';
 import eventsRoutes from './routes/event';
 import usersRouter from './routes/user';
+import categoriesRouter from './routes/category';
 import errorHandlerMiddleware from './middlewares/error-handler';
 import * as bodyParser from 'body-parser';
 import * as passport from 'passport';
@@ -39,6 +40,8 @@ app.get('/', (req, res) => {
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
 
 app.use('/api/auth', authRoutes);
+
+app.use('/api/categories', categoriesRouter);
 
 app.use('/api/events', eventsRoutes.publicRouter);
 app.use('/api/events', isLoggedMiddleware, eventsRoutes.protectedRouter);

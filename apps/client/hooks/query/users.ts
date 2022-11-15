@@ -7,3 +7,10 @@ export const useUserQuery = (id: string, enabled = true) => {
     enabled,
   });
 };
+
+export const useUserEventsQuery = (id: string, enabled = true) => {
+  return useQuery(['user-events', id], () => userAPI.getUserEvents(id), {
+    retry: false,
+    enabled,
+  });
+};

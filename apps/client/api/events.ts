@@ -1,6 +1,10 @@
 import api from '../lib/api';
-import { CreateEventInputType, EventShowcaseType } from '@event-organizer/shared-types';
-import { CategoryType } from '@event-organizer/shared-types';
+import {
+  CreateEventInputType,
+  EventDetailsType,
+  EventShowcaseType,
+  GetAllEventsInputType,
+} from '@event-organizer/shared-types';
 
 const createEvent = async (registerData: CreateEventInputType) => {
   const { data } = await api.post('/events', registerData, {
@@ -9,19 +13,16 @@ const createEvent = async (registerData: CreateEventInputType) => {
   return data;
 };
 
-const getEventInfo = async (id: string): Promise<EventShowcaseType> => {
-  const { data } = await api.get(`/events/${id}`);
+const getEventInfo = async (id: string): Promise<EventDetailsType> => {
+  const { data } = await api.get(`/events/${id}`, {
+    withCredentials: true,
+  });
   return data;
 };
 
-const getEvents = async (args: {
-  page?: number;
-  city?: string;
-  locationStatus?: string;
-  visibilityStatus?: string;
-  category?: string;
-  timeRange?: string;
-}): Promise<{ events: EventShowcaseType[]; currentPage: number; pageCount: number }> => {
+const getEvents = async (
+  args: GetAllEventsInputType
+): Promise<{ events: EventShowcaseType[]; currentPage: number; pageCount: number }> => {
   const { data } = await api.get('/events', {
     withCredentials: true,
     params: {
@@ -29,15 +30,9 @@ const getEvents = async (args: {
       category: args.category,
       city: args.city,
       locationStatus: args.locationStatus,
-      visibilityStatus: args.visibilityStatus,
       timeRange: args.timeRange,
     },
   });
-  return data;
-};
-
-const getCategories = async (): Promise<CategoryType[]> => {
-  const { data } = await api.get('/events/categories');
   return data;
 };
 
@@ -50,11 +45,25 @@ const getNormalizedCities = async (search: string): Promise<{ id: string; name: 
   return data;
 };
 
+const addParticipant = async ({ userId, eventId }: { eventId: string; userId: string }) => {
+  await api.post(`/events/${eventId}/user/${userId}`, null, {
+    withCredentials: true,
+  });
+};
+
+const removeParticipant = async ({ userId, eventId }: { eventId: string; userId: string }) => {
+  await api.delete(`/events/${eventId}/user/${userId}`, {
+    withCredentials: true,
+  });
+};
+
 const eventsAPI = {
+  removeParticipant,
+  addParticipant,
   createEvent,
   getEvents,
   getEventInfo,
-  getCategories,
+
   getNormalizedCities,
 };
 

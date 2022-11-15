@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { CategoryType, UpdateUserInputType, updateUserSchema } from '@event-organizer/shared-types';
 import FormInput from '../form/form-input';
 import CategoryTile from '../categories/category-tile';
-import { useCategoriesQuery } from '../../hooks/query/events';
+import { useCategoriesQuery } from '../../hooks/query/categories';
 import Button from '../common/button';
 import { useUpdateUserMutation } from '../../hooks/mutations/users';
 import { useRouter } from 'next/router';

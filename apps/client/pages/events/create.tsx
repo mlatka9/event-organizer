@@ -12,7 +12,7 @@ import FormSelect from '../../components/form/form-select';
 import { createEventSchema } from '@event-organizer/shared-types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useCategoriesQuery } from '../../hooks/query/events';
+import { useCategoriesQuery } from '../../hooks/query/categories';
 import Heading from '../../components/common/heading';
 import React from 'react';
 import FileIcon from '../../components/icons/file-icon';

@@ -1,11 +1,12 @@
 import { Router } from 'express';
-import eventsRouter from '../controllers/users';
+import usersRouter from '../controllers/users';
 
 const publicRouter = Router();
 const protectedRouter = Router();
 
-publicRouter.get('/:userId', eventsRouter.getById);
-protectedRouter.patch('/:userId', eventsRouter.updateUser);
+publicRouter.get('/:userId', usersRouter.getById);
+publicRouter.get('/:userId/events', usersRouter.getUserEvents);
+protectedRouter.patch('/:userId', usersRouter.updateUser);
 
 const router = {
   publicRouter,
