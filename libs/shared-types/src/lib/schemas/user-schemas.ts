@@ -9,3 +9,8 @@ export const updateUserSchema = z.object({
   image: z.string().url().optional(),
   favouriteCategories: z.array(z.string()).optional(),
 });
+
+export const searchUserToEventInvitationSchema = z.object({
+  phrase: z.string().optional(),
+  limit: z.preprocess((val) => val && Number(val), z.number()).optional(),
+});

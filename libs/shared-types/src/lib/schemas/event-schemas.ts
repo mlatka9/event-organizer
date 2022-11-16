@@ -36,3 +36,7 @@ export const getAllEventsSchema = z.object({
   locationStatus: z.enum(['STATIONARY', 'ONLINE']).optional(),
   timeRange: z.enum(['TODAY', 'THISWEEK', 'THISMONTH']).optional(),
 });
+
+export const createEventInvitationSchema = z.object({
+  ids: z.array(z.string()),
+});

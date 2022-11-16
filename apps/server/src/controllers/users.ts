@@ -2,7 +2,12 @@ import { Request, Response } from 'express';
 import { prisma } from '@event-organizer/prisma-client';
 import { NotFoundError } from '../errors/not-found';
 import { getLoginSession } from '@event-organizer/auth';
-import { EventShowcaseType, UpdateUserInputType, updateUserSchema, UserType } from '@event-organizer/shared-types';
+import {
+  EventShowcaseType,
+  UpdateUserInputType,
+  updateUserSchema,
+  UserProfileType,
+} from '@event-organizer/shared-types';
 import { UnauthenticatedError, ValidationError } from '../errors';
 import { generateErrorMessage } from 'zod-error';
 import { formatDisplayAddress } from '../lib/format-display-address';
@@ -35,7 +40,7 @@ const getById = async (req: Request, res: Response) => {
     throw new NotFoundError(`There is no user with id ${userId}`);
   }
 
-  const formattedUser: UserType = {
+  const formattedUser: UserProfileType = {
     image: user.image,
     id: user.id,
     name: user.name,
@@ -153,8 +158,33 @@ const getUserEvents = async (req: Request, res: Response) => {
   res.status(200).json(formattedEvents);
 };
 
+// const searchUser = async (req: Request, res: Response) => {
+//   const validation = searchUserSchema.safeParse(req.body);
+//
+//   if (!validation.success) {
+//     const errorMessage = generateErrorMessage(validation.error.issues);
+//     throw new ValidationError(errorMessage);
+//   }
+//
+//   const { phrase, limit = 10 } = validation.data;
+//
+//   const matchingUsers = await prisma.user.findMany({
+//     take: limit,
+//     where: {
+//       name: {
+//         search: phrase,
+//       },
+//     },
+//   });
+//
+//   const formattedUsers: UserType = matchingUsers.map((user) => ({}));
+//
+//   res.status(200).json(matchingUsers);
+// };
+
 export default {
   getById,
   updateUser,
   getUserEvents,
+  // searchUser,
 };

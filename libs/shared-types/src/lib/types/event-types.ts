@@ -1,8 +1,16 @@
 import { z } from 'zod';
-import { createEventSchema, getAllEventsSchema } from '../schemas';
+import {
+  createEventInvitationSchema,
+  createEventSchema,
+  getAllEventsSchema,
+  searchUserToEventInvitationSchema,
+} from '../schemas';
+import { EventRole } from '@prisma/client';
 
 export type CreateEventInputType = z.infer<typeof createEventSchema>;
 export type GetAllEventsInputType = z.infer<typeof getAllEventsSchema>;
+export type CreateEventInvitationInputType = z.infer<typeof createEventInvitationSchema>;
+export type SearchUserToEventInvitationInputType = z.infer<typeof searchUserToEventInvitationSchema>;
 
 export interface EventShowcaseType {
   id: string;
@@ -36,11 +44,22 @@ export interface EventInvitationType {
   user: {
     id: string;
     name: string;
+    image: string | null;
   };
   event: {
     id: string;
     name: string;
+    bannerImage: string | null;
   };
   isUserAccepted: boolean;
   isAdminAccepted: boolean;
+}
+
+export type EventParticipantRole = EventRole;
+
+export interface EventParticipant {
+  id: string;
+  name: string;
+  image: string | null;
+  role: EventParticipantRole;
 }

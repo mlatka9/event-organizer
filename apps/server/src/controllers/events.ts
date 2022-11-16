@@ -10,10 +10,16 @@ import {
   GetAllEventsInputType,
   EventShowcaseType,
   EventInvitationType,
+  createEventInvitationSchema,
+  CreateEventInvitationInputType,
+  EventParticipant,
+  searchUserToEventInvitationSchema,
+  UserType,
 } from '@event-organizer/shared-types';
 import { NotFoundError } from '../errors/not-found';
 import { getLoginSession } from '@event-organizer/auth';
 import { formatDisplayAddress } from '../lib/format-display-address';
+import { use } from 'passport';
 
 const addNormalizedCity = async (city: string | undefined) => {
   if (!city) return;
@@ -200,6 +206,8 @@ const getAll = async (req: Request, res: Response) => {
       eventLocationStatus: locationStatus === 'STATIONARY' || locationStatus === 'ONLINE' ? locationStatus : undefined,
     },
   });
+
+  console.log('pre events');
 
   const events = await prisma.event.findMany({
     skip: (+page - 1) * +limit,
@@ -405,21 +413,33 @@ const getAllEventInvitation = async (req: Request, res: Response) => {
     throw new UnauthenticatedError(`You dont have permission to invitation for event with id ${eventId}`);
   }
 
-  const eventInvitation = await prisma.eventInvitaion.findMany({
+  const eventInvitation = await prisma.eventInvitation.findMany({
     where: {
       eventId,
+      NOT: {
+        AND: [
+          {
+            isUserAccepted: true,
+          },
+          {
+            isAdminAccepted: true,
+          },
+        ],
+      },
     },
     include: {
       user: {
         select: {
           id: true,
           name: true,
+          image: true,
         },
       },
       event: {
         select: {
           id: true,
           name: true,
+          bannerImage: true,
         },
       },
     },
@@ -438,14 +458,24 @@ const getAllEventInvitation = async (req: Request, res: Response) => {
 
 const createEventInvitation = async (req: Request, res: Response) => {
   const eventId = req.params.eventId as string;
-  const userId = req.body.userId;
   const loggedUserId = req.userId;
+
+  const validation = createEventInvitationSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+
+  const { ids }: CreateEventInvitationInputType = validation.data;
+
+  console.log('ids.length', ids.length);
 
   if (!loggedUserId) {
     throw new Error('No userId in req object');
   }
 
-  if (!userId) {
+  if (ids.length === 0) {
     throw new ValidationError('userId is required');
   }
 
@@ -467,23 +497,31 @@ const createEventInvitation = async (req: Request, res: Response) => {
     throw new NotFoundError(`Event with id ${eventId} dose not exists`);
   }
 
-  if (event.eventParticipants.some((user) => user.userId === userId)) {
-    throw new ValidationError(`User with id ${userId} is already participating in event with id ${eventId}`);
+  const usersAlreadyParticipatingInEvent = event.eventParticipants.filter((user) => ids.includes(user.userId));
+
+  if (usersAlreadyParticipatingInEvent.length) {
+    throw new ValidationError(
+      `Users with ids: ${usersAlreadyParticipatingInEvent
+        .map((u) => u.userId)
+        .join(', ')} is already participating in event with id ${eventId}`
+    );
   }
 
   const adminsIds = event.eventParticipants.filter((user) => user.role === 'ADMIN').map((user) => user.userId);
 
-  if (!loggedUserId === userId && !adminsIds.includes(loggedUserId)) {
-    throw new UnauthenticatedError('You dont have permissions to create event invitation');
+  const isLoggedUserAdmin = adminsIds.includes(loggedUserId);
+
+  if (!isLoggedUserAdmin || (!isLoggedUserAdmin && ids.length > 1 && loggedUserId !== ids[0])) {
+    throw new UnauthenticatedError('You dont have permissions to create event invitation 123');
   }
 
-  await prisma.eventInvitaion.create({
-    data: {
+  await prisma.eventInvitation.createMany({
+    data: ids.map((id) => ({
       eventId,
-      userId,
+      userId: id,
       isUserAccepted: !adminsIds.includes(loggedUserId),
       isAdminAccepted: adminsIds.includes(loggedUserId),
-    },
+    })),
   });
 
   res.status(201).end();
@@ -498,7 +536,7 @@ const acceptEventInvitation = async (req: Request, res: Response) => {
     throw new Error('No userId in req object');
   }
 
-  const invitation = await prisma.eventInvitaion.findUnique({
+  const invitation = await prisma.eventInvitation.findUnique({
     where: {
       id: invitationId,
     },
@@ -523,8 +561,6 @@ const acceptEventInvitation = async (req: Request, res: Response) => {
     (invitation.userId === loggedUserId && invitation.isAdminAccepted) ||
     (eventAdminsIds.includes(loggedUserId) && invitation.isUserAccepted);
 
-  console.log('isUserEligibleToJoinEvent', isUserEligibleToJoinEvent);
-
   if (isUserEligibleToJoinEvent) {
     await prisma.$transaction([
       prisma.eventParticipant.create({
@@ -533,7 +569,7 @@ const acceptEventInvitation = async (req: Request, res: Response) => {
           userId: invitation.userId,
         },
       }),
-      prisma.eventInvitaion.update({
+      prisma.eventInvitation.update({
         where: {
           id: invitationId,
         },
@@ -544,7 +580,7 @@ const acceptEventInvitation = async (req: Request, res: Response) => {
       }),
     ]);
 
-    res.status(201).end({ message: `User with id ${invitation.userId} was added to event with id ${eventId}` });
+    res.status(201).json({ message: `User with id ${invitation.userId} was added to event with id ${eventId}` });
   }
 
   throw new UnauthenticatedError('You dont have permission to accept invitation');
@@ -559,7 +595,7 @@ const declineEventInvitation = async (req: Request, res: Response) => {
     throw new Error('No userId in req object');
   }
 
-  const invitation = await prisma.eventInvitaion.findUnique({
+  const invitation = await prisma.eventInvitation.findUnique({
     where: {
       id: invitationId,
     },
@@ -574,28 +610,139 @@ const declineEventInvitation = async (req: Request, res: Response) => {
 
   const eventAdminsIds = eventAdmins.map((admin) => admin.userId);
 
+  console.log('eventAdminsIds', eventAdminsIds);
+  console.log('loggedUserId', loggedUserId);
+
   if (!invitation) {
     throw new NotFoundError(`Invitation with id ${invitationId} dose not exists`);
   }
 
-  const isUserEligibleToDeclineInvitation =
-    (invitation.userId === loggedUserId && invitation.isAdminAccepted) ||
-    (eventAdminsIds.includes(loggedUserId) && invitation.isUserAccepted);
+  const isUserEligibleToDeclineInvitation = invitation.userId === loggedUserId || eventAdminsIds.includes(loggedUserId);
 
   if (isUserEligibleToDeclineInvitation) {
-    await prisma.eventInvitaion.delete({
+    console.log('REMOVING');
+    await prisma.eventInvitation.delete({
       where: {
         id: invitationId,
       },
     });
 
     res.status(204).end();
+  } else {
+    throw new UnauthenticatedError('You dont have permission to decline invitation');
+  }
+};
+
+const getAllParticipants = async (req: Request, res: Response) => {
+  const eventId = req.params.eventId;
+
+  const eventCount = await prisma.event.count({
+    where: {
+      id: eventId,
+    },
+  });
+
+  if (!eventCount) {
+    throw new NotFoundError(`There is not event with id ${eventId}`);
   }
 
-  throw new UnauthenticatedError('You dont have permission to decline invitation');
+  const eventParticipants = await prisma.eventParticipant.findMany({
+    where: {
+      eventId,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+        },
+      },
+    },
+  });
+
+  const formattedParticipants: EventParticipant[] = eventParticipants.map((participant) => ({
+    id: participant.user.id,
+    name: participant.user.name,
+    image: participant.user.image,
+    role: participant.role,
+  }));
+
+  res.status(200).json(formattedParticipants);
+};
+
+const searchUsersToInvite = async (req: Request, res: Response) => {
+  const loggedUserId = req.userId;
+  if (!loggedUserId) {
+    throw new Error('No userId in req object');
+  }
+
+  const validation = searchUserToEventInvitationSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+
+  const eventId = req.params.eventId;
+
+  const eventCount = await prisma.event.count({
+    where: {
+      id: eventId,
+    },
+  });
+
+  if (!eventCount) {
+    throw new NotFoundError(`Event with id ${eventId} dose not exists`);
+  }
+
+  const { phrase, limit = 10 } = validation.data;
+
+  console.log('phrase', phrase);
+
+  const matchingUsers = await prisma.user.findMany({
+    where: {
+      name: {
+        contains: phrase,
+        mode: 'insensitive',
+      },
+      eventParticipants: {
+        none: {
+          eventId,
+          user: {
+            name: {
+              contains: phrase,
+              mode: 'insensitive',
+            },
+          },
+        },
+      },
+      pendingEventInvitations: {
+        none: {
+          eventId,
+          user: {
+            name: {
+              contains: phrase,
+              mode: 'insensitive',
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const formattedUsers: UserType[] = matchingUsers.map((user) => ({
+    id: user.id,
+    name: user.name,
+    image: user.image,
+  }));
+
+  res.json(formattedUsers);
 };
 
 export default {
+  searchUsersToInvite,
+  getAllParticipants,
   getAllEventInvitation,
   declineEventInvitation,
   acceptEventInvitation,

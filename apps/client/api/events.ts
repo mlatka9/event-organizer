@@ -1,9 +1,14 @@
 import api from '../lib/api';
 import {
   CreateEventInputType,
+  CreateEventInvitationInputType,
   EventDetailsType,
+  EventInvitationType,
+  EventParticipant,
   EventShowcaseType,
   GetAllEventsInputType,
+  SearchUserToEventInvitationInputType,
+  UserType,
 } from '@event-organizer/shared-types';
 
 const createEvent = async (registerData: CreateEventInputType) => {
@@ -57,14 +62,77 @@ const removeParticipant = async ({ userId, eventId }: { eventId: string; userId:
   });
 };
 
+const getAllEventInvitation = async (eventId: string): Promise<EventInvitationType[]> => {
+  const { data } = await api.get(`/events/${eventId}/invitation`, {
+    withCredentials: true,
+  });
+  return data;
+};
+
+const createEventInvitation = async ({ ids, eventId }: CreateEventInvitationInputType & { eventId: string }) => {
+  const { data } = await api.post(
+    `/events/${eventId}/invitation`,
+    { ids },
+    {
+      withCredentials: true,
+    }
+  );
+  return data;
+};
+
+const getAllParticipants = async (eventId: string): Promise<EventParticipant[]> => {
+  const { data } = await api.get(`/events/${eventId}/users`, {
+    withCredentials: true,
+  });
+  return data;
+};
+
+const searchUsersToInvite = async ({
+  eventId,
+  limit,
+  phrase,
+}: SearchUserToEventInvitationInputType & {
+  eventId: string;
+}): Promise<UserType[]> => {
+  const { data } = await api.post(
+    `/events/${eventId}/invitation/search-users`,
+    { limit, phrase },
+    {
+      withCredentials: true,
+    }
+  );
+  return data;
+};
+
+const acceptEventInvitation = async ({ eventId, invitationId }: { eventId: string; invitationId: string }) => {
+  const { data } = await api.post(`/events/${eventId}/invitation/${invitationId}/accept`, null, {
+    withCredentials: true,
+  });
+
+  return data;
+};
+
+const declineEventInvitation = async ({ eventId, invitationId }: { eventId: string; invitationId: string }) => {
+  const { data } = await api.delete(`/events/${eventId}/invitation/${invitationId}`, {
+    withCredentials: true,
+  });
+
+  return data;
+};
+
 const eventsAPI = {
+  createEventInvitation,
   removeParticipant,
   addParticipant,
   createEvent,
   getEvents,
   getEventInfo,
-
   getNormalizedCities,
+  getAllEventInvitation,
+  getAllParticipants,
+  searchUsersToInvite,
+  acceptEventInvitation,
+  declineEventInvitation,
 };
 
 export default eventsAPI;

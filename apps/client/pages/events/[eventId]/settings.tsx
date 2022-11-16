@@ -1,7 +1,11 @@
 import EventLayout from '../../../components/layouts/event-layout';
 
-const EventSettings = () => {
-  return <EventLayout>jakis settings</EventLayout>;
+const EventSettingsPage = () => {
+  return (
+    <EventLayout>
+      <div>settings</div>
+    </EventLayout>
+  );
 };
 
-export default EventSettings;
+export default EventSettingsPage;

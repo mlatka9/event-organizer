@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -20,7 +21,7 @@ model User {
   groups                  UsersInGroup[]
   favouriteCategories     UserFavouriteCategories[]
   joinedAt                DateTime                  @default(now())
-  pendingEventInvitations EventInvitaion[]
+  pendingEventInvitations EventInvitation[]
 }
 
 model UserFavouriteCategories {
@@ -52,7 +53,7 @@ model Event {
   eventLocationStatus           EventLocationStatus
   categoryId                    String
   category                      Category              @relation(fields: [categoryId], references: [id])
-  pendingParticipantInvitations EventInvitaion[]
+  pendingParticipantInvitations EventInvitation[]
 }
 
 model Group {
@@ -119,7 +120,7 @@ model Category {
   group             Group[]
 }
 
-model EventInvitaion {
+model EventInvitation {
   id              String  @id @default(cuid())
   user            User    @relation(fields: [userId], references: [id])
   userId          String

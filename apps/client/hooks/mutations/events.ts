@@ -28,3 +28,37 @@ export const useRemoveParticipantMutation = (eventId: string) => {
     },
   }).mutate;
 };
+
+export const useCreateEventInvitationMutation = (onSuccess?: () => void) => {
+  return useMutation(eventsAPI.createEventInvitation, {
+    onSuccess: () => {
+      onSuccess && onSuccess();
+    },
+  });
+};
+
+export const useAcceptEventInvitationMutation = (onSuccess?: () => void) => {
+  return useMutation(eventsAPI.acceptEventInvitation, {
+    onSuccess: () => {
+      onSuccess && onSuccess();
+    },
+  });
+};
+
+export const useDeclineEventInvitationMutation = ({
+  eventId,
+  onSuccess,
+}: {
+  onSuccess?: () => void;
+  eventId: string;
+}) => {
+  const queryClient = useQueryClient();
+  return useMutation(eventsAPI.declineEventInvitation, {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['event-invitations', eventId],
+      });
+      onSuccess && onSuccess();
+    },
+  });
+};

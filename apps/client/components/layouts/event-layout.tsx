@@ -5,6 +5,7 @@ import { useAddParticipantMutation, useRemoveParticipantMutation } from '../../h
 import { useEventInfoQuery } from '../../hooks/query/events';
 import { useMeQuery } from '../../hooks/query/auth';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -30,6 +31,8 @@ const EventLayout = ({ children }: MainLayoutProps) => {
     removeParticipant({ userId: meData.userId, eventId });
   };
 
+  console.log(eventData);
+
   if (!isSuccess || !isMeFetched) return <>loading...</>;
 
   return (
@@ -37,27 +40,30 @@ const EventLayout = ({ children }: MainLayoutProps) => {
       <Header />
 
       <main className="mx-auto max-w-[1000px] pt-[80px]">
-        {eventData.bannerImage && <img src={eventData.bannerImage} className={'w-full h-[300px] object-cover'} />}
-        <div className={'mb-5 flex items-start shadow-lg p-10 rounded-b-xl bg-white'}>
-          <div>
-            <h1 className={'text-4xl font-semibold'}>{eventData.name}</h1>
-            <p className={'text-lg text-neutral-600'}>{eventData.description}</p>
+        <div className={'rounded-b-xl bg-white shadow-lg mb-10'}>
+          {eventData.bannerImage && <img src={eventData.bannerImage} className={'w-full h-[300px] object-cover'} />}
+          <div className={'px-10 py-5'}>
+            <div>
+              <h1 className={'text-4xl font-semibold'}>{eventData.name}</h1>
+              <p className={'text-lg text-neutral-600'}>{eventData.description}</p>
+            </div>
+            {eventData.isCurrentUserParticipant && !eventData.isCurrentUserAdmin && (
+              <Button className={'ml-auto'} onClick={handleRemoveParticipant}>
+                Opuść wydarzenie
+              </Button>
+            )}
+            {!eventData.isCurrentUserParticipant && (
+              <Button onClick={handleAddParticipant} className={'ml-auto'}>
+                Dołącz
+              </Button>
+            )}
+
+            <div className={'bg-white space-x-5 mt-10'}>
+              <Link href={`/events/${eventId}`}>Strona główna</Link>
+              <Link href={`/events/${eventId}/participants`}>Uczestnicy</Link>
+              <Link href={`/events/${eventId}/settings`}>Ustawienia</Link>
+            </div>
           </div>
-          {eventData.isCurrentUserAdmin && (
-            <Button className={'ml-auto'} onClick={() => router.push(`/events/${eventId}/settings`)}>
-              Ustawienia
-            </Button>
-          )}
-          {eventData.isCurrentUserParticipant && !eventData.isCurrentUserAdmin && (
-            <Button className={'ml-auto'} onClick={handleRemoveParticipant}>
-              Opuść wydarzenie
-            </Button>
-          )}
-          {!eventData.isCurrentUserParticipant && (
-            <Button onClick={handleAddParticipant} className={'ml-auto'}>
-              Dołącz
-            </Button>
-          )}
         </div>
         {children}
       </main>
