@@ -4,12 +4,12 @@ import { useAcceptEventInvitationMutation } from '../../../hooks/mutations/event
 
 interface UserToAcceptCardProps {
   image: string | null;
-  userName: string;
+  name: string;
   eventId: string;
   invitationId: string;
 }
 
-const InvitationToAcceptCard = ({ userName, image, invitationId, eventId }: UserToAcceptCardProps) => {
+const InvitationToAcceptCard = ({ name, image, invitationId, eventId }: UserToAcceptCardProps) => {
   const { mutate: acceptEventInvitation, isLoading } = useAcceptEventInvitationMutation();
 
   const handleAcceptInvitation = () => {
@@ -21,8 +21,8 @@ const InvitationToAcceptCard = ({ userName, image, invitationId, eventId }: User
 
   return (
     <div className={'flex items-center'}>
-      <UserImage imageUrl={image} userName={userName} />
-      <p className={'font-semibold ml-3'}>{userName}</p>
+      <UserImage imageUrl={image} userName={name} />
+      <p className={'font-semibold ml-3'}>{name}</p>
       <Button isSmall kind={'secondary'} onClick={handleAcceptInvitation} className={'ml-auto'} disabled={isLoading}>
         Zaakceptuj
       </Button>

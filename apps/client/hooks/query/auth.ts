@@ -16,7 +16,7 @@ export const useMeQuery = ({ redirectTo, redirectIfFound }: UseMeQueryProps = {}
 
   useEffect(() => {
     if (!redirectTo || !me.isFetched) return;
-    if ((redirectTo && !redirectIfFound && !me.data) || (redirectIfFound && me.data)) {
+    if ((redirectTo && !redirectIfFound && !me.isSuccess) || (redirectIfFound && me.isSuccess)) {
       router.push(redirectTo);
     }
   }, [router, me.data, me.isFetched, redirectTo, redirectIfFound]);

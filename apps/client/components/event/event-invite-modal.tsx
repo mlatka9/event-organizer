@@ -60,6 +60,7 @@ const EventInviteModal = ({ handleCloseModal, eventId }: EventInviteModalProps) 
                     <p className={'ml-3'}>{user.name}</p>
                     <Button
                       isSmall
+                      kind={isUserSelected ? 'error' : undefined}
                       className={'ml-auto'}
                       onClick={isUserSelected ? () => handleUnselectUser(user.id) : () => handleSelectUser(user)}
                     >
@@ -85,7 +86,7 @@ const EventInviteModal = ({ handleCloseModal, eventId }: EventInviteModalProps) 
           </div>
         </div>
       </div>
-      <Button secondary className={'mt-auto self-end'} onClick={handleInviteToEvent} disabled={isLoading}>
+      <Button kind={'secondary'} className={'mt-auto self-end'} onClick={handleInviteToEvent} disabled={isLoading}>
         Wyślij zaproszenia
       </Button>
     </ModalWrapper>

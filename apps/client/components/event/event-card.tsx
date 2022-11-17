@@ -11,11 +11,11 @@ interface EventCardProps {
 const EventCard = ({ event, onMouseEnter, onMouseLeave }: EventCardProps) => {
   return (
     <div
-      className={'flex shadow-md rounded-xl overflow-hidden bg-white w-full'}
+      className={'flex shadow-md rounded-xl overflow-hidden bg-white w-full h-[170px]'}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <img src={event.bannerImage || '/images/image-fallback.png'} alt={event.name} className={'w-40 h-32'} />
+      <img src={event.bannerImage || '/images/image-fallback.png'} alt={event.name} className={'w-40 object-cover'} />
       <div className={'flex flex-col px-5 py-3'}>
         <p className={'text-sm text-gray-500'}>
           {event.startDate ? dayjs(event.startDate).format('D-MM-YYYY H:mm') : 'termin nieogłoszony'}

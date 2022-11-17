@@ -3,6 +3,7 @@ import { prisma } from '@event-organizer/prisma-client';
 import { NotFoundError } from '../errors/not-found';
 import { getLoginSession } from '@event-organizer/auth';
 import {
+  EventInvitationType,
   EventShowcaseType,
   UpdateUserInputType,
   updateUserSchema,
@@ -11,6 +12,7 @@ import {
 import { UnauthenticatedError, ValidationError } from '../errors';
 import { generateErrorMessage } from 'zod-error';
 import { formatDisplayAddress } from '../lib/format-display-address';
+import { isPrivateEvent, isPublicEvent } from '../lib/events';
 
 const getById = async (req: Request, res: Response) => {
   const session = await getLoginSession(req);
@@ -105,7 +107,11 @@ const updateUser = async (req: Request, res: Response) => {
 };
 
 const getUserEvents = async (req: Request, res: Response) => {
+  const session = await getLoginSession(req);
+
   const userId = req.params.userId;
+
+  const requestFromUserOwner = userId === session?.userId;
 
   const userCount = await prisma.user.count({
     where: {
@@ -124,6 +130,7 @@ const getUserEvents = async (req: Request, res: Response) => {
           userId,
         },
       },
+      eventVisibilityStatus: requestFromUserOwner ? undefined : 'PUBLIC',
     },
     include: {
       _count: {
@@ -142,20 +149,24 @@ const getUserEvents = async (req: Request, res: Response) => {
     },
   });
 
-  const formattedEvents: EventShowcaseType[] = events.map((event) => ({
+  const formattedEvents = events.map((event) => ({
     id: event.id,
     name: event.name,
-    displayAddress: formatDisplayAddress([event.street, event.city, event.country, event.postCode]),
-    participantsCount: event._count.eventParticipants,
-    startDate: event.startDate ? event.startDate.toISOString() : undefined,
-    latitude: event.latitude ? Number(event.latitude) : undefined,
-    longitude: event.longitude ? Number(event.longitude) : undefined,
-    bannerImage: event.bannerImage || undefined,
+    displayAddress: formatDisplayAddress([event.street, event.city, event.country, event.postCode]) || null,
+    participantsCount: event._count.eventParticipants || null,
+    startDate: event.startDate ? event.startDate.toISOString() : null,
+    latitude: event.latitude ? Number(event.latitude) : null,
+    longitude: event.longitude ? Number(event.longitude) : null,
+    bannerImage: event.bannerImage || null,
+    visibilityStatus: event.eventVisibilityStatus,
   }));
 
-  console.log('formattedEvents', formattedEvents);
+  const publicEvents = formattedEvents.filter(isPublicEvent);
+  const privateEvents = formattedEvents.filter(isPrivateEvent);
 
-  res.status(200).json(formattedEvents);
+  const eventShowcases: EventShowcaseType[] = [...publicEvents, ...privateEvents];
+
+  res.status(200).json(eventShowcases);
 };
 
 // const searchUser = async (req: Request, res: Response) => {
@@ -182,9 +193,64 @@ const getUserEvents = async (req: Request, res: Response) => {
 //   res.status(200).json(matchingUsers);
 // };
 
+const getEventInvitations = async (req: Request, res: Response) => {
+  const loggedUser = req.userId;
+  const userId = req.params.userId;
+
+  if (!loggedUser) {
+    throw new Error('no userId no req object');
+  }
+
+  if (loggedUser !== userId) {
+    throw new UnauthenticatedError('You dont have permission to read event invitation');
+  }
+
+  const userInvitations = await prisma.eventInvitation.findMany({
+    where: {
+      userId,
+      NOT: {
+        AND: [
+          {
+            isUserAccepted: true,
+          },
+          {
+            isAdminAccepted: true,
+          },
+        ],
+      },
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+        },
+      },
+      event: {
+        select: {
+          id: true,
+          name: true,
+          bannerImage: true,
+        },
+      },
+    },
+  });
+
+  const formattedEventInvitation: EventInvitationType[] = userInvitations.map((invitation) => ({
+    id: invitation.id,
+    user: invitation.user,
+    event: invitation.event,
+    isUserAccepted: invitation.isUserAccepted,
+    isAdminAccepted: invitation.isAdminAccepted,
+  }));
+
+  res.status(200).json(formattedEventInvitation);
+};
+
 export default {
   getById,
   updateUser,
   getUserEvents,
-  // searchUser,
+  getEventInvitations,
 };

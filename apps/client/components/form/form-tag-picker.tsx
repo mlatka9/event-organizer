@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import FormErrorMessage from './form-error-message';
 import Button from '../common/button';
+import CloseIcon from '../icons/close-icon';
 
 export type FormTagPickerProps = {
   addTag: (tagName: string) => void;
@@ -29,7 +30,7 @@ const FormTagPicker = ({ addTag, removeTag, selectedTags }: FormTagPickerProps) 
             value={inputValue}
             onChange={({ target }) => {
               if (target.value.includes(' ')) {
-                setErrorMessage('Illegal characters');
+                setErrorMessage('Tag nie może zawierać spacji');
               } else {
                 setErrorMessage('');
               }
@@ -44,7 +45,7 @@ const FormTagPicker = ({ addTag, removeTag, selectedTags }: FormTagPickerProps) 
             }}
           />
           <label className="absolute top-5 z-10 origin-[0] -translate-y-5 scale-75 transform px-2 text-sm text-gray-500 duration-300">
-            tags
+            tagi
           </label>
         </div>
 
@@ -56,12 +57,12 @@ const FormTagPicker = ({ addTag, removeTag, selectedTags }: FormTagPickerProps) 
       <div className="mt-3 flex flex-wrap gap-2">
         {selectedTags.map((tag) => (
           <div
-            className="w- flex items-center justify-center space-x-1 rounded-full bg-blue-50 px-2 py-2 text-xs text-gray-700"
+            className="flex items-center justify-center space-x-1 rounded-full bg-blue-500 px-3 py-2 text-sm text-white"
             key={tag}
           >
             <span className="mr-1">{tag}</span>
             <button className="flex h-2 w-2 items-center justify-center text-white" onClick={() => removeTag(tag)}>
-              X
+              <CloseIcon className={'fill-white'} />
             </button>
           </div>
         ))}

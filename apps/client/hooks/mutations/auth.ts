@@ -31,7 +31,7 @@ export const useLogoutMutation = (onSuccess?: () => void) => {
   const queryClient = useQueryClient();
   return useMutation(authAPI.logout, {
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['me'] });
+      await queryClient.invalidateQueries(['me']);
       if (onSuccess) {
         onSuccess();
       }

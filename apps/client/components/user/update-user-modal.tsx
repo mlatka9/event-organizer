@@ -26,7 +26,6 @@ const UpdateUserModal = ({
   currentImage,
   userId,
 }: UpdateUserModalProps) => {
-  const router = useRouter();
   const {
     handleSubmit,
     register,
@@ -83,7 +82,7 @@ const UpdateUserModal = ({
         </div>
         <div className={'!mt-10'}>
           <p className={'font-semibold mb-2'}>Dostępne kategorie</p>
-          <div className={'flex flex-wrap space-x-2'}>
+          <div className={'flex flex-wrap  gap-y-2'}>
             {isSuccess &&
               categories
                 .filter((c) => !selectedCategories.includes(c.name))

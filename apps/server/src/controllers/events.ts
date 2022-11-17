@@ -15,11 +15,14 @@ import {
   EventParticipant,
   searchUserToEventInvitationSchema,
   UserType,
+  PrivateEventType,
+  PublicEventType,
 } from '@event-organizer/shared-types';
 import { NotFoundError } from '../errors/not-found';
 import { getLoginSession } from '@event-organizer/auth';
 import { formatDisplayAddress } from '../lib/format-display-address';
 import { use } from 'passport';
+import { isPrivateEvent, isPublicEvent } from '../lib/events';
 
 const addNormalizedCity = async (city: string | undefined) => {
   if (!city) return;
@@ -156,8 +159,6 @@ const getEventInfo = async (req: Request, res: Response) => {
 const getAll = async (req: Request, res: Response) => {
   const validation = getAllEventsSchema.safeParse(req.query);
 
-  console.log(validation);
-
   if (!validation.success) {
     const errorMessage = generateErrorMessage(validation.error.issues);
     throw new ValidationError(errorMessage);
@@ -245,21 +246,24 @@ const getAll = async (req: Request, res: Response) => {
     },
   });
 
-  const formattedEvents: EventShowcaseType[] = events.map((event) => ({
+  const formattedEvents = events.map((event) => ({
     id: event.id,
     name: event.name,
-    description: event.description,
-    displayAddress: formatDisplayAddress([event.street, event.city, event.country, event.postCode]),
-    participantsCount: event._count.eventParticipants,
-    startDate: event.startDate ? event.startDate.toISOString() : undefined,
-    latitude: event.latitude ? Number(event.latitude) : undefined,
-    longitude: event.longitude ? Number(event.longitude) : undefined,
-    categoryName: event.category.name,
-    categoryId: event.category.id,
-    bannerImage: event.bannerImage || undefined,
+    displayAddress: formatDisplayAddress([event.street, event.city, event.country, event.postCode]) || null,
+    participantsCount: event._count.eventParticipants || null,
+    startDate: event.startDate ? event.startDate.toISOString() : null,
+    latitude: event.latitude ? Number(event.latitude) : null,
+    longitude: event.longitude ? Number(event.longitude) : null,
+    bannerImage: event.bannerImage || null,
+    visibilityStatus: event.eventVisibilityStatus,
   }));
 
-  res.status(200).json({ events: formattedEvents, currentPage: +page, pageCount: Math.ceil(eventsCount / +limit) });
+  const publicEvents = formattedEvents.filter(isPublicEvent);
+  // const privateEvents = formattedEvents.filter(isPrivateEvent);
+
+  const eventShowcases: EventShowcaseType[] = [...publicEvents];
+
+  res.status(200).json({ events: eventShowcases, currentPage: +page, pageCount: Math.ceil(eventsCount / +limit) });
 };
 
 const getNormalizedCities = async (req: Request, res: Response) => {
@@ -346,6 +350,7 @@ const addParticipant = async (req: Request, res: Response) => {
 };
 
 const removeParticipant = async (req: Request, res: Response) => {
+  console.log('removeParticipant');
   const currentUserId = req.userId;
 
   const eventId = req.params.eventId as string;
@@ -357,7 +362,7 @@ const removeParticipant = async (req: Request, res: Response) => {
     throw new Error('No userId in protected route');
   }
 
-  const [event, userToAdd] = await Promise.all([
+  const [event, userToRemove] = await Promise.all([
     prisma.event.findUnique({
       where: {
         id: eventId,
@@ -374,24 +379,24 @@ const removeParticipant = async (req: Request, res: Response) => {
     throw new NotFoundError(`Event with id ${eventId} dose not exists`);
   }
 
-  if (!userToAdd) {
+  if (!userToRemove) {
     throw new NotFoundError(`User with id ${userId} dose not exists`);
   }
 
-  if (event.eventVisibilityStatus === 'PUBLIC') {
-    if (userToAdd.id !== userId) {
-      throw new UnauthenticatedError('You dont have permission to remove user from this event');
-    }
-    await prisma.eventParticipant.delete({
-      where: {
-        userId_eventId: {
-          userId,
-          eventId,
-        },
-      },
-    });
-    res.status(204).end();
+  // if (event.eventVisibilityStatus === 'PUBLIC') {
+  if (userToRemove.id !== userId) {
+    throw new UnauthenticatedError('You dont have permission to remove user from this event');
   }
+  await prisma.eventParticipant.delete({
+    where: {
+      userId_eventId: {
+        userId,
+        eventId,
+      },
+    },
+  });
+  res.status(204).end();
+  // }
 };
 
 const getAllEventInvitation = async (req: Request, res: Response) => {
@@ -469,8 +474,6 @@ const createEventInvitation = async (req: Request, res: Response) => {
 
   const { ids }: CreateEventInvitationInputType = validation.data;
 
-  console.log('ids.length', ids.length);
-
   if (!loggedUserId) {
     throw new Error('No userId in req object');
   }
@@ -511,20 +514,20 @@ const createEventInvitation = async (req: Request, res: Response) => {
 
   const isLoggedUserAdmin = adminsIds.includes(loggedUserId);
 
-  if (!isLoggedUserAdmin || (!isLoggedUserAdmin && ids.length > 1 && loggedUserId !== ids[0])) {
-    throw new UnauthenticatedError('You dont have permissions to create event invitation 123');
+  if (isLoggedUserAdmin || (ids.length === 1 && loggedUserId === ids[0])) {
+    await prisma.eventInvitation.createMany({
+      data: ids.map((id) => ({
+        eventId,
+        userId: id,
+        isUserAccepted: !adminsIds.includes(loggedUserId),
+        isAdminAccepted: adminsIds.includes(loggedUserId),
+      })),
+    });
+
+    res.status(201).end();
+    return;
   }
-
-  await prisma.eventInvitation.createMany({
-    data: ids.map((id) => ({
-      eventId,
-      userId: id,
-      isUserAccepted: !adminsIds.includes(loggedUserId),
-      isAdminAccepted: adminsIds.includes(loggedUserId),
-    })),
-  });
-
-  res.status(201).end();
+  throw new UnauthenticatedError('You dont have permissions to create event invitation 123');
 };
 
 const acceptEventInvitation = async (req: Request, res: Response) => {
@@ -569,13 +572,9 @@ const acceptEventInvitation = async (req: Request, res: Response) => {
           userId: invitation.userId,
         },
       }),
-      prisma.eventInvitation.update({
+      prisma.eventInvitation.delete({
         where: {
           id: invitationId,
-        },
-        data: {
-          isUserAccepted: true,
-          isAdminAccepted: true,
         },
       }),
     ]);

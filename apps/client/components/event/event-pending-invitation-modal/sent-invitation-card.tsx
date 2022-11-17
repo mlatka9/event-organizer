@@ -1,15 +1,15 @@
 import UserImage from '../../common/user-image';
 import Button from '../../common/button';
-import { useAcceptEventInvitationMutation, useDeclineEventInvitationMutation } from '../../../hooks/mutations/events';
+import { useDeclineEventInvitationMutation } from '../../../hooks/mutations/events';
 
 interface UserToAcceptCardProps {
   image: string | null;
-  userName: string;
+  name: string;
   eventId: string;
   invitationId: string;
 }
 
-const SentInvitationCard = ({ userName, image, invitationId, eventId }: UserToAcceptCardProps) => {
+const SentInvitationCard = ({ name, image, invitationId, eventId }: UserToAcceptCardProps) => {
   const { mutate: declineEventInvitation, isLoading } = useDeclineEventInvitationMutation({ eventId });
 
   const handleDeclineEventInvitation = () => {
@@ -21,8 +21,8 @@ const SentInvitationCard = ({ userName, image, invitationId, eventId }: UserToAc
 
   return (
     <div className={'flex items-center'}>
-      <UserImage imageUrl={image} userName={userName} />
-      <p className={'font-semibold ml-3'}>{userName}</p>
+      <UserImage imageUrl={image} userName={name} />
+      <p className={'font-semibold ml-3'}>{name}</p>
       <Button isSmall kind={'error'} onClick={handleDeclineEventInvitation} className={'ml-auto'} disabled={isLoading}>
         Anuluj
       </Button>

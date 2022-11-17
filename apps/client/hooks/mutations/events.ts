@@ -19,6 +19,7 @@ export const useAddParticipantMutation = (eventId: string) => {
 };
 
 export const useRemoveParticipantMutation = (eventId: string) => {
+  console.log('useRemoveParticipantMutation');
   const queryClient = useQueryClient();
   return useMutation(eventsAPI.removeParticipant, {
     onSuccess: async () => {
@@ -30,16 +31,21 @@ export const useRemoveParticipantMutation = (eventId: string) => {
 };
 
 export const useCreateEventInvitationMutation = (onSuccess?: () => void) => {
+  const queryClient = useQueryClient();
   return useMutation(eventsAPI.createEventInvitation, {
     onSuccess: () => {
+      queryClient.invalidateQueries(['user-event-invitations']);
       onSuccess && onSuccess();
     },
   });
 };
 
 export const useAcceptEventInvitationMutation = (onSuccess?: () => void) => {
+  const queryClient = useQueryClient();
   return useMutation(eventsAPI.acceptEventInvitation, {
     onSuccess: () => {
+      queryClient.invalidateQueries(['event-invitations']);
+      queryClient.invalidateQueries(['user-event-invitations']);
       onSuccess && onSuccess();
     },
   });
@@ -55,9 +61,8 @@ export const useDeclineEventInvitationMutation = ({
   const queryClient = useQueryClient();
   return useMutation(eventsAPI.declineEventInvitation, {
     onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ['event-invitations', eventId],
-      });
+      queryClient.invalidateQueries(['event-invitations', eventId]);
+      queryClient.invalidateQueries(['user-event-invitations']);
       onSuccess && onSuccess();
     },
   });

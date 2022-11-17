@@ -5,23 +5,38 @@ import {
   getAllEventsSchema,
   searchUserToEventInvitationSchema,
 } from '../schemas';
-import { EventRole } from '@prisma/client';
+import { EventRole, EventVisibilityStatus } from '@prisma/client';
 
 export type CreateEventInputType = z.infer<typeof createEventSchema>;
 export type GetAllEventsInputType = z.infer<typeof getAllEventsSchema>;
 export type CreateEventInvitationInputType = z.infer<typeof createEventInvitationSchema>;
 export type SearchUserToEventInvitationInputType = z.infer<typeof searchUserToEventInvitationSchema>;
 
-export interface EventShowcaseType {
+export interface PrivateEventType {
   id: string;
   name: string;
-  displayAddress?: string;
-  participantsCount: number;
-  startDate?: string;
-  latitude?: number;
-  longitude?: number;
-  bannerImage?: string;
+  bannerImage: string | null;
+  visibilityStatus: 'PRIVATE';
+  displayAddress: null;
+  participantsCount: null;
+  startDate: null;
+  latitude: null;
+  longitude: null;
 }
+
+export interface PublicEventType {
+  id: string;
+  name: string;
+  bannerImage: string | null;
+  visibilityStatus: 'PUBLIC';
+  displayAddress: string | null;
+  participantsCount: number | null;
+  startDate: string | null;
+  latitude: number | null;
+  longitude: number | null;
+}
+
+export type EventShowcaseType = PublicEventType | PrivateEventType;
 
 export interface EventDetailsType {
   id: string;

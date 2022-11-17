@@ -6,7 +6,7 @@ import UserIcon from '../icons/user-icon';
 import clsx from 'clsx';
 
 interface UserLayoutProps {
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 const routesMap: Record<string, 'profile' | 'events' | 'groups'> = {

@@ -11,7 +11,7 @@ const CategoryTile = ({ onButtonClick, iconType, name }: CategoryTile) => {
   return (
     <div
       className={clsx(
-        'bg-blue-100 text-blue-800 rounded-full px-2 py-1 flex items-center',
+        'bg-blue-100 text-blue-800 rounded-full px-2 py-1 flex items-center mr-2',
         iconType === 'ADD' && '!bg-purple-100 !text-purple-800'
       )}
     >

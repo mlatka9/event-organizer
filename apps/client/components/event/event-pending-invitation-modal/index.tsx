@@ -31,7 +31,7 @@ const Index = ({ handleCloseModal, eventId }: EventPendingInvitationsModalProps)
               <InvitationToAcceptCard
                 key={i.id}
                 image={i.user.image}
-                userName={i.user.name}
+                name={i.user.name}
                 eventId={eventId}
                 invitationId={i.id}
               />
@@ -45,8 +45,8 @@ const Index = ({ handleCloseModal, eventId }: EventPendingInvitationsModalProps)
               <SentInvitationCard
                 key={i.id}
                 image={i.user.image}
-                userName={i.user.name}
-                eventId={eventId}
+                name={i.user.name}
+                eventId={i.event.id}
                 invitationId={i.id}
               />
             ))}

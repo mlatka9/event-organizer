@@ -13,23 +13,18 @@ import FilterIcon from '../../components/icons/filter-icon';
 import Link from 'next/link';
 import Pagination from '../../components/common/pagination';
 import { useEventsQuery } from '../../hooks/query/events';
+import { GetAllEventsInputType, getAllEventsSchema } from '@event-organizer/shared-types';
+import PlusIcon from '../../components/icons/plus-icons';
+import { useMeQuery } from '../../hooks/query/auth';
 
 const MapWithNoSSR = dynamic(() => import('../../components/map'), {
   ssr: false,
 });
 
-const filtersMap: {
-  locationStatus: Record<string, string>;
-  visibilityStatus: Record<string, string>;
-  timeRange: Record<string, string>;
-} = {
+const filtersMap = {
   locationStatus: {
     STATIONARY: 'stacjonarnie',
     ONLINE: 'online',
-  },
-  visibilityStatus: {
-    PUBLIC: 'publiczne',
-    PRIVATE: 'prywatne',
   },
   timeRange: {
     TODAY: 'dziś',
@@ -39,14 +34,15 @@ const filtersMap: {
 };
 
 const EventsPage = () => {
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const router = useRouter();
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [focusedMarkerId, setFocusedMarkerId] = useState<undefined | string>(undefined);
+  const { isSuccess: isMeSuccess, data: meData } = useMeQuery();
+
   const { data: categories, isSuccess: isCategoriesSuccess } = useCategoriesQuery();
 
   const updateParam = (key: string, value: string | undefined) => {
     const currentParams = { ...router.query };
-
     if (!value) {
       delete currentParams[key];
       router.replace({
@@ -59,40 +55,28 @@ const EventsPage = () => {
     }
   };
 
-  const page = typeof router.query.page === 'string' ? +router.query.page : undefined;
-  const city = typeof router.query.city === 'string' ? router.query.city : undefined;
-  const category = typeof router.query.category === 'string' ? router.query.category : undefined;
-  const locationStatus = typeof router.query.locationStatus === 'string' ? router.query.locationStatus : undefined;
-  const visibilityStatus =
-    typeof router.query.visibilityStatus === 'string' ? router.query.visibilityStatus : undefined;
-  const timeRange = typeof router.query.timeRange === 'string' ? router.query.timeRange : undefined;
+  const validation = getAllEventsSchema.safeParse(router.query);
+
+  const { page, timeRange, category, locationStatus, city }: GetAllEventsInputType = router.query;
 
   const { data: eventsData, isSuccess: isEventsSuccess } = useEventsQuery({
     page,
     city,
     category,
     locationStatus,
-    visibilityStatus,
     timeRange,
-    enabled: router.isReady,
+    enabled: validation.success,
   });
 
-  if (!router.isReady || !isCategoriesSuccess || !isEventsSuccess) return <>loading ...</>;
-
-  const selectedCategory = (category && categories.find((c) => c.name === category)?.name) || 'all';
-
-  const selectedLocationStatus =
-    (locationStatus && ['STATIONARY', 'ONLINE'].find((c) => c === locationStatus)) || 'all';
-
-  const selectedVisibilityStatus =
-    (visibilityStatus && ['PUBLIC', 'PRIVATE'].find((c) => c === visibilityStatus)) || 'all';
-
-  const selectedTimeRange = (timeRange && ['TODAY', 'THISWEEK', 'THISMONTH'].find((c) => c === timeRange)) || 'all';
+  if (!validation.success) {
+    router.push('/events');
+    return;
+  }
 
   const isMarkerType = (marker: {
     id: string;
-    longitude: number | undefined;
-    latitude: number | undefined;
+    longitude: number | null;
+    latitude: number | null;
   }): marker is { id: string; longitude: number; latitude: number } => !!marker.latitude && !!marker.latitude;
 
   const locationMarker = isEventsSuccess
@@ -113,94 +97,114 @@ const EventsPage = () => {
     }));
   };
 
+  const selectedCategory =
+    (category && isCategoriesSuccess && categories.find((c) => c.name === category)?.name) || 'all';
+
+  if (!router.isReady || !isCategoriesSuccess || !isEventsSuccess) return <MainLayout />;
+
   return (
     <MainLayout>
-      <h1 className={'font-semibold text-3xl mb-10'}>Wydarzenia</h1>
-      <div className={'flex mb-10 w-full items-center'}>
-        <div className={'z-1 w-[300px]'}>
-          <AsyncSelect
-            cacheOptions
-            defaultOptions
-            loadOptions={loadOptions}
-            placeholder={'Warszawa'}
-            value={city ? { value: city, label: city } : null}
-            onChange={(v) => updateParam('city', v ? v.value : undefined)}
-            defaultValue={city ? { value: city, label: city } : null}
-            isClearable
-          />
-        </div>
-        <select
-          className={'border-2 rounded px-3 py-[6px] ml-3 cursor-pointer'}
-          value={selectedCategory}
-          onChange={(v) => {
-            updateParam('category', v.target.value === 'wszytskie' ? undefined : v.target.value);
-          }}
-        >
-          <option>wszytskie</option>
-          {categories.map((c) => (
-            <option key={c.name}>{c.name}</option>
-          ))}
-        </select>
-        <div className={'flex space-x-1 ml-2'}>
-          {selectedLocationStatus && selectedLocationStatus !== 'all' && (
-            <FilterTile
-              label={filtersMap.locationStatus[selectedLocationStatus]}
-              handleRemove={() => updateParam('locationStatus', undefined)}
-            />
-          )}
-          {selectedVisibilityStatus && selectedVisibilityStatus !== 'all' && (
-            <FilterTile
-              label={filtersMap.visibilityStatus[selectedVisibilityStatus]}
-              handleRemove={() => updateParam('visibilityStatus', undefined)}
-            />
-          )}
-          {selectedTimeRange && selectedTimeRange !== 'all' && (
-            <FilterTile
-              label={filtersMap.timeRange[selectedTimeRange]}
-              handleRemove={() => updateParam('timeRange', undefined)}
-            />
-          )}
-        </div>
-        <button
-          className={
-            'flex items-center ml-auto ring-1 rounded-full ring-gray-300 px-5 text-gray-500 py-3 hover:ring-gray-300 hover:text-gray-900 hover:bg-gray-50 transition-all'
-          }
-          onClick={() => setIsFilterModalOpen(true)}
-        >
-          <FilterIcon width={15} height={15} /> <span className={'ml-2'}>więcej filtrów</span>
-        </button>
-        {isFilterModalOpen && (
-          <FiltersModal
-            defaultLocationStatus={locationStatus || 'all'}
-            defaultVisibilityStatus={visibilityStatus || 'all'}
-            defaultTimeRange={timeRange || 'all'}
-            handleCloseModal={() => setIsFilterModalOpen(false)}
-          />
-        )}
-      </div>
-
-      <div className={'grid grid-cols-2 gap-3'}>
-        <div className={'space-y-3'}>
-          {eventsData.events.map((event) => (
-            <Link href={`/events/${event.id}`} key={event.id} className={'block'}>
-              <EventCard
-                event={event}
-                onMouseEnter={() => setFocusedMarkerId(event.id)}
-                onMouseLeave={() => setFocusedMarkerId(undefined)}
-              />
+      <div className={'mt-10'}>
+        <div className={'flex items-center justify-between mb-20'}>
+          <h1 className={'font-semibold text-3xl '}>Wydarzenia</h1>
+          {meData && (
+            <Link
+              href={'/events/create'}
+              className={'block flex bg-blue-600 text-white hover:bg-blue-500 items-center px-4 py-2 rounded-md'}
+            >
+              <PlusIcon width={14} height={14} className={'mr-3 fill-white'} />
+              Utwórz nowe
             </Link>
-          ))}
+          )}
         </div>
-        {/*<div className={'bg-green-300'}>*/}
-        <div className={'w-full h-[600px] bg-pink-400 sticky top-[100px]'}>
-          <MapWithNoSSR markers={locationMarker} focusedMarkerId={focusedMarkerId} mapHeight={'100%'} />
+
+        <div className={'flex mb-10 w-full items-center flex-wrap'}>
+          <div className={'z-1 w-[300px]'}>
+            <AsyncSelect
+              cacheOptions
+              defaultOptions
+              loadOptions={loadOptions}
+              placeholder={'Miasto'}
+              value={city ? { value: city, label: city } : null}
+              onChange={(v) => updateParam('city', v ? v.value : undefined)}
+              defaultValue={city ? { value: city, label: city } : null}
+              isClearable
+            />
+          </div>
+          <select
+            className={'border-2 rounded px-3 py-[6px] ml-3 cursor-pointer'}
+            value={selectedCategory}
+            onChange={(v) => {
+              updateParam('category', v.target.value === 'wszystkie kategorie' ? undefined : v.target.value);
+            }}
+          >
+            <option>wszystkie kategorie</option>
+            {categories.map((c) => (
+              <option key={c.name}>{c.name}</option>
+            ))}
+          </select>
+          <div className={'flex space-x-1 ml-2'}>
+            {locationStatus && (
+              <FilterTile
+                label={filtersMap.locationStatus[locationStatus]}
+                handleRemove={() => updateParam('locationStatus', undefined)}
+              />
+            )}
+            {/*{visibilityStatus && (*/}
+            {/*  <FilterTile*/}
+            {/*    label={filtersMap.visibilityStatus[visibilityStatus]}*/}
+            {/*    handleRemove={() => updateParam('visibilityStatus', undefined)}*/}
+            {/*  />*/}
+            {/*)}*/}
+            {timeRange && (
+              <FilterTile
+                label={filtersMap.timeRange[timeRange]}
+                handleRemove={() => updateParam('timeRange', undefined)}
+              />
+            )}
+          </div>
+
+          <button
+            className={
+              'flex items-center ml-auto ring-1 bg-white rounded-full ring-gray-300 px-5 text-gray-500 py-3 hover:ring-gray-300 hover:text-gray-900 transition-all'
+            }
+            onClick={() => setIsFilterModalOpen(true)}
+          >
+            <FilterIcon width={15} height={15} /> <span className={'ml-2'}>więcej filtrów</span>
+          </button>
+          {isFilterModalOpen && (
+            <FiltersModal
+              defaultLocationStatus={locationStatus || 'all'}
+              // defaultVisibilityStatus={visibilityStatus || 'all'}
+              defaultTimeRange={timeRange || 'all'}
+              handleCloseModal={() => setIsFilterModalOpen(false)}
+            />
+          )}
         </div>
+        <div className={'grid grid-cols-2 gap-3'}>
+          <div className={'space-y-3'}>
+            {eventsData.events.map((event) => {
+              return (
+                <Link href={`/events/${event.id}`} key={event.id} className={'block'}>
+                  <EventCard
+                    event={event}
+                    onMouseEnter={() => setFocusedMarkerId(event.id)}
+                    onMouseLeave={() => setFocusedMarkerId(undefined)}
+                  />
+                </Link>
+              );
+            })}
+          </div>
+          <div className={'w-full h-[600px] sticky top-[100px]'}>
+            <MapWithNoSSR markers={locationMarker} focusedMarkerId={focusedMarkerId} mapHeight={'100%'} />
+          </div>
+        </div>
+        <Pagination
+          pageCount={eventsData.pageCount}
+          currentPage={eventsData.currentPage}
+          changePage={(pageNumber) => updateParam('page', pageNumber === 1 ? undefined : `${pageNumber}`)}
+        />
       </div>
-      <Pagination
-        pageCount={eventsData.pageCount}
-        currentPage={eventsData.currentPage}
-        changePage={(pageNumber) => updateParam('page', pageNumber === 1 ? undefined : `${pageNumber}`)}
-      />
     </MainLayout>
   );
 };

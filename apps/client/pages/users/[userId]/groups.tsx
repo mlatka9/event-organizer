@@ -1,7 +1,7 @@
 import UserLayout from '../../../components/layouts/user-layout';
 
 const UserGroupsPage = () => {
-  return <UserLayout>user groups main</UserLayout>;
+  return <UserLayout>USER'S GROUPS TODO</UserLayout>;
 };
 
 export default UserGroupsPage;

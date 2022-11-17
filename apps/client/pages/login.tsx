@@ -7,9 +7,10 @@ import Button from '../components/common/button';
 import { useLoginMutation } from '../hooks/mutations/auth';
 import Header from '../components/common/header';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import FormErrorMessage from '../components/form/form-error-message';
 import { useMeQuery } from '../hooks/query/auth';
+import { toast } from 'react-toastify';
 
 const schema = z.object({
   email: z.string().email({ message: 'Wprowadz poprawny adres email' }),
@@ -19,7 +20,7 @@ const schema = z.object({
 type LoginFormInput = z.infer<typeof schema>;
 
 const LoginPage = () => {
-  const me = useMeQuery({ redirectTo: '/', redirectIfFound: true });
+  useMeQuery({ redirectTo: '/', redirectIfFound: true });
 
   const [APIErrorMessage, setAPIErrorMessage] = useState<undefined | string>(undefined);
   const router = useRouter();
@@ -47,8 +48,6 @@ const LoginPage = () => {
       password: data.password,
     });
   };
-
-  console.log(APIErrorMessage);
 
   return (
     <div>

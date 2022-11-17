@@ -1,3 +1,5 @@
+import CloseIcon from '../icons/close-icon';
+
 interface FilterTileProps {
   label: string;
   handleRemove: () => void;
@@ -5,10 +7,10 @@ interface FilterTileProps {
 
 const FilterTile = ({ handleRemove, label }: FilterTileProps) => {
   return (
-    <div className={'text-sm bg-blue-50 text-blue-800 flex items-center justify-center px-3 py-2 rounded-full'}>
+    <div className={'text-sm bg-blue-500 text-white flex items-center justify-center px-3 py-2 rounded-full'}>
       <span>{label}</span>
       <button onClick={handleRemove} className={'cursor-pointer ml-2'}>
-        X
+        <CloseIcon width={14} height={14} className={'fill-white'} />
       </button>
     </div>
   );

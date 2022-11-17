@@ -34,6 +34,7 @@ export const getAllEventsSchema = z.object({
   city: z.string().optional(),
   category: z.string().optional(),
   locationStatus: z.enum(['STATIONARY', 'ONLINE']).optional(),
+  // visibilityStatus: z.enum(['PRIVATE', 'PUBLIC']).optional(),
   timeRange: z.enum(['TODAY', 'THISWEEK', 'THISMONTH']).optional(),
 });
 

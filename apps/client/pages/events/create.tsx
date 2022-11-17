@@ -18,6 +18,9 @@ import React from 'react';
 import FileIcon from '../../components/icons/file-icon';
 import CalendarIcon from '../../components/icons/calendar-icon';
 import MapIcon from '../../components/icons/map-icon';
+import { toast } from 'react-toastify';
+import { useMeQuery } from '../../hooks/query/auth';
+import { useRouter } from 'next/router';
 
 const CreateEventFormSchema = createEventSchema
   .omit({ startDate: true })
@@ -50,8 +53,6 @@ const MapWithNoSSR = dynamic(() => import('../../components/map'), {
 
 const currentDate = dayjs().format('YYYY-MM-DD[T]hh:mm');
 
-console.log('currentDate', currentDate);
-
 const CreateEventPage = () => {
   const {
     reset,
@@ -72,7 +73,8 @@ const CreateEventPage = () => {
     },
   });
 
-  console.log(errors);
+  const router = useRouter();
+  const { data: meData, isError: isMeError, isLoading: isMeLoading } = useMeQuery();
 
   console.log('form data', watch());
 
@@ -82,11 +84,14 @@ const CreateEventPage = () => {
   console.log('date', date);
   console.log('iso date', date && new Date(date).toISOString());
 
-  const resetForm = () => {
+  const onSuccess = () => {
+    toast('Pomyślnie dodano wydarzenie', {
+      type: 'success',
+    });
     reset();
   };
 
-  const createEvent = useCreateEventMutation(resetForm);
+  const createEvent = useCreateEventMutation(onSuccess);
 
   const onSubmit = async (data: CreateEventFormType) => {
     console.log(data);
@@ -124,7 +129,6 @@ const CreateEventPage = () => {
   const selectedTags = watch('tags');
 
   const findGeologicalLocation = async () => {
-    // const [street, city, postCode, country] = getValues(['street', 'city', 'postCode', 'country']);
     const addressValues = getValues(['street', 'city', 'postCode', 'country']);
 
     const query = addressValues.filter((value) => value).join(', ');
@@ -192,142 +196,153 @@ const CreateEventPage = () => {
 
   const locationStatus = watch('eventLocationStatus');
 
+  if (isMeLoading) {
+    return <MainLayout />;
+  }
+
+  if (!isMeLoading && isMeError) {
+    router.push('/events');
+    return <MainLayout />;
+  }
+
   return (
     <MainLayout>
-      <Heading className={'mb-20'}>Stwórz nowe wydarzenie</Heading>
-      <form onSubmit={handleSubmit(onSubmit)} className="mx-auto mb-20 flex flex-col">
-        <div className={'flex'}>
-          <FileIcon width={50} height={50} />
-          <div className={'ml-5'}>
-            <h2 className={'text-2xl font-semibold text-neutral-800'}>Podstawowe informacje</h2>
-            <p className={'text-gray-600'}>
-              Nazwij swoje wydarzenie, zachęć innych do uczestnictwa i opisz czym twoje wydarzenie się wyróżnia
-            </p>
-          </div>
-        </div>
-        <div className={'space-y-5 ml-[70px] mt-10 mb-20'}>
-          <FormInput
-            label="name"
-            register={register}
-            name="name"
-            rules={{
-              required: {
-                value: true,
-                message: 'name is required',
-              },
-            }}
-            error={errors.name}
-          />
-          <FormTextarea label="description" register={register} name="description" error={errors.description} />
-          <FormSelect
-            label={'status'}
-            name={'eventVisibilityStatus'}
-            register={register}
-            options={eventVisibilityStatusOptions}
-            error={errors.eventVisibilityStatus}
-          />
-          <FormInput
-            label="obrazek"
-            register={register}
-            name="bannerImage"
-            onBlur={findGeologicalLocation}
-            error={errors.bannerImage}
-          />
-          <div className={'grid grid-cols-2 gap-3'}>
-            <FormSelect
-              label={'status'}
-              name={'eventLocationStatus'}
-              register={register}
-              options={eventLocationStatusOptions}
-              error={errors.eventLocationStatus}
-            />
-            <FormSelect
-              label={'kategoria'}
-              name={'categoryId'}
-              register={register}
-              options={eventCategoryOptions}
-              error={errors.categoryId}
-            />
-          </div>
-          <FormTagPicker addTag={handleAddTag} removeTag={handleRemoveTag} selectedTags={selectedTags} />
-        </div>
-        {locationStatus === 'STATIONARY' && (
-          <>
-            <div className={'flex'}>
-              <MapIcon width={50} height={50} />
-              <div className={'ml-5'}>
-                <h2 className={'mb-5 text-2xl mb-0 font-semibold text-neutral-800'}>Lokalizacja</h2>
-                <p className={'text-gray-600'}>Pomóż innym odnaleźć twoje wydarzenie</p>
-              </div>
+      <div className={'mt-10'}>
+        <Heading className={'mb-20'}>Stwórz nowe wydarzenie</Heading>
+        <form onSubmit={handleSubmit(onSubmit)} className="mx-auto mb-20 flex flex-col">
+          <div className={'flex'}>
+            <FileIcon width={50} height={50} />
+            <div className={'ml-5'}>
+              <h2 className={'text-2xl font-semibold text-neutral-800'}>Podstawowe informacje</h2>
+              <p className={'text-gray-600'}>
+                Nazwij swoje wydarzenie, zachęć innych do uczestnictwa i opisz czym twoje wydarzenie się wyróżnia
+              </p>
             </div>
-            <div className={'space-y-5 ml-[70px] mt-10 mb-20'}>
-              <MapWithNoSSR markers={locationMarker} />
-              <div className={'grid grid-cols-2 gap-3'}>
-                <FormInput
-                  label="street"
-                  register={register}
-                  name="street"
-                  onBlur={findGeologicalLocation}
-                  error={errors.street}
-                />
-                <FormInput
-                  label="city"
-                  register={register}
-                  name="city"
-                  onBlur={findGeologicalLocation}
-                  error={errors.city}
-                />
-              </div>
-              <div className={'grid grid-cols-2 gap-3'}>
-                <FormInput
-                  label="post code"
-                  register={register}
-                  name="postCode"
-                  onBlur={findGeologicalLocation}
-                  error={errors.postCode}
-                />
-                <FormInput
-                  label="country"
-                  register={register}
-                  name="country"
-                  onBlur={findGeologicalLocation}
-                  error={errors.country}
-                />
-              </div>
-            </div>
-          </>
-        )}
-        <div className={'flex'}>
-          <CalendarIcon width={50} height={50} />
-          <div className={'ml-5'}>
-            <h2 className={'mb-5 text-2xl mb-0 font-semibold text-neutral-800'}>Czas</h2>
-            <p className={'text-gray-600'}>
-              Powiadom innych kiedy odbywa się wydarzenie, aby wiedzieli kiedy mają uczestniczyć{' '}
-            </p>
           </div>
-        </div>
-        <div className={'space-y-5 ml-[70px] mt-10 mb-20'}>
-          <div className="relative w-1/2">
-            <input
-              id={'startDate'}
-              type="datetime-local"
-              {...register('startDate')}
-              min={currentDate}
-              className="bg-primary-100 peer block w-full appearance-none rounded-lg border-2 border-gray-300 px-2 pb-2.5 pt-4 text-sm text-gray-900 focus:border-blue-300"
+          <div className={'space-y-5 ml-[70px] mt-10 mb-20'}>
+            <FormInput
+              label="nazwa"
+              register={register}
+              name="name"
+              rules={{
+                required: {
+                  value: true,
+                  message: 'name is required',
+                },
+              }}
+              error={errors.name}
             />
-            <label
-              htmlFor={'startDate'}
-              className="absolute top-5 z-10 origin-[0] -translate-y-5 scale-75 transform px-2 text-sm text-gray-500 duration-300"
-            >
-              data rozpoczęcia
-            </label>
+            <FormTextarea label="description" register={register} name="description" error={errors.description} />
+            <FormSelect
+              label={'widoczność'}
+              name={'eventVisibilityStatus'}
+              register={register}
+              options={eventVisibilityStatusOptions}
+              error={errors.eventVisibilityStatus}
+            />
+            <FormInput
+              label="obrazek"
+              register={register}
+              name="bannerImage"
+              onBlur={findGeologicalLocation}
+              error={errors.bannerImage}
+            />
+            <div className={'grid grid-cols-2 gap-3'}>
+              <FormSelect
+                label={'lokalizacja'}
+                name={'eventLocationStatus'}
+                register={register}
+                options={eventLocationStatusOptions}
+                error={errors.eventLocationStatus}
+              />
+              <FormSelect
+                label={'kategoria'}
+                name={'categoryId'}
+                register={register}
+                options={eventCategoryOptions}
+                error={errors.categoryId}
+              />
+            </div>
+            <FormTagPicker addTag={handleAddTag} removeTag={handleRemoveTag} selectedTags={selectedTags} />
           </div>
-        </div>
+          {locationStatus === 'STATIONARY' && (
+            <>
+              <div className={'flex'}>
+                <MapIcon width={50} height={50} />
+                <div className={'ml-5'}>
+                  <h2 className={'mb-5 text-2xl mb-0 font-semibold text-neutral-800'}>Lokalizacja</h2>
+                  <p className={'text-gray-600'}>Pomóż innym odnaleźć twoje wydarzenie</p>
+                </div>
+              </div>
+              <div className={'space-y-5 ml-[70px] mt-10 mb-20'}>
+                <MapWithNoSSR markers={locationMarker} />
+                <div className={'grid grid-cols-2 gap-3'}>
+                  <FormInput
+                    label="ulica"
+                    register={register}
+                    name="street"
+                    onBlur={findGeologicalLocation}
+                    error={errors.street}
+                  />
+                  <FormInput
+                    label="miasto"
+                    register={register}
+                    name="city"
+                    onBlur={findGeologicalLocation}
+                    error={errors.city}
+                  />
+                </div>
+                <div className={'grid grid-cols-2 gap-3'}>
+                  <FormInput
+                    label="kod pocztowy"
+                    register={register}
+                    name="postCode"
+                    onBlur={findGeologicalLocation}
+                    error={errors.postCode}
+                  />
+                  <FormInput
+                    label="kraj"
+                    register={register}
+                    name="country"
+                    onBlur={findGeologicalLocation}
+                    error={errors.country}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+          <div className={'flex'}>
+            <CalendarIcon width={50} height={50} />
+            <div className={'ml-5'}>
+              <h2 className={'mb-5 text-2xl mb-0 font-semibold text-neutral-800'}>Czas</h2>
+              <p className={'text-gray-600'}>
+                Powiadom innych kiedy odbywa się wydarzenie, aby wiedzieli kiedy mają uczestniczyć{' '}
+              </p>
+            </div>
+          </div>
+          <div className={'space-y-5 ml-[70px] mt-10 mb-20'}>
+            <div className="relative w-1/2">
+              <input
+                id={'startDate'}
+                type="datetime-local"
+                {...register('startDate')}
+                min={currentDate}
+                className="bg-primary-100 peer block w-full appearance-none rounded-lg border-2 border-gray-300 px-2 pb-2.5 pt-4 text-sm text-gray-900 focus:border-blue-300"
+              />
+              <label
+                htmlFor={'startDate'}
+                className="absolute top-5 z-10 origin-[0] -translate-y-5 scale-75 transform px-2 text-sm text-gray-500 duration-300"
+              >
+                data rozpoczęcia
+              </label>
+            </div>
+          </div>
 
-        <Button type="submit" className={'ml-auto'}>
-          Submit
-        </Button>
-      </form>
+          <Button type="submit" className={'ml-auto'}>
+            Submit
+          </Button>
+        </form>
+      </div>
     </MainLayout>
   );
 };

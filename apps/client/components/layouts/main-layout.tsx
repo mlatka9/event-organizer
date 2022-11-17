@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import Header from '../common/header';
 
 interface MainLayoutProps {
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 const MainLayout = ({ children }: MainLayoutProps) => {

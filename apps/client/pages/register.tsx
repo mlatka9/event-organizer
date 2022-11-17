@@ -9,6 +9,7 @@ import Header from '../components/common/header';
 import Link from 'next/link';
 import { useState } from 'react';
 import FormErrorMessage from '../components/form/form-error-message';
+import { toast } from 'react-toastify';
 
 const schema = z
   .object({
@@ -40,7 +41,12 @@ const RegisterPage = () => {
   });
 
   const registerUser = useRegisterMutation({
-    onSuccess: () => router.push('/login'),
+    onSuccess: () => {
+      toast('Pomyślnie utworzono konto', {
+        type: 'success',
+      });
+      router.push('/login');
+    },
     onError: (err) =>
       setAPIErrorMessage(err.response?.status === 409 ? 'Użytkownik z takim adresem email już istnieje' : undefined),
   });

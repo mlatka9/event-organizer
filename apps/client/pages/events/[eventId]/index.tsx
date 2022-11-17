@@ -1,6 +1,5 @@
 import { useRouter } from 'next/router';
 import { useEventInfoQuery } from '../../../hooks/query/events';
-import MainLayout from '../../../components/layouts/main-layout';
 import dynamic from 'next/dynamic';
 import dayjs from 'dayjs';
 import CalendarIcon from '../../../components/icons/calendar-icon';
@@ -16,17 +15,19 @@ const EventDetailsPage = () => {
   const router = useRouter();
   const eventId = router.query.eventId as string;
 
-  const { data: eventData, isSuccess, isError, error } = useEventInfoQuery(eventId, router.isReady);
+  const { data: eventData, isSuccess } = useEventInfoQuery(eventId, router.isReady);
 
-  if (isError && error?.response?.status === 401) {
-    return <MainLayout>no right to see</MainLayout>;
-  }
+  console.log('eventData', eventData);
 
-  if (isError && error?.response?.status === 400) {
-    return <MainLayout>no event with id</MainLayout>;
-  }
+  // if (isError && error?.response?.status === 401) {
+  //   return <MainLayout>no right to see</MainLayout>;
+  // }
+  //
+  // if (isError && error?.response?.status === 400) {
+  //   return <MainLayout>no event with id</MainLayout>;
+  // }
 
-  if (!isSuccess) return <>loading...</>;
+  if (!isSuccess) return <EventLayout />;
 
   return (
     <EventLayout>
