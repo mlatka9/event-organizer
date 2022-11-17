@@ -17,7 +17,7 @@ const EventDetailsPage = () => {
 
   const { data: eventData, isSuccess } = useEventInfoQuery(eventId, router.isReady);
 
-  console.log('eventData', eventData);
+  console.log('eventData ', eventData);
 
   // if (isError && error?.response?.status === 401) {
   //   return <MainLayout>no right to see</MainLayout>;
