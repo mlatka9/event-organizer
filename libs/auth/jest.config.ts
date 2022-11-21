@@ -12,5 +12,5 @@ export default {
     '^.+\\.[tj]sx?$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  coverageDirectory: '../../coverage/libs/auth',
+  coverageDirectory: '../../coverage/libs/auth.ts',
 };

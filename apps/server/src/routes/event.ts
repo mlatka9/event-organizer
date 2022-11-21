@@ -10,6 +10,7 @@ publicRouter.get('/:id', eventsRouter.getEventInfo);
 publicRouter.get('/:eventId/users', eventsRouter.getAllParticipants);
 
 protectedRouter.post('/', eventsRouter.create);
+protectedRouter.put('/:eventId', eventsRouter.updateEvent);
 protectedRouter.post('/:eventId/user/:userId', eventsRouter.addParticipant);
 protectedRouter.delete('/:eventId/user/:userId', eventsRouter.removeParticipant);
 protectedRouter.post('/:eventId/invitation', eventsRouter.createEventInvitation);

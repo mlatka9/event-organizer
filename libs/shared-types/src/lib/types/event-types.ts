@@ -5,7 +5,7 @@ import {
   getAllEventsSchema,
   searchUserToEventInvitationSchema,
 } from '../schemas';
-import { EventRole, EventVisibilityStatus } from '@prisma/client';
+import { EventRole } from '@prisma/client';
 
 export type CreateEventInputType = z.infer<typeof createEventSchema>;
 export type GetAllEventsInputType = z.infer<typeof getAllEventsSchema>;
@@ -52,6 +52,13 @@ export interface EventDetailsType {
   categoryId: string;
   isCurrentUserParticipant: boolean;
   isCurrentUserAdmin: boolean;
+  street?: string;
+  city?: string;
+  country?: string;
+  postCode?: string;
+  tags: string[];
+  eventVisibilityStatus: 'PRIVATE' | 'PUBLIC';
+  eventLocationStatus: 'STATIONARY' | 'ONLINE';
 }
 
 export interface EventInvitationType {

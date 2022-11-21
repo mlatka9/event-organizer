@@ -1,8 +1,10 @@
+import { SessionUserType } from '@event-organizer/shared-types';
+
 export {};
 
 declare module 'jsonwebtoken' {
   export interface JwtPayload {
-    userId: string;
+    user: SessionUserType;
     createdAt: number;
     maxAge: number;
   }

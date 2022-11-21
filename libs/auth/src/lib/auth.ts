@@ -1,18 +1,18 @@
 import * as jwt from 'jsonwebtoken';
 import { parse, serialize } from 'cookie';
 import { IncomingMessage, ServerResponse } from 'http';
+import { SessionUserType } from '@event-organizer/shared-types';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const TOKEN_NAME = 'token';
 export const MAX_AGE = 60 * 60 * 8; // 8 hours
 
-export function setLoginSession(res: ServerResponse, session: { userId: string }) {
+export function setLoginSession(res: ServerResponse, sessionUser: SessionUserType) {
   const createdAt = Date.now();
-  // Create a session object with a max age that we can validate later
-  const obj = { ...session, createdAt, maxAge: MAX_AGE };
-  console.log('obj', obj);
-  const token = jwt.sign(obj, JWT_SECRET);
+  const sessionData = { user: sessionUser, createdAt, maxAge: MAX_AGE };
+  const token = jwt.sign(sessionData, JWT_SECRET);
   setTokenCookie(res, token);
+  return sessionData;
 }
 
 export async function getLoginSession(req: IncomingMessage) {

@@ -4,13 +4,14 @@ import { getLoginSession, setLoginSession } from '@event-organizer/auth';
 import { removeTokenCookie } from '@event-organizer/auth';
 import { prisma } from '@event-organizer/prisma-client';
 import { createUser } from '../lib/user';
-import { UnauthenticatedError } from '../errors';
-import { MeType } from '@event-organizer/shared-types';
+import { UnauthenticatedError, ValidationError } from '../errors';
+import { SessionType, SessionUserType } from '@event-organizer/shared-types';
+import { credentialsSchema } from '@event-organizer/shared-types';
+import { generateErrorMessage } from 'zod-error';
 
 const authenticate = (method: string, req: Request, res: Response) =>
-  new Promise<{ userId: string }>((resolve, reject) => {
+  new Promise<SessionUserType>((resolve, reject) => {
     passport.authenticate(method, { session: false }, (error, token) => {
-      console.log('token w authenticate', token, error);
       if (error) {
         reject(error);
       } else {
@@ -20,30 +21,46 @@ const authenticate = (method: string, req: Request, res: Response) =>
   });
 
 const register = async (req: Request, res: Response) => {
-  console.log(req.body);
-  //todo zod
-  const { email, password } = req.body;
+  const validation = credentialsSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+
+  const { email, password } = validation.data;
   await createUser(email, password);
   res.status(201).end();
 };
 
 const login = async (req: Request, res: Response) => {
+  console.log('LOGIN');
+  const validation = credentialsSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+
   try {
     const user = await authenticate('local', req, res);
-    const session = { ...user };
-    setLoginSession(res, session);
-    res.status(200).json(session);
+    const sessionData = setLoginSession(res, user);
+    const formattedSessionData: SessionType = {
+      createdAt: new Date(sessionData.createdAt),
+      expiredAt: new Date(sessionData.createdAt + sessionData.maxAge * 1000),
+      user: sessionData.user,
+    };
+    res.status(200).json(formattedSessionData);
   } catch (err) {
     if (err instanceof Error) {
       throw new UnauthenticatedError('Wrong credentials');
-      // res.status(401).json({ message: err.message });
     }
   }
 };
 
 const logout = async (req: Request, res: Response) => {
   removeTokenCookie(res);
-  res.writeHead(302, { Location: '/' }).end();
+  res.status(200).end();
 };
 
 const me = async (req: Request, res: Response) => {
@@ -56,7 +73,7 @@ const me = async (req: Request, res: Response) => {
 
   const user = await prisma.user.findUnique({
     where: {
-      id: session.userId,
+      id: session.user.userId,
     },
   });
 
@@ -65,9 +82,17 @@ const me = async (req: Request, res: Response) => {
     return;
   }
 
-  const formattedUser: MeType = { userId: user.id, name: user.name, image: user.image };
+  const formattedSessionData: SessionType = {
+    createdAt: new Date(session.createdAt),
+    expiredAt: new Date(session.createdAt + session.maxAge * 1000),
+    user: {
+      userId: user.id,
+      name: user.name,
+      image: user.image,
+    },
+  };
 
-  res.status(200).json(formattedUser);
+  res.status(200).json(formattedSessionData);
 };
 
 export default {

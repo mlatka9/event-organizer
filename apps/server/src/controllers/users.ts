@@ -13,6 +13,7 @@ import { UnauthenticatedError, ValidationError } from '../errors';
 import { generateErrorMessage } from 'zod-error';
 import { formatDisplayAddress } from '../lib/format-display-address';
 import { isPrivateEvent, isPublicEvent } from '../lib/events';
+import { ConflictError } from '../errors/conflict';
 
 const getById = async (req: Request, res: Response) => {
   const session = await getLoginSession(req);
@@ -47,7 +48,7 @@ const getById = async (req: Request, res: Response) => {
     id: user.id,
     name: user.name,
     favouriteCategories: user.favouriteCategories.map((c) => c.category),
-    isMe: session?.userId === user.id,
+    isMe: session?.user.userId === user.id,
     joinedAt: user.joinedAt.toISOString(),
   };
 
@@ -69,6 +70,16 @@ const updateUser = async (req: Request, res: Response) => {
     throw new ValidationError(errorMessage);
   }
   const body: UpdateUserInputType = req.body;
+
+  const duplicatedUsersCount = await prisma.user.count({
+    where: {
+      name: body.name,
+    },
+  });
+
+  if (duplicatedUsersCount) {
+    throw new ConflictError(`There is already user with name ${body.name}`);
+  }
 
   const categoriesToSet = await prisma.category.findMany({
     where: {
@@ -111,7 +122,7 @@ const getUserEvents = async (req: Request, res: Response) => {
 
   const userId = req.params.userId;
 
-  const requestFromUserOwner = userId === session?.userId;
+  const requestFromUserOwner = userId === session?.user.userId;
 
   const userCount = await prisma.user.count({
     where: {

@@ -5,13 +5,10 @@ export const isLoggedMiddleware = async (req: Request, res: Response, next: Next
   const session = await getLoginSession(req);
 
   if (!session) {
-    console.log('BRAK SESJI');
+    console.log('No session in isLoggedMiddleware');
     res.status(401).end('Authentication token is invalid, please log in');
     return;
   }
-
-  console.log('MIDDLE END');
-
-  req.userId = session.userId;
+  req.userId = session.user.userId;
   next();
 };

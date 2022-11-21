@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { prisma } from '@event-organizer/prisma-client';
 import { UnauthenticatedError, ValidationError } from '../errors';
 import { generateErrorMessage } from 'zod-error';
@@ -15,14 +15,11 @@ import {
   EventParticipant,
   searchUserToEventInvitationSchema,
   UserType,
-  PrivateEventType,
-  PublicEventType,
 } from '@event-organizer/shared-types';
 import { NotFoundError } from '../errors/not-found';
 import { getLoginSession } from '@event-organizer/auth';
 import { formatDisplayAddress } from '../lib/format-display-address';
-import { use } from 'passport';
-import { isPrivateEvent, isPublicEvent } from '../lib/events';
+import { isPublicEvent } from '../lib/events';
 
 const addNormalizedCity = async (city: string | undefined) => {
   if (!city) return;
@@ -40,7 +37,7 @@ const addNormalizedCity = async (city: string | undefined) => {
   return normalizedCity.id;
 };
 
-const create = async (req: Request, res: Response, next: NextFunction) => {
+const create = async (req: Request, res: Response) => {
   const validation = createEventSchema.safeParse(req.body);
 
   if (!validation.success) {
@@ -49,29 +46,29 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   }
 
   if (!req.userId) {
-    throw new Error('Bad middleware order');
+    throw new Error('No userId in req object');
   }
 
-  const body: CreateEventInputType = req.body;
+  const eventData = validation.data;
 
-  const normalizedCityId = await addNormalizedCity(body.normalizedCity);
+  const normalizedCityId = await addNormalizedCity(eventData.normalizedCity);
 
-  await prisma.event.create({
+  const event = await prisma.event.create({
     data: {
-      name: body.name,
-      description: body.description,
-      street: body.street,
-      city: body.city,
-      country: body.country,
-      postCode: body.postCode,
-      startDate: body.startDate,
-      categoryId: body.categoryId,
-      longitude: body.longitude,
-      latitude: body.latitude,
+      name: eventData.name,
+      description: eventData.description,
+      street: eventData.street,
+      city: eventData.city,
+      country: eventData.country,
+      postCode: eventData.postCode,
+      startDate: eventData.startDate,
+      categoryId: eventData.categoryId,
+      longitude: eventData.longitude,
+      latitude: eventData.latitude,
       normalizedCityId: normalizedCityId,
-      bannerImage: body.bannerImage,
-      eventVisibilityStatus: body.eventVisibilityStatus,
-      eventLocationStatus: body.eventLocationStatus,
+      bannerImage: eventData.bannerImage,
+      eventVisibilityStatus: eventData.eventVisibilityStatus,
+      eventLocationStatus: eventData.eventLocationStatus,
       eventParticipants: {
         create: {
           role: 'ADMIN',
@@ -80,8 +77,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       },
       tags: {
         connectOrCreate:
-          body.tags &&
-          body.tags.map((t) => ({
+          eventData.tags &&
+          eventData.tags.map((t) => ({
             create: {
               name: t,
             },
@@ -93,7 +90,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     },
   });
 
-  res.status(201).end();
+  res.status(201).json({ eventId: event.id });
 };
 
 const getEventInfo = async (req: Request, res: Response) => {
@@ -126,11 +123,7 @@ const getEventInfo = async (req: Request, res: Response) => {
     return;
   }
 
-  console.log(event.eventVisibilityStatus);
-
-  const isLoggedUserParticipant = event.eventParticipants.some((user) => user.userId === session?.userId);
-
-  console.log('isLoggedUserParticipant', isLoggedUserParticipant);
+  const isLoggedUserParticipant = event.eventParticipants.some((user) => user.userId === session?.user.userId);
 
   if (event.eventVisibilityStatus === 'PUBLIC' || isLoggedUserParticipant) {
     const formattedEvent: EventDetailsType = {
@@ -146,9 +139,16 @@ const getEventInfo = async (req: Request, res: Response) => {
       categoryId: event.category.id,
       bannerImage: event.bannerImage || undefined,
       isCurrentUserAdmin: event.eventParticipants.some(
-        (user) => user.role === 'ADMIN' && user.userId === session?.userId
+        (user) => user.role === 'ADMIN' && user.userId === session?.user.userId
       ),
-      isCurrentUserParticipant: event.eventParticipants.some((user) => user.userId === session?.userId),
+      isCurrentUserParticipant: event.eventParticipants.some((user) => user.userId === session?.user.userId),
+      city: event.city || undefined,
+      country: event.country || undefined,
+      eventLocationStatus: event.eventLocationStatus,
+      eventVisibilityStatus: event.eventVisibilityStatus,
+      postCode: event.postCode || undefined,
+      street: event.postCode || undefined,
+      tags: event.tags.map((t) => t.name),
     };
     res.json(formattedEvent);
   } else {
@@ -672,6 +672,7 @@ const getAllParticipants = async (req: Request, res: Response) => {
 
 const searchUsersToInvite = async (req: Request, res: Response) => {
   const loggedUserId = req.userId;
+
   if (!loggedUserId) {
     throw new Error('No userId in req object');
   }
@@ -739,7 +740,63 @@ const searchUsersToInvite = async (req: Request, res: Response) => {
   res.json(formattedUsers);
 };
 
+const updateEvent = async (req: Request, res: Response) => {
+  const eventId = req.params.eventId;
+
+  const validation = createEventSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+
+  if (!req.userId) {
+    throw new Error('No userId in req object');
+  }
+
+  const eventData = validation.data;
+
+  const normalizedCityId = await addNormalizedCity(eventData.normalizedCity);
+
+  const event = await prisma.event.update({
+    where: {
+      id: eventId,
+    },
+    data: {
+      name: eventData.name,
+      description: eventData.description,
+      street: eventData.street,
+      city: eventData.city,
+      country: eventData.country,
+      postCode: eventData.postCode,
+      startDate: eventData.startDate,
+      categoryId: eventData.categoryId,
+      longitude: eventData.longitude,
+      latitude: eventData.latitude,
+      normalizedCityId: normalizedCityId,
+      bannerImage: eventData.bannerImage,
+      eventVisibilityStatus: eventData.eventVisibilityStatus,
+      eventLocationStatus: eventData.eventLocationStatus,
+      tags: {
+        connectOrCreate:
+          eventData.tags &&
+          eventData.tags.map((t) => ({
+            create: {
+              name: t,
+            },
+            where: {
+              name: t,
+            },
+          })),
+      },
+    },
+  });
+
+  res.status(200).end();
+};
+
 export default {
+  updateEvent,
   searchUsersToInvite,
   getAllParticipants,
   getAllEventInvitation,
