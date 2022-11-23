@@ -1,6 +1,6 @@
 import Button from '../../../components/common/button';
 import { useRouter } from 'next/router';
-import { useUserEventInvitationsQuery } from '../../../hooks/query/users';
+import { useUserEventInvitationsQuery, useUserEventPendingRequestsQuery } from '../../../hooks/query/users';
 import { useCreateEventInvitationMutation } from '../../../hooks/mutation/events';
 
 interface JoinEventRequestModalProps {
@@ -11,7 +11,7 @@ interface JoinEventRequestModalProps {
 const JoinEventRequestModal = ({ eventId, userId }: JoinEventRequestModalProps) => {
   const router = useRouter();
   const { mutate: createEventInvitation } = useCreateEventInvitationMutation();
-  const { data: userEventInvitations, isSuccess } = useUserEventInvitationsQuery(userId);
+  const { data: userEventInvitations, isSuccess } = useUserEventPendingRequestsQuery({ userId });
 
   const createJoinEventRequest = () => {
     console.log('createJoinEventRequest');

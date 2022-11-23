@@ -21,7 +21,7 @@ const EventCard = ({ event, onMouseEnter, onMouseLeave }: EventCardProps) => {
       <img src={event.bannerImage || ImageFallback} alt={event.name} className={'w-40 object-cover'} />
       <div className={'flex flex-col px-5 py-3'}>
         <p className={'text-sm text-gray-500'}>
-          {event.startDate ? dayjs(event.startDate).format('D-MM-YYYY H:mm') : 'termin nieogłoszony'}
+          {event.startDate ? dayjs(event.startDate).format('D MMMM YYYY H:mm') : 'termin nieogłoszony'}
         </p>
         <h2 className={'font-semibold '}>{event.name}</h2>
         <p className={'text-sm'}>{event.displayAddress}</p>

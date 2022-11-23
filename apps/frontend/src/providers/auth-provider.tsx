@@ -7,7 +7,7 @@ interface AuthContextType {
   user: SessionUserType | null;
   isLoading: boolean;
   login: (args: { credentials: CredentialsType; onSuccess?: VoidFunction; onError?: (error: Error) => void }) => void;
-  logout: (callback?: VoidFunction) => void;
+  logout: (onSuccess?: VoidFunction) => void;
 }
 
 export const AuthContext = React.createContext<AuthContextType>(null!);
@@ -50,11 +50,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const logout = async (callback?: VoidFunction) => {
+  const logout = async (onSuccess?: VoidFunction) => {
     const response = await authAPI.logout();
     if (response.status === 200) {
       setUser(null);
-      callback && callback();
+      onSuccess && onSuccess();
     }
   };
 

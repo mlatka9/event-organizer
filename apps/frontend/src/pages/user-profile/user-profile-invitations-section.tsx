@@ -4,21 +4,20 @@ import SentInvitationCard from '../events/event-details/sent-invitation-card';
 
 interface UserProfileInvitationsSectionProps {
   userEventInvitations: EventInvitationType[];
+  userEventPendingRequests: EventInvitationType[];
 }
 
-const UserProfileInvitationsSection = ({ userEventInvitations }: UserProfileInvitationsSectionProps) => {
-  const pendingInvitations = userEventInvitations.filter((i) => !i.isAdminAccepted);
-  const invitationsToAccept = userEventInvitations.filter((i) => !i.isUserAccepted);
-
-  console.log(userEventInvitations);
-
+const UserProfileInvitationsSection = ({
+  userEventInvitations,
+  userEventPendingRequests,
+}: UserProfileInvitationsSectionProps) => {
   return (
     <>
-      {!!invitationsToAccept.length && (
+      {userEventInvitations.length > 0 && (
         <div>
           <h2 className={'text-xl font-semibold mb-10'}>Do akceptacji</h2>
-          {invitationsToAccept.map((i) => (
-            <div className={'bg-white p-5 rounded-md shadow'}>
+          {userEventInvitations.map((i) => (
+            <div className={'bg-white p-5 rounded-md shadow'} key={i.id}>
               <InvitationToAcceptCard
                 key={i.id}
                 image={i.event.bannerImage}
@@ -30,11 +29,11 @@ const UserProfileInvitationsSection = ({ userEventInvitations }: UserProfileInvi
           ))}
         </div>
       )}
-      {!!pendingInvitations.length && (
+      {userEventPendingRequests.length > 0 && (
         <div>
           <h2 className={'text-lg font-semibold mb-10'}>Wysłane prośby o dodanie</h2>
-          {pendingInvitations.map((i) => (
-            <div className={'bg-white p-5 rounded-md shadow'}>
+          {userEventPendingRequests.map((i) => (
+            <div className={'bg-white p-5 rounded-md shadow'} key={i.id}>
               <SentInvitationCard
                 key={i.id}
                 image={i.event.bannerImage}

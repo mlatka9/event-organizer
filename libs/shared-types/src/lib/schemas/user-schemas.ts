@@ -10,6 +10,10 @@ export const updateUserSchema = z.object({
   favouriteCategories: z.array(z.string()).optional(),
 });
 
+export const eventUserInvitationSchema = z.object({
+  limit: z.preprocess((val) => val && Number(val), z.number().min(1).optional()),
+});
+
 export const searchUserToEventInvitationSchema = z.object({
   phrase: z.string().optional(),
   limit: z.preprocess((val) => val && Number(val), z.number()).optional(),

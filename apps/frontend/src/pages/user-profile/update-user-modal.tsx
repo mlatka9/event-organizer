@@ -56,7 +56,7 @@ const UpdateUserModal = ({
     }
   };
 
-  const updateUser = useUpdateUserMutation({ userId, onSuccess, onError });
+  const { mutate: updateUser, isLoading } = useUpdateUserMutation({ userId, onSuccess, onError });
   const { isSuccess, data: categories } = useCategoriesQuery();
 
   const onSubmit = async (data: UpdateUserFormType) => {
@@ -106,7 +106,9 @@ const UpdateUserModal = ({
                 ))}
           </div>
         </div>
-        <Button className={'ml-auto !mt-20'}>Zatwierdź</Button>
+        <Button className={'ml-auto !mt-20'} disabled={isLoading} isLoading={isLoading}>
+          Zatwierdź
+        </Button>
       </form>
     </ModalWrapper>
   );

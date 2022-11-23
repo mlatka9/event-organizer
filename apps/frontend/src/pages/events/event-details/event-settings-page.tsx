@@ -6,6 +6,7 @@ import { useUpdateEventMutation } from '../../../hooks/mutation/events';
 import { CreateEventFormType } from '../create-event/use-create-event';
 import React from 'react';
 import { useEventInfoQuery } from '../../../hooks/query/events';
+import { useEventDetails } from '../../../layouts/events-layout';
 
 const EventSettingsPage = () => {
   const params = useParams();
@@ -19,8 +20,6 @@ const EventSettingsPage = () => {
   };
 
   const { data, isSuccess: isEventInfoSuccess } = useEventInfoQuery(eventId);
-
-  console.log(data);
 
   const updateEvent = useUpdateEventMutation(onSuccess);
 

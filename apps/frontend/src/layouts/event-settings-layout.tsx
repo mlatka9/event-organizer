@@ -1,9 +1,17 @@
-import { Outlet, useParams } from 'react-router-dom';
+import { Navigate, Outlet, useParams } from 'react-router-dom';
 import NavigationLink from '../components/common/navigation-link';
+import { useEventDetails } from './events-layout';
+import React from 'react';
 
 const EventSettingsLayout = () => {
   const params = useParams();
   const eventId = params['id'] as string;
+
+  const { event } = useEventDetails();
+
+  if (!event.isCurrentUserAdmin) {
+    return <Navigate to={`/events/${eventId}`} />;
+  }
 
   return (
     <div>

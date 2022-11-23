@@ -7,9 +7,10 @@ interface MenuDropdownProps {
 
 const MenuDropdown = ({ userId }: MenuDropdownProps) => {
   const navigate = useNavigate();
+  const onSuccess = () => {
+    navigate('/');
+  };
   const { logout } = useAuth();
-
-  console.log('userId', userId);
 
   return (
     <div className={'bg-white shadow-md rounded-b-md absolute top-[calc(100%+30px)] right-0 w-[200px]'}>
@@ -18,7 +19,7 @@ const MenuDropdown = ({ userId }: MenuDropdownProps) => {
       </Link>
       <button
         className={'px-5 h-14 w-full block flex items-center hover:bg-red-50 text-red-400'}
-        onClick={() => logout()}
+        onClick={() => logout(onSuccess)}
       >
         Wyloguj się
       </button>

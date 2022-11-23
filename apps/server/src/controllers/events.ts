@@ -558,8 +558,6 @@ const acceptEventInvitation = async (req: Request, res: Response) => {
     throw new NotFoundError(`Invitation with id ${invitationId} dose not exists`);
   }
 
-  console.log(invitation.userId, loggedUserId, invitation.isAdminAccepted);
-
   const isUserEligibleToJoinEvent =
     (invitation.userId === loggedUserId && invitation.isAdminAccepted) ||
     (eventAdminsIds.includes(loggedUserId) && invitation.isUserAccepted);

@@ -6,6 +6,7 @@ import * as cors from 'cors';
 import authRoutes from './routes/auth';
 import eventsRoutes from './routes/event';
 import usersRouter from './routes/user';
+import groupsRouter from './routes/group';
 import categoriesRouter from './routes/category';
 import errorHandlerMiddleware from './middlewares/error-handler';
 import * as bodyParser from 'body-parser';
@@ -48,6 +49,9 @@ app.use('/api/events', isLoggedMiddleware, eventsRoutes.protectedRouter);
 
 app.use('/api/users', usersRouter.publicRouter);
 app.use('/api/users', isLoggedMiddleware, usersRouter.protectedRouter);
+
+app.use('/api/groups', groupsRouter.publicRouter);
+app.use('/api/groups', isLoggedMiddleware, groupsRouter.protectedRouter);
 
 app.use(errorHandlerMiddleware);
 

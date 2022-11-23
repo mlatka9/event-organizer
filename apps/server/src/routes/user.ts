@@ -10,6 +10,7 @@ publicRouter.get('/:userId/events', usersRouter.getUserEvents);
 
 protectedRouter.patch('/:userId', usersRouter.updateUser);
 protectedRouter.get('/:userId/event-invitations', usersRouter.getEventInvitations);
+protectedRouter.get('/:userId/event-pending-requests', usersRouter.getEventPendingRequest);
 
 const router = {
   publicRouter,

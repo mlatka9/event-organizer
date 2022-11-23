@@ -1,6 +1,7 @@
 import UserImage from '../../../components/common/user-image';
 import Button from '../../../components/common/button';
 import { useDeclineEventInvitationMutation } from '../../../hooks/mutation/events';
+import ImageFallback from '../../../assets/images/image-fallback.svg';
 
 interface UserToAcceptCardProps {
   image: string | null;
@@ -21,7 +22,7 @@ const SentInvitationCard = ({ name, image, invitationId, eventId }: UserToAccept
 
   return (
     <div className={'flex items-center'}>
-      <UserImage imageUrl={image} userName={name} />
+      <UserImage imageUrl={image || ImageFallback} userName={name} />
       <p className={'font-semibold ml-3'}>{name}</p>
       <Button isSmall kind={'error'} onClick={handleDeclineEventInvitation} className={'ml-auto'} disabled={isLoading}>
         Anuluj

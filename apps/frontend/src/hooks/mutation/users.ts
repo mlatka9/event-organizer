@@ -18,5 +18,5 @@ export const useUpdateUserMutation = ({ userId, onSuccess, onError }: UseUpdateU
       onSuccess && onSuccess();
     },
     onError,
-  }).mutate;
+  });
 };

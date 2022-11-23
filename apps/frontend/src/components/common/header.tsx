@@ -15,8 +15,6 @@ const Header = ({ hasLoginButtons = true }: HeaderProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // console.log(user);
-
   const toggleDownDownOpen = () => {
     setIsDownDownOpen(!isDownDownOpen);
   };

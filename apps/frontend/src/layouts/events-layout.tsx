@@ -1,10 +1,11 @@
-import { Link, NavLink, Outlet, useParams } from 'react-router-dom';
+import { Link, NavLink, Outlet, useOutletContext, useParams } from 'react-router-dom';
 import { useAuth } from '../hooks/use-auth';
 import { useEventInfoQuery } from '../hooks/query/events';
 import { useAddParticipantMutation, useRemoveParticipantMutation } from '../hooks/mutation/events';
 import JoinEventRequestModal from '../pages/events/event-details/join-event-request-modal';
 import Button from '../components/common/button';
 import Header from '../components/common/header';
+import { EventDetailsType } from '@event-organizer/shared-types';
 
 const EventLayout = () => {
   const params = useParams();
@@ -52,7 +53,9 @@ const EventLayout = () => {
               {event.tags.length > 0 && (
                 <div className={'flex space-x-3'}>
                   {event.tags.map((tag) => (
-                    <div className={'text-sm bg-neutral-100 px-2 py-1 rounded-md'}>{tag}</div>
+                    <div className={'text-sm bg-neutral-100 px-2 py-1 rounded-md'} key={tag}>
+                      {tag}
+                    </div>
                   ))}
                 </div>
               )}
@@ -101,10 +104,16 @@ const EventLayout = () => {
             </div>
           </div>
         </div>
-        <Outlet />
+        <Outlet context={{ event }} />
       </main>
     </div>
   );
+};
+
+type ContextType = { event: EventDetailsType };
+
+export const useEventDetails = () => {
+  return useOutletContext<ContextType>();
 };
 
 export default EventLayout;

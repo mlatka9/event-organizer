@@ -5,6 +5,7 @@ import { getLoginSession } from '@event-organizer/auth';
 import {
   EventInvitationType,
   EventShowcaseType,
+  eventUserInvitationSchema,
   UpdateUserInputType,
   updateUserSchema,
   UserProfileType,
@@ -71,13 +72,13 @@ const updateUser = async (req: Request, res: Response) => {
   }
   const body: UpdateUserInputType = req.body;
 
-  const duplicatedUsersCount = await prisma.user.count({
+  const duplicatedUser = await prisma.user.findUnique({
     where: {
       name: body.name,
     },
   });
 
-  if (duplicatedUsersCount) {
+  if (duplicatedUser?.id !== userId) {
     throw new ConflictError(`There is already user with name ${body.name}`);
   }
 
@@ -204,9 +205,16 @@ const getUserEvents = async (req: Request, res: Response) => {
 //   res.status(200).json(matchingUsers);
 // };
 
-const getEventInvitations = async (req: Request, res: Response) => {
+const getEventPendingRequest = async (req: Request, res: Response) => {
   const loggedUser = req.userId;
   const userId = req.params.userId;
+
+  const validation = eventUserInvitationSchema.safeParse(req.query);
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+  const query = validation.data;
 
   if (!loggedUser) {
     throw new Error('no userId no req object');
@@ -215,20 +223,12 @@ const getEventInvitations = async (req: Request, res: Response) => {
   if (loggedUser !== userId) {
     throw new UnauthenticatedError('You dont have permission to read event invitation');
   }
-
-  const userInvitations = await prisma.eventInvitation.findMany({
+  const eventPendingRequests = await prisma.eventInvitation.findMany({
+    take: query.limit,
     where: {
       userId,
-      NOT: {
-        AND: [
-          {
-            isUserAccepted: true,
-          },
-          {
-            isAdminAccepted: true,
-          },
-        ],
-      },
+      isAdminAccepted: false,
+      isUserAccepted: true,
     },
     include: {
       user: {
@@ -248,7 +248,65 @@ const getEventInvitations = async (req: Request, res: Response) => {
     },
   });
 
-  const formattedEventInvitation: EventInvitationType[] = userInvitations.map((invitation) => ({
+  const formattedPendingRequests: EventInvitationType[] = eventPendingRequests.map((invitation) => ({
+    id: invitation.id,
+    user: invitation.user,
+    event: invitation.event,
+    isUserAccepted: invitation.isUserAccepted,
+    isAdminAccepted: invitation.isAdminAccepted,
+  }));
+
+  res.status(200).json(formattedPendingRequests);
+};
+
+const getEventInvitations = async (req: Request, res: Response) => {
+  const loggedUser = req.userId;
+  const userId = req.params.userId;
+
+  const validation = eventUserInvitationSchema.safeParse(req.query);
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+  const query = validation.data;
+
+  if (!loggedUser) {
+    throw new Error('no userId no req object');
+  }
+
+  if (loggedUser !== userId) {
+    throw new UnauthenticatedError('You dont have permission to read event invitation');
+  }
+
+  const eventInvitations = await prisma.eventInvitation.findMany({
+    take: query.limit,
+    where: {
+      userId,
+      isUserAccepted: false,
+      isAdminAccepted: true,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+        },
+      },
+      event: {
+        select: {
+          id: true,
+          name: true,
+          bannerImage: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+
+  const formattedEventInvitation: EventInvitationType[] = eventInvitations.map((invitation) => ({
     id: invitation.id,
     user: invitation.user,
     event: invitation.event,
@@ -264,4 +322,5 @@ export default {
   updateUser,
   getUserEvents,
   getEventInvitations,
+  getEventPendingRequest,
 };

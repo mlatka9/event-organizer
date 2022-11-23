@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch"]
 }
 
@@ -54,15 +54,29 @@ model Event {
   categoryId                    String
   category                      Category              @relation(fields: [categoryId], references: [id])
   pendingParticipantInvitations EventInvitation[]
+  sharedInGroups                EventSharedInGroup[]
 }
 
 model Group {
-  id          String         @id @default(cuid())
-  name        String
-  description String
-  memebrs     UsersInGroup[]
-  categoryId  String
-  category    Category       @relation(fields: [categoryId], references: [id])
+  id           String               @id @default(cuid())
+  name         String   @unique
+  description  String
+  members      UsersInGroup[]
+  eventsShared EventSharedInGroup[]
+  bannerImage  String?
+  categoryId   String
+  category     Category             @relation(fields: [categoryId], references: [id])
+  visibility   GroupVisibility
+}
+
+model EventSharedInGroup {
+  group     Group    @relation(fields: [groupId], references: [id])
+  groupId   String
+  event     Event    @relation(fields: [eventId], references: [id])
+  eventId   String
+  createdAt DateTime @default(now())
+
+  @@id([groupId, eventId])
 }
 
 model UsersInGroup {
@@ -102,6 +116,11 @@ enum GroupRole {
   ADMIN
 }
 
+enum GroupVisibility {
+  PRIVATE
+  PUBLIC
+}
+
 enum EventVisibilityStatus {
   PRIVATE
   PUBLIC
@@ -121,10 +140,11 @@ model Category {
 }
 
 model EventInvitation {
-  id              String  @id @default(cuid())
-  user            User    @relation(fields: [userId], references: [id])
+  createdAt       DateTime @default(now())
+  id              String   @id @default(cuid())
+  user            User     @relation(fields: [userId], references: [id])
   userId          String
-  event           Event   @relation(fields: [eventId], references: [id])
+  event           Event    @relation(fields: [eventId], references: [id])
   eventId         String
   isUserAccepted  Boolean
   isAdminAccepted Boolean

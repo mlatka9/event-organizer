@@ -1,7 +1,6 @@
 import Header from '../components/common/header';
 import { Outlet, useParams } from 'react-router-dom';
 import NavigationLink from '../components/common/navigation-link';
-import { useUserQuery } from '../hooks/query/users';
 
 const UserLayout = () => {
   const params = useParams();
@@ -14,7 +13,7 @@ const UserLayout = () => {
         <nav className={'bg-white rounded-lg shadow flex flex-col relative'}>
           <ul>
             <li>
-              <NavigationLink href={`/users/${userId}`} label={'Profil'} />
+              <NavigationLink href={`/users/${userId}`} label={'Profil'} exact />
             </li>
             <li>
               <NavigationLink href={`/users/${userId}/events`} label={'Wydarzenia'} />

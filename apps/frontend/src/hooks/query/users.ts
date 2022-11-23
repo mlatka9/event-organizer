@@ -15,9 +15,32 @@ export const useUserEventsQuery = (id: string, enabled = true) => {
   });
 };
 
-export const useUserEventInvitationsQuery = (userId: string, enabled = true) => {
-  return useQuery(['user-event-invitations', userId], () => userAPI.getUserEventInvitations(userId), {
+interface UseUserEventInvitationsQueryType {
+  userId: string;
+  enabled?: boolean;
+  limit?: number;
+}
+
+export const useUserEventInvitationsQuery = ({ userId, enabled = true, limit }: UseUserEventInvitationsQueryType) => {
+  return useQuery(['user-event-invitations', userId], () => userAPI.getUserEventInvitations({ userId, limit }), {
     retry: false,
     enabled,
   });
+};
+
+interface UseUserEventPendingRequestsQueryType {
+  userId: string;
+  enabled?: boolean;
+  limit?: number;
+}
+
+export const useUserEventPendingRequestsQuery = ({ userId, enabled, limit }: UseUserEventPendingRequestsQueryType) => {
+  return useQuery(
+    ['user-event-pending-requests', userId],
+    () => userAPI.getUserEventPendingRequests({ userId, limit }),
+    {
+      retry: false,
+      enabled,
+    }
+  );
 };

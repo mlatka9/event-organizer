@@ -24,6 +24,9 @@ import EventSettingsLayout from './layouts/event-settings-layout';
 import EventSettingsModulesPage from './pages/events/event-details/event-settings-modules-page';
 
 import dayjs from 'dayjs';
+import GroupsLayout from './layouts/groups-layout';
+import GroupsHomePage from './pages/groups/groups-home/groups-home-page';
+import CreateGroupPage from './pages/groups/create-group/create-group-page';
 
 require('dayjs/locale/pl');
 dayjs.locale('pl');
@@ -47,10 +50,23 @@ const App = () => {
               }
             />
           </Route>
+          <Route path={'/groups'} element={<GroupsLayout />}>
+            <Route index element={<GroupsHomePage />} />
+            <Route
+              path={'create'}
+              element={
+                <RequireAuth>
+                  <CreateGroupPage />
+                </RequireAuth>
+              }
+            />
+          </Route>
           <Route path={'/users/:id'} element={<UserProfileLayout />}>
             <Route index element={<UserProfilePage />} />
             <Route path={'events'} element={<UserEventsPage />} />
             <Route path={'groups'} element={<UserGroupsPage />} />
+            {/*<Route path={'events/invitations'} element={<EventInvitationsPage />} />*/}
+            {/*<Route path={'events/pending-requests'} element={<EventPendingRequestsPage />} />*/}
           </Route>
           <Route path={'/'} element={<LoginLayout />}>
             <Route path={'login'} element={<LoginPage />} />
@@ -66,7 +82,7 @@ const App = () => {
           </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
-        <ToastContainer />
+        <ToastContainer autoClose={2000} />
       </AuthProvider>
     </QueryClientProvider>
   );
