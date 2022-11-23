@@ -105,7 +105,7 @@ const createGroup = async (req: Request, res: Response) => {
       },
     });
 
-    res.json(createdGroup);
+    res.json({ id: createdGroup.id });
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
       throw new ConflictError(`There is already group with name ${body.name}`);

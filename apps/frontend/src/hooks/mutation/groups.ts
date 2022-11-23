@@ -3,17 +3,17 @@ import groupsAPI from '../../api/groups';
 import { APIError } from '../../libs/api/types';
 
 interface UseCreateGroupMutationArgs {
-  onSuccess?: () => void;
+  onSuccess?: (data: { id: string }) => void;
   onError?: (error: APIError) => void;
 }
-const useCreateGroupMutation = ({ onError, onSuccess }: UseCreateGroupMutationArgs) => {
+const useCreateGroupMutation = ({ onError, onSuccess }: UseCreateGroupMutationArgs = {}) => {
   const queryClient = useQueryClient();
   return useMutation(groupsAPI.createGroup, {
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: ['groups'],
       });
-      onSuccess && onSuccess();
+      onSuccess && onSuccess(data);
     },
     onError,
   });

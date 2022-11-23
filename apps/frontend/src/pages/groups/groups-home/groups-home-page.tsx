@@ -3,9 +3,11 @@ import React, { Fragment, useEffect } from 'react';
 import GroupCard from './group-card';
 import Heading from '../../../components/common/heading';
 import GroupsFilters from './groups-filters';
-import { Navigate, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 import { useInView } from 'react-intersection-observer';
+import Button from '../../../components/common/button';
+import PlusIcon from '../../../components/icons/plus-icons';
 
 const searchParamsSchema = z.object({
   visibility: z.enum(['PRIVATE', 'PUBLIC']).optional(),
@@ -15,7 +17,7 @@ const searchParamsSchema = z.object({
 type SearchParamsType = z.infer<typeof searchParamsSchema>;
 
 const GroupsHomePage = () => {
-  const { ref, inView, entry } = useInView({});
+  const { ref, inView } = useInView({});
   const [searchParams, setSearchParams] = useSearchParams();
 
   const currentParams = {} as Record<string, string | undefined>;
@@ -75,7 +77,16 @@ const GroupsHomePage = () => {
 
   return (
     <div className={'pt-10'}>
-      <Heading className={'mb-10'}>Grupy</Heading>
+      <div className={'flex items-baseline mb-20'}>
+        <Heading>Grupy</Heading>
+        <Link
+          className={'flex items-center px-3 ml-5 text-sm bg-blue-600 text-white font-semibold py-2 rounded-md'}
+          to={'/groups/create'}
+        >
+          <PlusIcon height={12} width={12} className={'fill-white'} />
+          <span className={'ml-2'}>Utwórz nową</span>
+        </Link>
+      </div>
       <GroupsFilters
         onChangeSearch={onChangeSearch}
         onChangeVisibility={onChangeVisibility}

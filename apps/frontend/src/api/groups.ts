@@ -5,7 +5,7 @@ import {
 } from '@event-organizer/shared-types';
 import api from '../libs/api/api';
 
-const createGroup = async (groupData: CreateGroupInputType) => {
+const createGroup = async (groupData: CreateGroupInputType): Promise<{ id: string }> => {
   const { data } = await api.post('/groups', groupData, {
     withCredentials: true,
   });

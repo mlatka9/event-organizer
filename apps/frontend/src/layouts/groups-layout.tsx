@@ -5,7 +5,7 @@ const GroupsLayout = () => {
   return (
     <>
       <Header />
-      <main className="mx-auto max-w-[1200px] pt-[80px] h-full flex flex-col">
+      <main className="mx-auto max-w-[1200px] pt-[80px] h-full flex flex-col items-center">
         <Outlet />
       </main>
     </>
