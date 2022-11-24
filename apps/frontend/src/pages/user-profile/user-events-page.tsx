@@ -8,6 +8,7 @@ import {
 import EventCard from '../events/events-home/event-card';
 import UserProfileInvitationsSection from './user-profile-invitations-section';
 import { useAuth } from '../../hooks/use-auth';
+import clsx from 'clsx';
 
 const UserEventsPage = () => {
   const params = useParams();
@@ -42,7 +43,7 @@ const UserEventsPage = () => {
     <div className={'grid grid-cols-1'}>
       <div>
         {isUserInvitationsSuccess && isPendingRequestsSuccess && (
-          <div>
+          <div className={clsx((userEventInvitations.length || userEventPendingRequests.length) && 'mb-20')}>
             <UserProfileInvitationsSection
               userEventInvitations={userEventInvitations}
               userEventPendingRequests={userEventPendingRequests}
@@ -53,7 +54,9 @@ const UserEventsPage = () => {
       <div>
         {userEvents.length ? (
           <div>
-            <h2 className={'text-xl font-semibold mb-10'}>Wydarzenia w których bierze udział</h2>
+            <h2 className={'text-xl font-semibold mb-3'}>
+              Wydarzenia {!isCurrentUserPage && 'publiczne'} w których bierze udział
+            </h2>
             <div className={'grid grid-cols-fluid space-y-10'}>
               {userEvents.map((event) => (
                 <Link to={`/events/${event.id}`} key={event.id} className={'h-[150px]'}>

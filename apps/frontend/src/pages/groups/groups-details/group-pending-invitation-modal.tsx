@@ -1,20 +1,20 @@
 import ModalWrapper from '../../../components/common/modal-wrapper';
-import InvitationToAcceptCard from './invitation-to-accept-card';
-import SentInvitationCard from './sent-invitation-card';
-import { useAllEventInvitationQuery } from '../../../hooks/query/events';
+import GroupSentInvitationCard from './group-sent-invitation-card';
+import GroupInvitationToAcceptCard from './group-invitation-to-accept-card';
+import { useAllGroupInvitationQuery } from '../../../hooks/query/groups';
 
 interface EventPendingInvitationsModalProps {
   handleCloseModal: () => void;
-  eventId: string;
+  groupId: string;
 }
 
-const EventPendingInvitationsModal = ({ handleCloseModal, eventId }: EventPendingInvitationsModalProps) => {
-  const { data: invitations, isSuccess } = useAllEventInvitationQuery(eventId);
+const GroupPendingInvitationsModal = ({ handleCloseModal, groupId }: EventPendingInvitationsModalProps) => {
+  const { data: invitations, isSuccess } = useAllGroupInvitationQuery(groupId);
 
-  if (!isSuccess) return <div>loading</div>;
+  // if (!isSuccess) return <div>loading</div>;
 
-  const invitationToAccept = invitations.filter((i) => !i.isAdminAccepted);
-  const invitationSent = invitations.filter((i) => !i.isUserAccepted);
+  const invitationToAccept = isSuccess ? invitations.filter((i) => !i.isAdminAccepted) : [];
+  const invitationSent = isSuccess ? invitations.filter((i) => !i.isUserAccepted) : [];
 
   return (
     <ModalWrapper title={'Oczekujące zaproszenia'} handleCloseModal={handleCloseModal}>
@@ -23,11 +23,11 @@ const EventPendingInvitationsModal = ({ handleCloseModal, eventId }: EventPendin
           <p className={'font-semibold mb-5'}>Do akceptacji</p>
           <div className={'space-y-3'}>
             {invitationToAccept.map((i) => (
-              <InvitationToAcceptCard
+              <GroupInvitationToAcceptCard
                 key={i.id}
                 image={i.user.image}
                 name={i.user.name}
-                eventId={eventId}
+                groupId={i.group.id}
                 invitationId={i.id}
               />
             ))}
@@ -37,11 +37,11 @@ const EventPendingInvitationsModal = ({ handleCloseModal, eventId }: EventPendin
           <p className={'font-semibold mb-5'}>Wysłane</p>
           <div className={'space-y-3'}>
             {invitationSent.map((i) => (
-              <SentInvitationCard
+              <GroupSentInvitationCard
                 key={i.id}
                 image={i.user.image}
                 name={i.user.name}
-                eventId={i.event.id}
+                groupId={i.group.id}
                 invitationId={i.id}
               />
             ))}
@@ -52,4 +52,4 @@ const EventPendingInvitationsModal = ({ handleCloseModal, eventId }: EventPendin
   );
 };
 
-export default EventPendingInvitationsModal;
+export default GroupPendingInvitationsModal;

@@ -22,6 +22,8 @@ model User {
   favouriteCategories     UserFavouriteCategories[]
   joinedAt                DateTime                  @default(now())
   pendingEventInvitations EventInvitation[]
+  pendingGroupInvitations GroupInvitation[]
+  eventsSharedInGroups    EventSharedInGroup[]
 }
 
 model UserFavouriteCategories {
@@ -58,15 +60,16 @@ model Event {
 }
 
 model Group {
-  id           String               @id @default(cuid())
-  name         String   @unique
-  description  String
-  members      UsersInGroup[]
-  eventsShared EventSharedInGroup[]
-  bannerImage  String?
-  categoryId   String
-  category     Category             @relation(fields: [categoryId], references: [id])
-  visibility   GroupVisibility
+  id                       String               @id @default(cuid())
+  name                     String               @unique
+  description              String
+  members                  UsersInGroup[]
+  eventsShared             EventSharedInGroup[]
+  bannerImage              String?
+  categoryId               String
+  category                 Category             @relation(fields: [categoryId], references: [id])
+  visibility               GroupVisibility
+  pendingMemberInvitations GroupInvitation[]
 }
 
 model EventSharedInGroup {
@@ -75,8 +78,10 @@ model EventSharedInGroup {
   event     Event    @relation(fields: [eventId], references: [id])
   eventId   String
   createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
 
-  @@id([groupId, eventId])
+  @@id([groupId, eventId, userId])
 }
 
 model UsersInGroup {
@@ -106,6 +111,46 @@ model NormalizedCity {
   events Event[]
 }
 
+model Category {
+  id                String                    @id @default(cuid())
+  name              String
+  events            Event[]
+  favouritedByUsers UserFavouriteCategories[]
+  group             Group[]
+}
+
+model EventInvitation {
+  createdAt       DateTime @default(now())
+  id              String   @id @default(cuid())
+  user            User     @relation(fields: [userId], references: [id])
+  userId          String
+  event           Event    @relation(fields: [eventId], references: [id])
+  eventId         String
+  isUserAccepted  Boolean
+  isAdminAccepted Boolean
+
+  @@unique([userId, eventId])
+}
+
+model GroupInvitation {
+  createdAt       DateTime @default(now())
+  id              String   @id @default(cuid())
+  user            User     @relation(fields: [userId], references: [id])
+  userId          String
+  group           Group    @relation(fields: [groupId], references: [id])
+  groupId         String
+  isUserAccepted  Boolean
+  isAdminAccepted Boolean
+
+  @@unique([userId, groupId])
+}
+
+model EventTag {
+  id     String  @id @default(cuid())
+  name   String  @unique
+  events Event[]
+}
+
 enum EventRole {
   USER
   ADMIN
@@ -129,31 +174,4 @@ enum EventVisibilityStatus {
 enum EventLocationStatus {
   STATIONARY
   ONLINE
-}
-
-model Category {
-  id                String                    @id @default(cuid())
-  name              String
-  events            Event[]
-  favouritedByUsers UserFavouriteCategories[]
-  group             Group[]
-}
-
-model EventInvitation {
-  createdAt       DateTime @default(now())
-  id              String   @id @default(cuid())
-  user            User     @relation(fields: [userId], references: [id])
-  userId          String
-  event           Event    @relation(fields: [eventId], references: [id])
-  eventId         String
-  isUserAccepted  Boolean
-  isAdminAccepted Boolean
-
-  @@unique([userId, eventId])
-}
-
-model EventTag {
-  id     String  @id @default(cuid())
-  name   String  @unique
-  events Event[]
 }

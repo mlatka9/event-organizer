@@ -15,6 +15,13 @@ export const useUserEventsQuery = (id: string, enabled = true) => {
   });
 };
 
+export const useUserGroupsQuery = (userId: string, enabled = true) => {
+  return useQuery(['user-groups', userId], () => userAPI.getUserGroups(userId), {
+    retry: false,
+    enabled,
+  });
+};
+
 interface UseUserEventInvitationsQueryType {
   userId: string;
   enabled?: boolean;
@@ -43,4 +50,22 @@ export const useUserEventPendingRequestsQuery = ({ userId, enabled, limit }: Use
       enabled,
     }
   );
+};
+
+export const useUserGroupPendingRequestsQuery = ({ userId, enabled, limit }: UseUserEventPendingRequestsQueryType) => {
+  return useQuery(
+    ['user-group-pending-requests', userId],
+    () => userAPI.getUserGroupPendingRequests({ userId, limit }),
+    {
+      retry: false,
+      enabled,
+    }
+  );
+};
+
+export const useUserGroupInvitationsQuery = ({ userId, enabled = true, limit }: UseUserEventInvitationsQueryType) => {
+  return useQuery(['user-group-invitations', userId], () => userAPI.getUserGroupInvitations({ userId, limit }), {
+    retry: false,
+    enabled,
+  });
 };

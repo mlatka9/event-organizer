@@ -3,24 +3,34 @@ import imageFallback from '../../../assets/images/image-fallback.svg';
 import Button from '../../../components/common/button';
 import LockIcon from '../../../components/icons/lock-icon';
 import { Link } from 'react-router-dom';
+import clsx from 'clsx';
 
 interface GroupCardProps {
   group: GroupShowcaseType;
+  isHorizontal?: boolean;
 }
 
-const GroupCard = ({ group }: GroupCardProps) => {
+const GroupCard = ({ group, isHorizontal = false }: GroupCardProps) => {
   return (
-    <article className={'flex flex-col rounded-md overflow-hidden shadow-md'}>
-      <img className={'h-40 object-cover'} src={group.bannerImage || imageFallback} />
-      <div className={'flex flex-col p-4'}>
+    <article
+      className={clsx(
+        'flex flex-col rounded-md overflow-hidden shadow-md h-96',
+        isHorizontal && 'grid grid-cols-[200px_1fr] h-44'
+      )}
+    >
+      <img
+        className={clsx('h-40 object-cover block', isHorizontal && '!h-44 w-[160px]')}
+        src={group.bannerImage || imageFallback}
+      />
+      <div className={clsx('flex flex-col p-4')}>
         <div className={'flex justify-between'}>
           <h2 className={'text-lg font-semibold'}>{group.name}</h2>
           <div className={'px-3 py-2 bg-blue-100 rounded-md text-sm font-semibold text-blue-800'}>
             {group.category.name}
           </div>
         </div>
-        <p className={'mb-10 text-neutral-700'}>{group.description}</p>
-        <div className={'flex justify-between mb-5 text-sm text-neutral-700'}>
+        <p className={clsx('mb-10 text-neutral-700', isHorizontal && '!mb-0')}>{group.description}</p>
+        <div className={clsx('flex justify-between mb-5 text-sm text-neutral-700 mt-auto', isHorizontal && '!mb-0')}>
           <p className={'font-semibold'}>{group.membersCount} członków grupy</p>
           {group.groupVisibility === 'PUBLIC' && <div>grupa publiczna</div>}
           {group.groupVisibility === 'PRIVATE' && (
@@ -30,12 +40,14 @@ const GroupCard = ({ group }: GroupCardProps) => {
             </div>
           )}
         </div>
-        <Link
-          to={`/groups/${group.id}`}
-          className={'flex items-center justify-center bg-blue-600 text-white font-semibold p-2 rounded-md'}
-        >
-          Wyświetl
-        </Link>
+        {!isHorizontal && (
+          <Link
+            to={`/groups/${group.id}`}
+            className={clsx('flex items-center justify-center bg-blue-600 text-white font-semibold p-2 rounded-md')}
+          >
+            Wyświetl
+          </Link>
+        )}
       </div>
     </article>
   );

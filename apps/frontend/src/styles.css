@@ -7,6 +7,6 @@
 /*}*/
 
 html, body, #root {
-  @apply h-screen bg-gray-50
-
+  @apply h-screen bg-gray-50;
+  font-family: 'Roboto', sans-serif;
 }

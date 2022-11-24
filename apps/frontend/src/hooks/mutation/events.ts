@@ -57,17 +57,11 @@ export const useAcceptEventInvitationMutation = (onSuccess?: () => void) => {
   });
 };
 
-export const useDeclineEventInvitationMutation = ({
-  eventId,
-  onSuccess,
-}: {
-  onSuccess?: () => void;
-  eventId: string;
-}) => {
+export const useDeclineEventInvitationMutation = ({ onSuccess }: { onSuccess?: () => void } = {}) => {
   const queryClient = useQueryClient();
   return useMutation(eventsAPI.declineEventInvitation, {
     onSuccess: async () => {
-      queryClient.invalidateQueries(['event-invitations', eventId]);
+      queryClient.invalidateQueries(['event-invitations']);
       queryClient.invalidateQueries(['user-event-invitations']);
       onSuccess && onSuccess();
     },

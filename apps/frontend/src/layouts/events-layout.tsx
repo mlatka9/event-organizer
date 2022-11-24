@@ -29,18 +29,30 @@ const EventLayout = () => {
   };
 
   if (isError && error?.response?.status === 401) {
-    if (user) {
-      return <JoinEventRequestModal eventId={eventId} userId={user.userId} />;
-    } else {
-      return <div>Wydarzenie jest prywatne musisz się zalogowac</div>;
-    }
+    return (
+      <div>
+        <Header />
+        <div className={'pt-20 max-w-[1000px] mx-auto rounded-md'}>
+          {user ? (
+            <JoinEventRequestModal eventId={eventId} userId={user.userId} />
+          ) : (
+            <div>Wydarzenie jest prywatne musisz się zalogowac</div>
+          )}
+        </div>
+      </div>
+    );
   }
 
   if (isError && error?.response?.status === 400) {
-    return <div>Błąd! Wydarzenie nie istnieje</div>;
+    return (
+      <div>
+        <Header />
+        <div className={'pt-20 max-w-[1000px] mx-auto rounded-md'}>Błąd! Wydarzenie nie istnieje</div>
+      </div>
+    );
   }
 
-  if (!isEventSuccess) return <div>'loading ...'</div>;
+  if (!isEventSuccess) return <div>'loading...'</div>;
 
   return (
     <div>

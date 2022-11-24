@@ -20,3 +20,11 @@ export const getAllGroupsQueryParamsSchema = z.object({
   name: z.string().optional(),
   visibility: z.enum(['PUBLIC', 'PRIVATE']).optional(),
 });
+
+export const createGroupInvitationSchema = z.object({
+  ids: z.array(z.string()),
+});
+
+export const shareEventSchema = z.object({
+  eventId: z.string().min(1, 'eventId is required'),
+});

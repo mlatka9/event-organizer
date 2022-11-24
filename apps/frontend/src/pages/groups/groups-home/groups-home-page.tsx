@@ -6,7 +6,6 @@ import GroupsFilters from './groups-filters';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 import { useInView } from 'react-intersection-observer';
-import Button from '../../../components/common/button';
 import PlusIcon from '../../../components/icons/plus-icons';
 
 const searchParamsSchema = z.object({
@@ -76,7 +75,7 @@ const GroupsHomePage = () => {
   const onChangeSearch = (e: React.ChangeEvent<HTMLInputElement>) => updateParam({ search: e.target.value });
 
   return (
-    <div className={'pt-10'}>
+    <div className={'pt-10 w-full'}>
       <div className={'flex items-baseline mb-20'}>
         <Heading>Grupy</Heading>
         <Link

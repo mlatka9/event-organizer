@@ -1,21 +1,21 @@
 import UserImage from '../../../components/common/user-image';
 import Button from '../../../components/common/button';
-import { useDeclineEventInvitationMutation } from '../../../hooks/mutation/events';
 import ImageFallback from '../../../assets/images/image-fallback.svg';
+import { useDeclineGroupInvitationMutation } from '../../../hooks/query/groups';
 
-interface UserToAcceptCardProps {
+interface GroupSentInvitationCardProps {
   image: string | null;
   name: string;
-  eventId: string;
+  groupId: string;
   invitationId: string;
 }
 
-const SentInvitationCard = ({ name, image, invitationId, eventId }: UserToAcceptCardProps) => {
-  const { mutate: declineEventInvitation, isLoading } = useDeclineEventInvitationMutation();
+const GroupSentInvitationCard = ({ name, image, invitationId, groupId }: GroupSentInvitationCardProps) => {
+  const { mutate: declineGroupInvitation, isLoading } = useDeclineGroupInvitationMutation();
 
   const handleDeclineEventInvitation = () => {
-    declineEventInvitation({
-      eventId,
+    declineGroupInvitation({
+      groupId,
       invitationId,
     });
   };
@@ -31,4 +31,4 @@ const SentInvitationCard = ({ name, image, invitationId, eventId }: UserToAccept
   );
 };
 
-export default SentInvitationCard;
+export default GroupSentInvitationCard;

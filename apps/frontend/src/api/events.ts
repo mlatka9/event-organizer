@@ -7,6 +7,7 @@ import {
   EventParticipant,
   EventShowcaseType,
   GetAllEventsInputType,
+  GroupInvitationType,
   SearchUserToEventInvitationInputType,
   UserType,
 } from '@event-organizer/shared-types';

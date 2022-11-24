@@ -14,8 +14,8 @@ const UserProfileInvitationsSection = ({
   return (
     <>
       {userEventInvitations.length > 0 && (
-        <div>
-          <h2 className={'text-xl font-semibold mb-10'}>Do akceptacji</h2>
+        <div className={'mb-10'}>
+          <h2 className={'text-xl font-semibold mb-3'}>Do akceptacji</h2>
           {userEventInvitations.map((i) => (
             <div className={'bg-white p-5 rounded-md shadow'} key={i.id}>
               <InvitationToAcceptCard
@@ -30,8 +30,8 @@ const UserProfileInvitationsSection = ({
         </div>
       )}
       {userEventPendingRequests.length > 0 && (
-        <div>
-          <h2 className={'text-lg font-semibold mb-10'}>Wysłane prośby o dodanie</h2>
+        <div className={'mb-10'}>
+          <h2 className={'text-xl font-semibold mb-3'}>Wysłane prośby o dodanie</h2>
           {userEventPendingRequests.map((i) => (
             <div className={'bg-white p-5 rounded-md shadow'} key={i.id}>
               <SentInvitationCard

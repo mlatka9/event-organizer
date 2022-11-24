@@ -9,7 +9,7 @@ import FormSelect from '../../../components/form/form-select';
 import React from 'react';
 import Heading from '../../../components/common/heading';
 import Button from '../../../components/common/button';
-import useCreateGroupMutation from '../../../hooks/mutation/groups';
+import { useCreateGroupMutation } from '../../../hooks/mutation/groups';
 import { APIError } from '../../../libs/api/types';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';

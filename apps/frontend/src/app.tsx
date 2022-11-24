@@ -27,6 +27,11 @@ import dayjs from 'dayjs';
 import GroupsLayout from './layouts/groups-layout';
 import GroupsHomePage from './pages/groups/groups-home/groups-home-page';
 import CreateGroupPage from './pages/groups/create-group/create-group-page';
+import GroupDetailsLayout from './layouts/group-details-layout';
+import GroupsDetailsPage from './pages/groups/groups-details/groups-details-page';
+import GroupsMembersPage from './pages/groups/groups-details/groups-members-page';
+import GroupsSettingsPage from './pages/groups/groups-details/groups-settings-page';
+import GroupsSharedEventsPage from './pages/groups/groups-details/groups-shared-events-page';
 
 require('dayjs/locale/pl');
 dayjs.locale('pl');
@@ -60,6 +65,12 @@ const App = () => {
                 </RequireAuth>
               }
             />
+          </Route>
+          <Route path={'/groups/:groupId'} element={<GroupDetailsLayout />}>
+            <Route index element={<GroupsDetailsPage />} />
+            <Route path={'members'} element={<GroupsMembersPage />} />
+            <Route path={'settings'} element={<GroupsSettingsPage />} />
+            <Route path={'shared-events'} element={<GroupsSharedEventsPage />} />
           </Route>
           <Route path={'/users/:id'} element={<UserProfileLayout />}>
             <Route index element={<UserProfilePage />} />

@@ -36,6 +36,16 @@ export interface PublicEventType {
   longitude: number | null;
 }
 
+export interface SharedEventType {
+  id: string;
+  name: string;
+  bannerImage: string | null;
+  displayAddress: string | null;
+  participantsCount: number | null;
+  startDate: string | null;
+  sharedBy: { id: string; name: string; image: string | null }[];
+}
+
 export type EventShowcaseType = PublicEventType | PrivateEventType;
 
 export interface EventDetailsType {
@@ -69,6 +79,22 @@ export interface EventInvitationType {
     image: string | null;
   };
   event: {
+    id: string;
+    name: string;
+    bannerImage: string | null;
+  };
+  isUserAccepted: boolean;
+  isAdminAccepted: boolean;
+}
+
+export interface GroupInvitationType {
+  id: string;
+  user: {
+    id: string;
+    name: string;
+    image: string | null;
+  };
+  group: {
     id: string;
     name: string;
     bannerImage: string | null;

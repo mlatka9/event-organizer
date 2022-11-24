@@ -462,6 +462,7 @@ const getAllEventInvitation = async (req: Request, res: Response) => {
 };
 
 const createEventInvitation = async (req: Request, res: Response) => {
+  console.log('HALLO');
   const eventId = req.params.eventId as string;
   const loggedUserId = req.userId;
 
