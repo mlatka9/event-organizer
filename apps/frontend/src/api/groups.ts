@@ -114,6 +114,17 @@ const getSharedEvents = async (groupId: string): Promise<SharedEventType[]> => {
   return data;
 };
 
+const shareEvent = async ({ eventId, groupId }: { groupId: string; eventId: string }) => {
+  const { data } = await api.post(
+    `/groups/${groupId}/shared-events`,
+    { eventId },
+    {
+      withCredentials: true,
+    }
+  );
+  return data;
+};
+
 const groupsAPI = {
   leaveGroup,
   joinGroup,
@@ -127,6 +138,7 @@ const groupsAPI = {
   searchUsersToGroupInvite,
   getAllGroupInvitation,
   getSharedEvents,
+  shareEvent,
 };
 
 export default groupsAPI;

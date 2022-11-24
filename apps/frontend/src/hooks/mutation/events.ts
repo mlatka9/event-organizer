@@ -4,27 +4,28 @@ import eventsAPI from '../../api/events';
 export const useCreateEventMutation = (onSuccess?: (eventData: { eventId: string }) => void) => {
   return useMutation(eventsAPI.createEvent, {
     onSuccess,
-  }).mutate;
+  });
 };
 
 export const useUpdateEventMutation = (onSuccess?: () => void) => {
   return useMutation(eventsAPI.updateEvent, {
     onSuccess,
-  }).mutate;
+  });
 };
 
-export const useAddParticipantMutation = (eventId: string) => {
+export const useAddParticipantMutation = (eventId: string, onSuccess?: () => void) => {
   const queryClient = useQueryClient();
   return useMutation(eventsAPI.addParticipant, {
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ['event', eventId],
       });
+      onSuccess && onSuccess();
     },
-  }).mutate;
+  });
 };
 
-export const useRemoveParticipantMutation = (eventId: string) => {
+export const useRemoveParticipantMutation = (eventId: string, onSuccess?: () => void) => {
   console.log('useRemoveParticipantMutation');
   const queryClient = useQueryClient();
   return useMutation(eventsAPI.removeParticipant, {
@@ -32,8 +33,9 @@ export const useRemoveParticipantMutation = (eventId: string) => {
       await queryClient.invalidateQueries({
         queryKey: ['event', eventId],
       });
+      onSuccess && onSuccess();
     },
-  }).mutate;
+  });
 };
 
 export const useCreateEventInvitationMutation = (onSuccess?: () => void) => {

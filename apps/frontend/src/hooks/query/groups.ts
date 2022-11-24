@@ -52,7 +52,7 @@ export const useCreateGroupInvitationMutation = (onSuccess?: () => void) => {
   const queryClient = useQueryClient();
   return useMutation(groupsAPI.createGroupInvitation, {
     onSuccess: () => {
-      //TODO
+      queryClient.invalidateQueries(['user-group-pending-requests']);
       onSuccess && onSuccess();
     },
   });
@@ -62,7 +62,7 @@ export const useAcceptGroupInvitationMutation = (onSuccess?: () => void) => {
   const queryClient = useQueryClient();
   return useMutation(groupsAPI.acceptGroupInvitation, {
     onSuccess: () => {
-      //TODO
+      queryClient.invalidateQueries();
       onSuccess && onSuccess();
     },
   });
@@ -76,7 +76,7 @@ export const useDeclineGroupInvitationMutation = ({
   const queryClient = useQueryClient();
   return useMutation(groupsAPI.declineGroupInvitation, {
     onSuccess: async () => {
-      // TODO
+      queryClient.invalidateQueries();
       // queryClient.invalidateQueries(['event-invitations', eventId]);
       // queryClient.invalidateQueries(['user-event-invitations']);
       onSuccess && onSuccess();

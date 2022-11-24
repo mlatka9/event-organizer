@@ -21,7 +21,9 @@ const EventDetailsPage = () => {
         <div className={'rounded-2xl shadow-md bg-white'}>
           <div className={'p-3'}>
             <h2 className={'text-lg font-semibold '}>Lokalizacja</h2>
-            <p className={'text-neutral-600 text-sm'}>{eventData.displayAddress}</p>
+            <p className={'text-neutral-600 text-sm'}>
+              {eventData.eventLocationStatus === 'ONLINE' ? 'online' : eventData.displayAddress}
+            </p>
           </div>
           {eventData.latitude && eventData.longitude && (
             <Map

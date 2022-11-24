@@ -3,6 +3,7 @@ import eventsAPI from '../../api/events';
 import {
   EventDetailsType,
   GetAllEventsInputType,
+  SearchGroupsToShareEventInputType,
   SearchUserToEventInvitationInputType,
 } from '@event-organizer/shared-types';
 import { APIError } from '../../libs/api/types';
@@ -59,4 +60,18 @@ export const useSearchUsersToInviteQuery = ({
     enabled,
     retry: false,
   });
+};
+
+export const useGroupsToShareEventQuery = ({
+  phrase,
+  limit,
+  eventId,
+}: SearchGroupsToShareEventInputType & { eventId: string }) => {
+  return useQuery(
+    ['groups-to-share', eventId, phrase],
+    () => eventsAPI.getGroupsToShareEvent({ eventId, phrase, limit }),
+    {
+      retry: false,
+    }
+  );
 };

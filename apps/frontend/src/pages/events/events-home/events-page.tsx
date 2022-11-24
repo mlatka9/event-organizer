@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../../hooks/use-auth';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom';
 import { GetAllEventsInputType, getAllEventsSchema } from '@event-organizer/shared-types';
 import { useEventsQuery } from '../../../hooks/query/events';

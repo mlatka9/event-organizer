@@ -22,6 +22,8 @@ protectedRouter.delete('/:eventId/invitation/:invitationId', eventsRouter.declin
 protectedRouter.post('/:eventId/invitation/search-users', eventsRouter.searchUsersToInvite);
 protectedRouter.get('/:eventId/invitation', eventsRouter.getAllEventInvitation);
 
+protectedRouter.post('/:eventId/shared-events/group-list', eventsRouter.getGroupsToShare);
+
 const router = {
   publicRouter,
   protectedRouter,

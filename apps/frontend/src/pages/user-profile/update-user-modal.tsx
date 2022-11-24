@@ -9,6 +9,7 @@ import Button from '../../components/common/button';
 import { useUpdateUserMutation } from '../../hooks/mutation/users';
 import { toast } from 'react-toastify';
 import { APIError } from '../../libs/api/types';
+import { useAuth } from '../../hooks/use-auth';
 
 interface UpdateUserModalProps {
   handleCloseModal: () => void;
@@ -27,6 +28,7 @@ const UpdateUserModal = ({
   currentImage,
   userId,
 }: UpdateUserModalProps) => {
+  const { forceRefresh } = useAuth();
   const {
     handleSubmit,
     register,
@@ -44,6 +46,7 @@ const UpdateUserModal = ({
   });
 
   const onSuccess = () => {
+    forceRefresh();
     toast('Zaktualizowano profil', {
       type: 'success',
     });

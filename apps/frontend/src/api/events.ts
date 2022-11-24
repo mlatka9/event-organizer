@@ -7,7 +7,8 @@ import {
   EventParticipant,
   EventShowcaseType,
   GetAllEventsInputType,
-  GroupInvitationType,
+  GroupType,
+  SearchGroupsToShareEventInputType,
   SearchUserToEventInvitationInputType,
   UserType,
 } from '@event-organizer/shared-types';
@@ -46,6 +47,7 @@ const getEvents = async (
       timeRange: args.timeRange,
     },
   });
+
   return data;
 };
 
@@ -128,6 +130,16 @@ const declineEventInvitation = async ({ eventId, invitationId }: { eventId: stri
   return data;
 };
 
+const getGroupsToShareEvent = async ({
+  eventId,
+  ...restData
+}: SearchGroupsToShareEventInputType & { eventId: string }): Promise<GroupType[]> => {
+  const { data } = await api.post(`/events/${eventId}/shared-events/group-list`, restData, {
+    withCredentials: true,
+  });
+  return data;
+};
+
 const eventsAPI = {
   createEventInvitation,
   removeParticipant,
@@ -142,6 +154,7 @@ const eventsAPI = {
   acceptEventInvitation,
   declineEventInvitation,
   updateEvent,
+  getGroupsToShareEvent,
 };
 
 export default eventsAPI;

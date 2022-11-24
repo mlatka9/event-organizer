@@ -24,11 +24,11 @@ const Header = ({ hasLoginButtons = true }: HeaderProps) => {
       <Link to={'/'} className={'text-xl font-semibold text-blue-900'}>
         Organizator
       </Link>
-      <div className={'flex items-center space-x-3 ml-20'}>
-        <Link to={'/events'} className={'text-xl font-semibold text-blue-900'}>
+      <div className={'flex items-center space-x-3 ml-20 '}>
+        <Link to={'/events'} className={'text-xl text-blue-900'}>
           Wydarzenie
         </Link>
-        <Link to={'/groups'} className={'text-xl font-semibold text-blue-900'}>
+        <Link to={'/groups'} className={'text-xl text-blue-900'}>
           Grupy
         </Link>
       </div>
@@ -36,7 +36,7 @@ const Header = ({ hasLoginButtons = true }: HeaderProps) => {
         {user ? (
           <div className={'flex justify-between items-center cursor-pointer relative'} onClick={toggleDownDownOpen}>
             <p className={'mr-3'}>{user.name}</p>
-            <img src={user.image || AvatarFallback} className={'w-10 h-10 rounded-full mr-3'} />
+            <img src={user.image || AvatarFallback} className={'w-10 h-10 rounded-full mr-3 object-cover'} />
             <ChevronDownIcon className={'fill-gray-800'} width={18} height={18} />
             {isDownDownOpen && <MenuDropdown userId={user.userId} />}
           </div>

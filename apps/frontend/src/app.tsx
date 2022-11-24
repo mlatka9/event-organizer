@@ -93,7 +93,7 @@ const App = () => {
           </Route>
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
-        <ToastContainer autoClose={2000} />
+        <ToastContainer autoClose={2000} position="bottom-right" />
       </AuthProvider>
     </QueryClientProvider>
   );

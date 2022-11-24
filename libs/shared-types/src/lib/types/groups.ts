@@ -1,8 +1,9 @@
 import { z } from 'zod';
-import { createGroupSchema, getAllGroupsQueryParamsSchema } from '../schemas/groups';
+import { createGroupSchema, getAllGroupsQueryParamsSchema, shareEventSchema } from '../schemas/groups';
 
 export type CreateGroupInputType = z.infer<typeof createGroupSchema>;
 export type GetAllGroupsQueryParamsType = z.infer<typeof getAllGroupsQueryParamsSchema>;
+export type ShareEventInputType = z.infer<typeof shareEventSchema>;
 
 export interface GroupShowcaseType {
   id: string;
@@ -15,6 +16,12 @@ export interface GroupShowcaseType {
   };
   groupVisibility: 'PUBLIC' | 'PRIVATE';
   membersCount: number;
+}
+
+export interface GroupType {
+  id: string;
+  name: string;
+  bannerImage: string | null;
 }
 
 export interface GetAllGroupsReturnType {

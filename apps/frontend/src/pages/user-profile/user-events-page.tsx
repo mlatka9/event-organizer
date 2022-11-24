@@ -66,9 +66,7 @@ const UserEventsPage = () => {
             </div>
           </div>
         ) : (
-          <p className={'text-xl font-semibold mb-10'}>
-            {user.name.toUpperCase()} nie bierze udziału w żadnych wydarzeniach{' '}
-          </p>
+          <p className={'text-xl font-semibold mb-10'}>{user.name} nie bierze udziału w żadnych wydarzeniach </p>
         )}
       </div>
     </div>

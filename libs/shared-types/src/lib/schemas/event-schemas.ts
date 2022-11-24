@@ -41,3 +41,8 @@ export const getAllEventsSchema = z.object({
 export const createEventInvitationSchema = z.object({
   ids: z.array(z.string()),
 });
+
+export const searchGroupsToShareEventSchema = z.object({
+  phrase: z.string().optional(),
+  limit: z.preprocess((val) => val && Number(val), z.number()).optional(),
+});

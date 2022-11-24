@@ -21,7 +21,7 @@ const EventSettingsPage = () => {
 
   const { data, isSuccess: isEventInfoSuccess } = useEventInfoQuery(eventId);
 
-  const updateEvent = useUpdateEventMutation(onSuccess);
+  const { mutate: updateEvent, isLoading } = useUpdateEventMutation(onSuccess);
 
   const onSubmit = async (data: CreateEventFormType) => {
     updateEvent({
@@ -54,7 +54,7 @@ const EventSettingsPage = () => {
 
   return (
     <div>
-      <EventForm onSubmit={onSubmit} defaultValues={data} />
+      <EventForm onSubmit={onSubmit} defaultValues={data} isUpdating={isLoading} />
     </div>
   );
 };

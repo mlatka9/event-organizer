@@ -17,9 +17,10 @@ const currentDate = dayjs().format('YYYY-MM-DD[T]hh:mm');
 interface EventFormProps {
   onSubmit: (data: CreateEventFormType) => void;
   defaultValues?: CreateEventInputType;
+  isUpdating?: boolean;
 }
 
-const EventForm = ({ onSubmit, defaultValues }: EventFormProps) => {
+const EventForm = ({ onSubmit, defaultValues, isUpdating }: EventFormProps) => {
   console.log(defaultValues);
 
   const {
@@ -168,7 +169,7 @@ const EventForm = ({ onSubmit, defaultValues }: EventFormProps) => {
         </div>
       </div>
 
-      <Button type="submit" className={'ml-auto'}>
+      <Button type="submit" className={'ml-auto'} disabled={isUpdating}>
         Submit
       </Button>
     </form>

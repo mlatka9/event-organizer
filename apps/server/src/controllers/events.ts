@@ -15,6 +15,8 @@ import {
   EventParticipant,
   searchUserToEventInvitationSchema,
   UserType,
+  searchGroupsToShareEventSchema,
+  GroupType,
 } from '@event-organizer/shared-types';
 import { NotFoundError } from '../errors/not-found';
 import { getLoginSession } from '@event-organizer/auth';
@@ -147,7 +149,7 @@ const getEventInfo = async (req: Request, res: Response) => {
       eventLocationStatus: event.eventLocationStatus,
       eventVisibilityStatus: event.eventVisibilityStatus,
       postCode: event.postCode || undefined,
-      street: event.postCode || undefined,
+      street: event.street || undefined,
       tags: event.tags.map((t) => t.name),
     };
     res.json(formattedEvent);
@@ -208,7 +210,7 @@ const getAll = async (req: Request, res: Response) => {
     },
   });
 
-  console.log('pre events');
+  console.log('eventsCount', eventsCount);
 
   const events = await prisma.event.findMany({
     skip: (+page - 1) * +limit,
@@ -246,6 +248,8 @@ const getAll = async (req: Request, res: Response) => {
     },
   });
 
+  console.log('events', events);
+
   const formattedEvents = events.map((event) => ({
     id: event.id,
     name: event.name,
@@ -259,6 +263,9 @@ const getAll = async (req: Request, res: Response) => {
   }));
 
   const publicEvents = formattedEvents.filter(isPublicEvent);
+
+  console.log('formattedEvents', formattedEvents);
+  console.log('publicEvents', publicEvents);
   // const privateEvents = formattedEvents.filter(isPrivateEvent);
 
   const eventShowcases: EventShowcaseType[] = [...publicEvents];
@@ -462,7 +469,6 @@ const getAllEventInvitation = async (req: Request, res: Response) => {
 };
 
 const createEventInvitation = async (req: Request, res: Response) => {
-  console.log('HALLO');
   const eventId = req.params.eventId as string;
   const loggedUserId = req.userId;
 
@@ -794,6 +800,61 @@ const updateEvent = async (req: Request, res: Response) => {
   res.status(200).end();
 };
 
+const getGroupsToShare = async (req: Request, res: Response) => {
+  const loggedUser = req.userId;
+  if (!loggedUser) {
+    throw new Error('No userId in req obj');
+  }
+  const eventId = req.params.eventId;
+
+  const validation = searchGroupsToShareEventSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+
+  const { data: body } = validation;
+
+  const eventToShare = await prisma.event.findUnique({
+    where: {
+      id: eventId,
+    },
+  });
+
+  if (!eventToShare) {
+    throw new ValidationError('Event dont exists');
+  }
+
+  if (eventToShare.eventVisibilityStatus === 'PRIVATE') {
+    throw new ValidationError('You cant share private events');
+  }
+
+  const groups = await prisma.group.findMany({
+    take: body.limit || 10,
+    where: {
+      name: {
+        contains: body.phrase,
+        mode: 'insensitive',
+      },
+      eventsShared: {
+        none: {
+          eventId,
+          userId: loggedUser,
+        },
+      },
+    },
+  });
+
+  const formattedGroups: GroupType[] = groups.map((group) => ({
+    id: group.id,
+    name: group.name,
+    bannerImage: group.bannerImage,
+  }));
+
+  res.json(formattedGroups);
+};
+
 export default {
   updateEvent,
   searchUsersToInvite,
@@ -808,4 +869,5 @@ export default {
   getNormalizedCities,
   addParticipant,
   removeParticipant,
+  getGroupsToShare,
 };

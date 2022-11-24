@@ -3,12 +3,9 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import FormInput from '../../components/form/form-input';
 import Button from '../../components/common/button';
-import Link from 'next/link';
-import { useState } from 'react';
-import FormErrorMessage from '../../components/form/form-error-message';
 import { useAuth } from '../../hooks/use-auth';
 import fireCampImage from '../../assets/images/fire-camp.jpg';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 
 const schema = z.object({
   email: z.string().email({ message: 'Wprowadz poprawny adres email' }),
@@ -59,7 +56,7 @@ const LoginPage = () => {
           <h1 className={'text-3xl mb-3 font-semibold'}>Zaloguj się</h1>
           <p className={'mb-10'}>
             Nie masz jeszcze konta
-            <Link href={'/register'} className={'text-blue-400 ml-1'}>
+            <Link to={'/register'} className={'text-blue-400 ml-1'}>
               zarejestruj się
             </Link>
           </p>

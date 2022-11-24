@@ -4,6 +4,7 @@ import {
   useUserGroupInvitationsQuery,
   useUserGroupPendingRequestsQuery,
   useUserGroupsQuery,
+  useUserQuery,
 } from '../../hooks/query/users';
 import GroupCard from '../groups/groups-home/group-card';
 
@@ -16,9 +17,9 @@ const UserGroupsPage = () => {
 
   const { user: currentUser } = useAuth();
   const { data: groupsData, isSuccess: isGroupsSuccess } = useUserGroupsQuery(userId);
+  const { data: userData, isSuccess: isUserSuccess } = useUserQuery(userId);
 
   const isCurrentUserPage = currentUser?.userId === userId;
-
   const { isSuccess: isUserInvitationsSuccess, data: userGroupsInvitations } = useUserGroupInvitationsQuery({
     userId,
     enabled: isCurrentUserPage,
@@ -28,6 +29,16 @@ const UserGroupsPage = () => {
     userId,
     enabled: isCurrentUserPage,
   });
+
+  console.log(isGroupsSuccess, isUserInvitationsSuccess, isPendingRequestsSuccess, isUserSuccess);
+
+  if (
+    !isGroupsSuccess ||
+    !isUserSuccess ||
+    (isCurrentUserPage && (!isUserInvitationsSuccess || !isPendingRequestsSuccess))
+  ) {
+    return <div>loading...</div>;
+  }
 
   return (
     <div>
@@ -42,7 +53,11 @@ const UserGroupsPage = () => {
         )}
       </div>
       <h2 className={'text-xl font-semibold mb-3'}>
-        Grupy {!isCurrentUserPage && 'publiczne'}, których jest członkiem
+        {groupsData.length > 0 ? (
+          <p>Grupy, których {userData?.name} jest członkiem</p>
+        ) : (
+          <>{userData?.name} nie dołączył jeszcze do żadnej grupy</>
+        )}
       </h2>
       <div className={'flex flex-col space-y-3'}>
         {isGroupsSuccess &&

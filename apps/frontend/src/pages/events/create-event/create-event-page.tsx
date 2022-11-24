@@ -18,7 +18,7 @@ const CreateEventPage = () => {
     navigate(`/events/${eventData.eventId}`);
   };
 
-  const createEvent = useCreateEventMutation(onSuccess);
+  const { mutate: createEvent, isLoading } = useCreateEventMutation(onSuccess);
 
   const onSubmit = async (data: CreateEventFormType) => {
     createEvent({
@@ -51,7 +51,7 @@ const CreateEventPage = () => {
   return (
     <div className={'mt-10 max-w-[800px] mx-auto'}>
       <Heading className={'mb-20'}>Stwórz nowe wydarzenie</Heading>
-      <EventForm onSubmit={onSubmit} />
+      <EventForm onSubmit={onSubmit} isUpdating={isLoading} />
     </div>
   );
 };

@@ -1,20 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { CredentialsType, SessionUserType } from '@event-organizer/shared-types';
 import authAPI from '../api/auth';
-import { APIError } from '../libs/api/types';
 
 interface AuthContextType {
   user: SessionUserType | null;
   isLoading: boolean;
   login: (args: { credentials: CredentialsType; onSuccess?: VoidFunction; onError?: (error: Error) => void }) => void;
   logout: (onSuccess?: VoidFunction) => void;
+  forceRefresh: () => void;
 }
 
 export const AuthContext = React.createContext<AuthContextType>(null!);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [count, setCount] = useState(0);
   const [user, setUser] = React.useState<SessionUserType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const forceRefresh = () => {
+    setCount(count + 1);
+  };
 
   useEffect(() => {
     authAPI
@@ -58,7 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const value = { user, login, logout, isLoading };
+  const value = { user, login, logout, isLoading, forceRefresh };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

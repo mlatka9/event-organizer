@@ -48,3 +48,15 @@ export const useLeaveGroupMutation = ({ onError, onSuccess }: useJoinGroupMutati
     onError,
   });
 };
+
+export const useShareEventMutation = (onSuccess?: () => void) => {
+  const queryClient = useQueryClient();
+  return useMutation(groupsAPI.shareEvent, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['groups-to-share'],
+      });
+      onSuccess && onSuccess();
+    },
+  });
+};

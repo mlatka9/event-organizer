@@ -13,7 +13,7 @@ const EventParticipantsPage = () => {
   if (!isParticipantsSuccess || !isEventSuccess) return <div>'participants loading...'</div>;
 
   return (
-    <>
+    <div className={'pb-20'}>
       <div className={'flex justify-between'}>
         <div className={'mb-10'}>
           <h2 className={'font-semibold text-lg'}>Uczestnicy wydarzenia</h2>
@@ -26,7 +26,7 @@ const EventParticipantsPage = () => {
             <EventParticipantCard key={p.id} id={p.id} name={p.name} image={p.image} role={p.role} />
           ))}
       </ul>
-    </>
+    </div>
   );
 };
 

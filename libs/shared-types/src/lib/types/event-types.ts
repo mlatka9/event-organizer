@@ -3,6 +3,7 @@ import {
   createEventInvitationSchema,
   createEventSchema,
   getAllEventsSchema,
+  searchGroupsToShareEventSchema,
   searchUserToEventInvitationSchema,
 } from '../schemas';
 import { EventRole } from '@prisma/client';
@@ -11,6 +12,7 @@ export type CreateEventInputType = z.infer<typeof createEventSchema>;
 export type GetAllEventsInputType = z.infer<typeof getAllEventsSchema>;
 export type CreateEventInvitationInputType = z.infer<typeof createEventInvitationSchema>;
 export type SearchUserToEventInvitationInputType = z.infer<typeof searchUserToEventInvitationSchema>;
+export type SearchGroupsToShareEventInputType = z.infer<typeof searchGroupsToShareEventSchema>;
 
 export interface PrivateEventType {
   id: string;

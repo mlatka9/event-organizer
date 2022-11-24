@@ -47,7 +47,7 @@ const CreateGroupPage = () => {
     }
   };
 
-  const { mutate: createGroup } = useCreateGroupMutation({ onSuccess, onError });
+  const { mutate: createGroup, isLoading } = useCreateGroupMutation({ onSuccess, onError });
   const { data, isSuccess } = useCategoriesQuery();
 
   const eventCategoryOptions = isSuccess
@@ -101,7 +101,7 @@ const CreateGroupPage = () => {
             />
           </div>
         </div>
-        <Button type={'submit'} className={'ml-auto'}>
+        <Button type={'submit'} className={'ml-auto'} disabled={isLoading}>
           Utwórz
         </Button>
       </form>
