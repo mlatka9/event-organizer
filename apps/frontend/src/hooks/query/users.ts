@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import userAPI from '../../api/users';
+import { UserEventsInputType } from '@event-organizer/shared-types';
 
 export const useUserQuery = (id: string, enabled = true) => {
   return useQuery(['user', id], () => userAPI.getUser(id), {
@@ -8,8 +9,11 @@ export const useUserQuery = (id: string, enabled = true) => {
   });
 };
 
-export const useUserEventsQuery = (id: string, enabled = true) => {
-  return useQuery(['user-events', id], () => userAPI.getUserEvents(id), {
+export const useUserEventsQuery = ({
+  enabled = true,
+  ...data
+}: UserEventsInputType & { userId?: string; enabled?: boolean }) => {
+  return useQuery(['user-events', data.userId, data.startBound, data.endBound], () => userAPI.getUserEvents(data), {
     retry: false,
     enabled,
   });

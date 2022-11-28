@@ -18,6 +18,10 @@ export const createEventSchema = z.object({
     .string()
     .refine((date) => (date ? isISODate(date) : true), { message: 'Nieprawidłowy format daty' })
     .optional(),
+  endDate: z
+    .string()
+    .refine((date) => (date ? isISODate(date) : true), { message: 'Nieprawidłowy format daty' })
+    .optional(),
   latitude: z.number().min(-90).max(90).optional(),
   longitude: z.number().min(-180).max(180).optional(),
   tags: z.array(z.string()),

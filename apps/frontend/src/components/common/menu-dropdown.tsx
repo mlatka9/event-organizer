@@ -13,7 +13,7 @@ const MenuDropdown = ({ userId }: MenuDropdownProps) => {
   const { logout } = useAuth();
 
   return (
-    <div className={'bg-white shadow-md rounded-b-md absolute top-[calc(100%+30px)] right-0 w-[200px]'}>
+    <div className={'bg-white shadow-md rounded-md bottom-[120%] right-[0px] absolute w-[200px] overflow-hidden'}>
       <Link className={'h-14 px-5 w-full block flex items-center hover:bg-blue-50'} to={`/users/${userId}`}>
         Profil
       </Link>

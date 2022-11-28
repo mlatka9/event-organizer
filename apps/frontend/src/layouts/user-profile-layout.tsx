@@ -7,9 +7,9 @@ const UserLayout = () => {
   const userId = params['id'] as string;
 
   return (
-    <div className={'min-h-screen pt-[80px]'}>
+    <div className={'grid grid-cols-[260px_1fr] min-h-screen'}>
       <Header />
-      <div className={'grid grid-cols-[300px_1fr] h-full items-start max-w-[1200px] mx-auto mt-20 gap-10'}>
+      <div className={'grid grid-cols-[300px_1fr] items-start max-w-[1200px] w-full mx-auto mt-20 gap-10'}>
         <nav className={'bg-white rounded-lg shadow flex flex-col relative'}>
           <ul>
             <li>

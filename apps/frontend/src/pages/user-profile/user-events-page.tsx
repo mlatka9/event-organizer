@@ -16,7 +16,7 @@ const UserEventsPage = () => {
   const { user: currentUser } = useAuth();
 
   const { isSuccess: isUserSuccess, data: user } = useUserQuery(userId);
-  const { isSuccess: isEventsSuccess, data: userEvents } = useUserEventsQuery(userId);
+  const { isSuccess: isEventsSuccess, data: userEvents } = useUserEventsQuery({ userId });
 
   const isCurrentUserPage = currentUser?.userId === userId;
 

@@ -7,9 +7,10 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 
 const CreateEventFormSchema = createEventSchema
-  .omit({ startDate: true })
+  .omit({ startDate: true, endDate: true })
   .extend({
     startDate: z.string().optional(),
+    endDate: z.string().optional(),
     mapZoomLevel: z.number(),
   })
   .refine((data) => (data.eventLocationStatus === 'STATIONARY' ? data.street?.length : true), {
@@ -27,7 +28,19 @@ const CreateEventFormSchema = createEventSchema
   .refine((data) => (data.eventLocationStatus === 'STATIONARY' ? data.country?.length : true), {
     message: 'Państwo jest wymagane',
     path: ['country'],
-  });
+  })
+  .refine((data) => (data.endDate ? data.startDate : true), {
+    message: 'Data startu jest wymagane',
+    path: ['startDate'],
+  })
+  .refine(
+    (data) =>
+      data.endDate ? data.startDate && new Date(data.endDate).valueOf() >= new Date(data.startDate).valueOf() : true,
+    {
+      message: 'Data końca musi być po dacie startu',
+      path: ['endDate'],
+    }
+  );
 
 export type CreateEventFormType = z.infer<typeof CreateEventFormSchema>;
 
@@ -56,6 +69,10 @@ const useCreateEvent = ({ defaultValues }: UseCreateEventProps = {}) => {
       startDate: defaultValues?.startDate
         ? dayjs(new Date(defaultValues.startDate)).format('YYYY-MM-DD[T]HH:mm')
         : undefined,
+      endDate:
+        defaultValues?.endDate && defaultValues?.startDate && defaultValues.endDate !== defaultValues.startDate
+          ? dayjs(new Date(defaultValues.endDate)).format('YYYY-MM-DD[T]HH:mm')
+          : undefined,
     },
   });
 

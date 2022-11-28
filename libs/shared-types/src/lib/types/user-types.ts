@@ -1,6 +1,6 @@
 import { CategoryType } from './category-types';
 import { z } from 'zod';
-import { updateUserSchema } from '../schemas';
+import { updateUserSchema, userEventsSchema } from '../schemas';
 
 export interface UserProfileType {
   joinedAt: string;
@@ -18,3 +18,4 @@ export interface UserType {
 }
 
 export type UpdateUserInputType = z.infer<typeof updateUserSchema>;
+export type UserEventsInputType = z.infer<typeof userEventsSchema>;

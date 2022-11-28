@@ -11,6 +11,7 @@ import React from 'react';
 import useCreateEvent, { CreateEventFormType } from './use-create-event';
 import dayjs from 'dayjs';
 import { CreateEventInputType } from '@event-organizer/shared-types';
+import FormErrorMessage from '../../../components/form/form-error-message';
 
 const currentDate = dayjs().format('YYYY-MM-DD[T]hh:mm');
 
@@ -21,8 +22,6 @@ interface EventFormProps {
 }
 
 const EventForm = ({ onSubmit, defaultValues, isUpdating }: EventFormProps) => {
-  console.log(defaultValues);
-
   const {
     errors,
     locationMarker,
@@ -150,8 +149,8 @@ const EventForm = ({ onSubmit, defaultValues, isUpdating }: EventFormProps) => {
           </p>
         </div>
       </div>
-      <div className={'space-y-5 ml-[70px] mt-10 mb-20'}>
-        <div className="relative w-1/2">
+      <div className={'grid grid-cols-2 ml-[70px] mt-10 mb-20 gap-3'}>
+        <div className="relative w-full">
           <input
             id={'startDate'}
             type="datetime-local"
@@ -166,6 +165,24 @@ const EventForm = ({ onSubmit, defaultValues, isUpdating }: EventFormProps) => {
           >
             data rozpoczęcia
           </label>
+          {errors.startDate && <FormErrorMessage message={errors.startDate.message} />}
+        </div>
+        <div className="relative w-full">
+          <input
+            id={'endDate'}
+            type="datetime-local"
+            {...register('endDate')}
+            // value={'2022-11-22T16:00'}
+            min={currentDate}
+            className="bg-primary-100 peer block w-full appearance-none rounded-lg border-2 border-gray-300 px-2 pb-2.5 pt-4 text-sm text-gray-900 focus:border-blue-300"
+          />
+          <label
+            htmlFor={'endDate'}
+            className="absolute top-5 z-10 origin-[0] -translate-y-5 scale-75 transform px-2 text-sm text-gray-500 duration-300"
+          >
+            data końca
+          </label>
+          {errors.endDate && <FormErrorMessage message={errors.endDate.message} />}
         </div>
       </div>
 

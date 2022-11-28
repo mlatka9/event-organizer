@@ -6,8 +6,6 @@ import { useUpdateEventMutation } from '../../../hooks/mutation/events';
 import { CreateEventFormType } from '../create-event/use-create-event';
 import React from 'react';
 import { useEventInfoQuery } from '../../../hooks/query/events';
-import { useEventDetails } from '../../../layouts/events-layout';
-
 const EventSettingsPage = () => {
   const params = useParams();
   const eventId = params['id'] as string;
@@ -20,6 +18,7 @@ const EventSettingsPage = () => {
   };
 
   const { data, isSuccess: isEventInfoSuccess } = useEventInfoQuery(eventId);
+  console.log('data', data);
 
   const { mutate: updateEvent, isLoading } = useUpdateEventMutation(onSuccess);
 
@@ -33,6 +32,7 @@ const EventSettingsPage = () => {
       country: data.country,
       postCode: data.postCode,
       startDate: data.startDate ? new Date(data.startDate).toISOString() : undefined,
+      endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
       street: data.street,
       tags: data.tags,
       latitude: data.latitude,

@@ -3,12 +3,12 @@ import { Outlet } from 'react-router-dom';
 
 const MainLayout = () => {
   return (
-    <>
+    <div className={'grid lg:grid-cols-[200px_1fr] xl:grid-cols-[260px_1fr] min-h-screen'}>
       <Header />
-      <main className="mx-auto max-w-[1200px] pt-[80px] h-full flex flex-col">
+      <main className="mx-auto max-w-[1200px] w-full h-full flex flex-col px-5">
         <Outlet />
       </main>
-    </>
+    </div>
   );
 };
 

@@ -46,6 +46,7 @@ model Event {
   country                       String?
   postCode                      String?
   startDate                     DateTime?
+  endDate                       DateTime?
   latitude                      Decimal?
   longitude                     Decimal?
   bannerImage                   String?

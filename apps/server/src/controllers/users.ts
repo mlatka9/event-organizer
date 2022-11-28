@@ -10,6 +10,7 @@ import {
   GroupShowcaseType,
   UpdateUserInputType,
   updateUserSchema,
+  userEventsSchema,
   UserProfileType,
 } from '@event-organizer/shared-types';
 import { UnauthenticatedError, ValidationError } from '../errors';
@@ -129,6 +130,16 @@ const getUserEvents = async (req: Request, res: Response) => {
   const userId = req.params.userId;
   const requestFromUserOwner = userId === session?.user.userId;
 
+  const validation = userEventsSchema.safeParse(req.query);
+
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+  const query = validation.data;
+
+  console.log('query', query);
+
   const userCount = await prisma.user.count({
     where: {
       id: userId,
@@ -146,6 +157,14 @@ const getUserEvents = async (req: Request, res: Response) => {
           userId,
         },
       },
+      AND: [
+        {
+          startDate: query.endBound ? { lte: new Date(query.endBound) } : undefined,
+        },
+        {
+          endDate: query.startBound ? { gte: new Date(query.startBound) } : undefined,
+        },
+      ],
       eventVisibilityStatus: requestFromUserOwner ? undefined : 'PUBLIC',
     },
     include: {
@@ -171,6 +190,7 @@ const getUserEvents = async (req: Request, res: Response) => {
     displayAddress: formatDisplayAddress([event.street, event.city, event.country, event.postCode]) || null,
     participantsCount: event._count.eventParticipants || null,
     startDate: event.startDate ? event.startDate.toISOString() : null,
+    endDate: event.endDate ? event.endDate.toISOString() : null,
     latitude: event.latitude ? Number(event.latitude) : null,
     longitude: event.longitude ? Number(event.longitude) : null,
     bannerImage: event.bannerImage || null,

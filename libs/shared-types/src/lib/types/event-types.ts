@@ -22,6 +22,7 @@ export interface PrivateEventType {
   displayAddress: null;
   participantsCount: null;
   startDate: null;
+  endDate: null;
   latitude: null;
   longitude: null;
 }
@@ -34,6 +35,7 @@ export interface PublicEventType {
   displayAddress: string | null;
   participantsCount: number | null;
   startDate: string | null;
+  endDate: string | null;
   latitude: number | null;
   longitude: number | null;
 }
@@ -57,6 +59,7 @@ export interface EventDetailsType {
   displayAddress?: string;
   participantsCount: number;
   startDate?: string;
+  endDate?: string;
   latitude?: number;
   longitude?: number;
   bannerImage?: string;

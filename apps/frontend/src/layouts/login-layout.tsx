@@ -1,14 +1,12 @@
-import Header from '../components/common/header';
 import { Outlet } from 'react-router-dom';
 
 const MainLayout = () => {
   return (
-    <>
-      <Header hasLoginButtons={false} />
-      <main className="mx-auto pt-[80px] h-full">
+    <div className={'grid min-h-screen'}>
+      <main className="mx-auto h-full">
         <Outlet />
       </main>
-    </>
+    </div>
   );
 };
 

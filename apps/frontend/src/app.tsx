@@ -32,6 +32,7 @@ import GroupsDetailsPage from './pages/groups/groups-details/groups-details-page
 import GroupsMembersPage from './pages/groups/groups-details/groups-members-page';
 import GroupsSettingsPage from './pages/groups/groups-details/groups-settings-page';
 import GroupsSharedEventsPage from './pages/groups/groups-details/groups-shared-events-page';
+import CalendarPage from './pages/calendar/calendar-page';
 
 require('dayjs/locale/pl');
 dayjs.locale('pl');
@@ -54,6 +55,18 @@ const App = () => {
                 </RequireAuth>
               }
             />
+            <Route
+              path={'calendar'}
+              element={
+                <RequireAuth>
+                  <CalendarPage />
+                </RequireAuth>
+              }
+            />
+          </Route>
+          <Route path={'/'} element={<LoginLayout />}>
+            <Route path={'login'} element={<LoginPage />} />
+            <Route path={'register'} element={<RegisterPage />} />
           </Route>
           <Route path={'/groups'} element={<GroupsLayout />}>
             <Route index element={<GroupsHomePage />} />
@@ -78,10 +91,6 @@ const App = () => {
             <Route path={'groups'} element={<UserGroupsPage />} />
             {/*<Route path={'events/invitations'} element={<EventInvitationsPage />} />*/}
             {/*<Route path={'events/pending-requests'} element={<EventPendingRequestsPage />} />*/}
-          </Route>
-          <Route path={'/'} element={<LoginLayout />}>
-            <Route path={'login'} element={<LoginPage />} />
-            <Route path={'register'} element={<RegisterPage />} />
           </Route>
           <Route path={'/events/:id'} element={<EventLayout />}>
             <Route index element={<EventDetailsPage />} />

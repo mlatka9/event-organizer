@@ -80,9 +80,9 @@ const EventLayout = () => {
   console.log('isShareModalOpen', isShareModalOpen);
 
   return (
-    <div>
+    <div className={'grid grid-cols-[260px_1fr] min-h-screen'}>
       <Header />
-      <main className="mx-auto max-w-[1000px] pt-[80px]">
+      <main className="mx-auto max-w-[1200px] w-full ">
         <div className={'rounded-b-xl bg-white shadow-md mb-10'}>
           {event.bannerImage && <img src={event.bannerImage} className={'w-full h-[300px] object-cover'} />}
           <div className={'px-10 py-5'}>

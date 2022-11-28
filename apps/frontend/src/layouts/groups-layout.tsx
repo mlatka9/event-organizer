@@ -3,12 +3,12 @@ import { Outlet } from 'react-router-dom';
 
 const GroupsLayout = () => {
   return (
-    <>
+    <div className={'grid grid-cols-[260px_1fr] min-h-screen'}>
       <Header />
-      <main className="mx-auto max-w-[1200px] pt-[80px] h-full flex flex-col items-center">
+      <main className="mx-auto max-w-[1200px] w-full h-full flex flex-col items-center">
         <Outlet />
       </main>
-    </>
+    </div>
   );
 };
 

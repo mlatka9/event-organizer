@@ -29,6 +29,7 @@ const CreateEventPage = () => {
       country: data.country,
       postCode: data.postCode,
       startDate: data.startDate ? new Date(data.startDate).toISOString() : undefined,
+      endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
       street: data.street,
       tags: data.tags,
       latitude: data.latitude,

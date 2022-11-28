@@ -15,7 +15,7 @@ const EventSettingsLayout = () => {
 
   return (
     <div>
-      <div className={'grid grid-cols-[300px_1fr] h-full items-start max-w-[1200px] mx-auto mt-20 gap-10'}>
+      <div className={'grid grid-cols-[260px_1fr] h-full items-start max-w-[1200px] mx-auto mt-20 gap-10'}>
         <nav className={'bg-white rounded-lg shadow flex flex-col relative'}>
           <ul>
             <li>
