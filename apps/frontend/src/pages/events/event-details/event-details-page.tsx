@@ -15,9 +15,9 @@ const EventDetailsPage = () => {
   if (!isSuccess) return <div>'loading details ....'</div>;
 
   return (
-    <div className={'grid grid-cols-[3fr_2fr]'}>
-      <div className={'h-[1000px]'}>main content</div>
-      <div className={'space-y-5'}>
+    <div className={'grid lg:grid-cols-[3fr_2fr] gap-5'}>
+      <div className={'h-[1000px] bg-blue-50'}>main content</div>
+      <div className={'space-y-5 row-start-1 lg:col-start-2'}>
         <div className={'rounded-2xl shadow-md bg-white'}>
           <div className={'p-3'}>
             <h2 className={'text-lg font-semibold '}>Lokalizacja</h2>

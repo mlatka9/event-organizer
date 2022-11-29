@@ -25,7 +25,7 @@ const CalendarEventsList = ({ selectedDate, unselectDate }: CalendarEventsListPr
 
   return (
     <div className={'p-5'}>
-      <div className={'flex justify-between'}>
+      <div className={'flex justify-between items-start'}>
         <h2 className={'text-xl font-semibold text-neutral-800'}>Wydarzenia w których bierzesz udział</h2>
         <button onClick={unselectDate}>
           <CloseIcon />

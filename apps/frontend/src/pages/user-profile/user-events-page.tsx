@@ -9,11 +9,16 @@ import EventCard from '../events/events-home/event-card';
 import UserProfileInvitationsSection from './user-profile-invitations-section';
 import { useAuth } from '../../hooks/use-auth';
 import clsx from 'clsx';
+import useBreakpoint from 'use-breakpoint';
+import { BREAKPOINTS } from '../../constants/breakboints';
 
 const UserEventsPage = () => {
   const params = useParams();
   const userId = params['id'] as string;
   const { user: currentUser } = useAuth();
+  const { breakpoint } = useBreakpoint(BREAKPOINTS);
+
+  const isMobileBreakpoint = breakpoint === 'sm';
 
   const { isSuccess: isUserSuccess, data: user } = useUserQuery(userId);
   const { isSuccess: isEventsSuccess, data: userEvents } = useUserEventsQuery({ userId });
@@ -60,7 +65,7 @@ const UserEventsPage = () => {
             <div className={'grid grid-cols-fluid space-y-10'}>
               {userEvents.map((event) => (
                 <Link to={`/events/${event.id}`} key={event.id} className={'h-[150px]'}>
-                  <EventCard event={event} />
+                  <EventCard event={event} isHorizontal={isMobileBreakpoint} isSmall={isMobileBreakpoint} />
                 </Link>
               ))}
             </div>

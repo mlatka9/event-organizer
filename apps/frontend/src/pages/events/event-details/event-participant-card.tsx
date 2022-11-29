@@ -13,7 +13,7 @@ const EventParticipantCard = ({ id, image, name, role }: UserCardProps) => {
   return (
     <div className={'bg-white flex items-center'}>
       <Link to={`/users/${id}`} className={'rounded-full'}>
-        <img src={image || AvatarFallback} className={'block w-14 h-14 rounded-full '} />
+        <img src={image || AvatarFallback} className={'block w-14 h-14 rounded-full object-cover'} />
       </Link>
       <Link to={`/users/${id}`} className={'hover:underline'}>
         <p className={'ml-3 font-semibold text-sm'}>{name}</p>

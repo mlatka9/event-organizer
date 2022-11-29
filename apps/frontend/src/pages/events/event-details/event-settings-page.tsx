@@ -17,8 +17,7 @@ const EventSettingsPage = () => {
     });
   };
 
-  const { data, isSuccess: isEventInfoSuccess } = useEventInfoQuery(eventId);
-  console.log('data', data);
+  const { data: defaultValues, isSuccess: isEventInfoSuccess } = useEventInfoQuery(eventId);
 
   const { mutate: updateEvent, isLoading } = useUpdateEventMutation(onSuccess);
 
@@ -31,7 +30,10 @@ const EventSettingsPage = () => {
       city: data.city,
       country: data.country,
       postCode: data.postCode,
-      startDate: data.startDate ? new Date(data.startDate).toISOString() : undefined,
+      startDate:
+        data.startDate && data.startDate !== defaultValues?.startDate
+          ? new Date(data.startDate).toISOString()
+          : undefined,
       endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
       street: data.street,
       tags: data.tags,
@@ -54,7 +56,7 @@ const EventSettingsPage = () => {
 
   return (
     <div>
-      <EventForm onSubmit={onSubmit} defaultValues={data} isUpdating={isLoading} />
+      <EventForm onSubmit={onSubmit} defaultValues={defaultValues} isUpdating={isLoading} />
     </div>
   );
 };

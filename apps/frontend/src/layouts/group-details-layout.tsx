@@ -64,16 +64,18 @@ const GroupDetailsLayout = () => {
     );
 
   return (
-    <div>
+    <div className={'grid lg:grid-cols-[200px_1fr] xl:grid-cols-[260px_1fr] min-h-screen'}>
       <Header />
-      <main className="mx-auto max-w-[1000px] pt-[80px]">
+      <main className="mx-auto max-w-[1200px] w-full px-5">
         <div className={'rounded-b-xl bg-white shadow-md mb-10'}>
-          {groupData.bannerImage && <img src={groupData.bannerImage} className={'w-full h-[300px] object-cover'} />}
-          <div className={'px-10 py-5 flex flex-col'}>
+          {groupData.bannerImage && (
+            <img src={groupData.bannerImage} className={'w-full h-[200px] lg:h-[300px] object-cover'} />
+          )}
+          <div className={'px-5 lg:px-10 py-5 flex flex-col'}>
             <div className={'flex'}>
               <div className={'flex flex-col'}>
-                <h1 className={'text-4xl font-semibold mb-3'}>{groupData.name}</h1>
-                <p className={'text-lg text-neutral-600 mb-5'}>{groupData.description}</p>
+                <h1 className={'text-xl lg:text-4xl font-semibold mb-3'}>{groupData.name}</h1>
+                <p className={'text-md lg:text-lg text-neutral-600 mb-5'}>{groupData.description}</p>
                 <div className={'text-blue-800 bg-blue-100 px-4 py-2 rounded-full font-semibold mr-auto'}>
                   {groupData.category.name}
                 </div>
@@ -91,7 +93,9 @@ const GroupDetailsLayout = () => {
                 )}
               </div>
             </div>
-            <div className={'bg-white space-x-10 mt-20 font-semibold text-gray-700'}>
+            <div
+              className={'bg-white gap-1 lg:gap-5 mt-10 lg:mt-20 font-semibold text-gray-700 flex flex-col lg:flex-row'}
+            >
               <NavLink to={`/groups/${groupId}`} className={({ isActive }) => (isActive ? 'text-blue-500' : '')} end>
                 Strona główna
               </NavLink>

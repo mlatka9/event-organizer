@@ -77,20 +77,20 @@ const EventLayout = () => {
 
   if (!isEventSuccess) return <div>'loading...'</div>;
 
-  console.log('isShareModalOpen', isShareModalOpen);
-
   return (
-    <div className={'grid grid-cols-[260px_1fr] min-h-screen'}>
+    <div className={'grid lg:grid-cols-[200px_1fr] xl:grid-cols-[260px_1fr] min-h-screen'}>
       <Header />
-      <main className="mx-auto max-w-[1200px] w-full ">
+      <main className="mx-auto max-w-[1200px] w-full px-3 lg:px-5">
         <div className={'rounded-b-xl bg-white shadow-md mb-10'}>
-          {event.bannerImage && <img src={event.bannerImage} className={'w-full h-[300px] object-cover'} />}
-          <div className={'px-10 py-5'}>
+          {event.bannerImage && (
+            <img src={event.bannerImage} className={'w-full h-[200px] lg:h-[300px] object-cover'} />
+          )}
+          <div className={'px-5 lg:px-10 py-5'}>
             <div className={'flex w-full items-center mb-3'}>
               {event.tags.length > 0 && (
                 <div className={'flex space-x-3'}>
                   {event.tags.map((tag) => (
-                    <div className={'text-sm bg-neutral-100 px-2 py-1 rounded-md'} key={tag}>
+                    <div className={'text-xs lg:text-sm bg-neutral-100 px-2 py-1 rounded-md'} key={tag}>
                       {tag}
                     </div>
                   ))}
@@ -99,8 +99,8 @@ const EventLayout = () => {
             </div>
             <div className={'flex'}>
               <div className={'flex flex-col'}>
-                <h1 className={'text-4xl font-semibold mb-3'}>{event.name}</h1>
-                <p className={'text-lg text-neutral-600'}>{event.description}</p>
+                <h1 className={'text-xl lg:text-4xl font-semibold mb-3'}>{event.name}</h1>
+                <p className={'lg:text-lg text-neutral-600'}>{event.description}</p>
                 <div className={'mr-auto text-blue-800 bg-blue-100 px-4 py-2 rounded-full mt-5 font-semibold'}>
                   {event.categoryName}
                 </div>
@@ -118,8 +118,8 @@ const EventLayout = () => {
                 )}
               </div>
             </div>
-            <div className={'bg-white mt-20 font-semibold text-gray-700 flex'}>
-              <div className={'flex space-x-10'}>
+            <div className={'bg-white mt-10 lg:mt-20 font-semibold text-gray-700 flex flex-wrap'}>
+              <div className={'flex flex-col lg:flex-row lg:space-x-2 lg:space-x-10'}>
                 <NavLink to={`/events/${eventId}`} className={({ isActive }) => (isActive ? 'text-blue-500' : '')} end>
                   Strona główna
                 </NavLink>
@@ -141,7 +141,7 @@ const EventLayout = () => {
                 )}
               </div>
 
-              <button className={'flex ml-auto'} onClick={() => setIsShareModalOpen(true)}>
+              <button className={'flex ml-auto mt-auto'} onClick={() => setIsShareModalOpen(true)}>
                 <ShareIcon />
                 <p className={'ml-2'}>Udostępnij</p>
               </button>

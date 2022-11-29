@@ -12,9 +12,10 @@ interface EventCardProps {
   onMouseEnter?: MouseEventHandler<HTMLDivElement>;
   onMouseLeave?: MouseEventHandler<HTMLDivElement>;
   isSmall?: boolean;
+  isHorizontal?: boolean;
 }
 
-const EventCard = ({ event, onMouseEnter, onMouseLeave, isSmall }: EventCardProps) => {
+const EventCard = ({ event, onMouseEnter, onMouseLeave, isSmall, isHorizontal }: EventCardProps) => {
   const formattedDate = event.startDate
     ? [
         dayjs(event.startDate).format('D MMMM YYYY H:mm'),
@@ -39,20 +40,26 @@ const EventCard = ({ event, onMouseEnter, onMouseLeave, isSmall }: EventCardProp
 
   return (
     <div
-      className={clsx('flex shadow-md rounded-lg overflow-hidden bg-white w-full h-[170px]', isSmall && '!h-[150px]')}
+      className={clsx(
+        'flex shadow-md rounded-lg overflow-hidden bg-white w-full h-[170px]',
+        isSmall && '!h-[150px]',
+        isHorizontal && 'flex-col',
+        isSmall && isHorizontal && '!h-[180px]'
+      )}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
       <img
         src={event.bannerImage || ImageFallback}
         alt={event.name}
-        className={clsx('w-40 object-cover', isSmall && 'w-36')}
+        className={clsx('w-40 object-cover', isSmall && 'w-36', isHorizontal && '!w-full h-[70px]')}
       />
-      <div className={'flex flex-col px-5 py-3'}>
-        <p className={'text-sm text-gray-500'}>{isSmall ? smallFormattedDate : formattedDate}</p>
-        <h2 className={clsx('font-semibold mt-1', isSmall && 'text-sm')}>{event.name}</h2>
+      <div className={clsx('flex flex-col px-5 py-3 h-full', isSmall && 'px-2')}>
+        <p className={'text-sm text-gray-500 '}>{isSmall ? smallFormattedDate : formattedDate}</p>
+        <h2 className={clsx('font-semibold my-1', isSmall && 'text-sm')}>{event.name}</h2>
         <p className={clsx('text-sm', isSmall && 'hidden')}>{event.displayAddress}</p>
-        <div className={'flex items-baseline mt-auto'}>
+        {event.locationStatus === 'ONLINE' && !isSmall && <div className={'text-sm text-gray-600'}>online</div>}
+        <div className={clsx('flex items-baseline mt-auto', isSmall && isHorizontal && '!mt-auto')}>
           <UserIcon width={12} height={12} />
           <p className={clsx('text-sm ml-1', isSmall && 'text-xs')}>{event.participantsCount} uczestników</p>
         </div>

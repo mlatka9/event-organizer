@@ -10,14 +10,14 @@ interface GroupsFiltersProps {
 
 const GroupsFilters = ({ searchValue, onChangeSearch, onChangeVisibility, selectedVisibility }: GroupsFiltersProps) => {
   return (
-    <div className={'flex justify-between mb-10'}>
+    <div className={'flex flex-col lg:flex-row justify-between mb-10'}>
       <div className="relative">
         <input
           value={searchValue || ''}
           onChange={onChangeSearch}
           type="text"
           id="group-search"
-          className="w-[300px] bg-primary-100 peer block w-full appearance-none rounded-lg border-2 border-gray-300 px-2 pb-2.5 pt-4 text-sm text-gray-900 focus:border-blue-300  focus:outline-none"
+          className="w-full w-[300px] bg-primary-100 peer block w-full appearance-none rounded-lg border-2 border-gray-300 px-2 pb-2.5 pt-4 text-sm text-gray-900 focus:border-blue-300  focus:outline-none"
         />
         <label
           htmlFor="group-search"
@@ -27,7 +27,7 @@ const GroupsFilters = ({ searchValue, onChangeSearch, onChangeVisibility, select
         </label>
       </div>
 
-      <div className={'w-[270px] grid grid-cols-3 relative '}>
+      <div className={'w-full lg:w-[270px] grid grid-cols-3 relative h-10 lg:h-auto mt-3 lg:mt-0'}>
         <div
           className={clsx(
             'h-full w-1/3 bg-blue-100 rounded-md absolute transition-transform',

@@ -19,6 +19,7 @@ export interface PrivateEventType {
   name: string;
   bannerImage: string | null;
   visibilityStatus: 'PRIVATE';
+  locationStatus: 'STATIONARY' | 'ONLINE';
   displayAddress: null;
   participantsCount: null;
   startDate: null;
@@ -32,6 +33,7 @@ export interface PublicEventType {
   name: string;
   bannerImage: string | null;
   visibilityStatus: 'PUBLIC';
+  locationStatus: 'STATIONARY' | 'ONLINE';
   displayAddress: string | null;
   participantsCount: number | null;
   startDate: string | null;

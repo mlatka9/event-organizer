@@ -12,8 +12,7 @@ import useCreateEvent, { CreateEventFormType } from './use-create-event';
 import dayjs from 'dayjs';
 import { CreateEventInputType } from '@event-organizer/shared-types';
 import FormErrorMessage from '../../../components/form/form-error-message';
-
-const currentDate = dayjs().format('YYYY-MM-DD[T]hh:mm');
+import clsx from 'clsx';
 
 interface EventFormProps {
   onSubmit: (data: CreateEventFormType) => void;
@@ -35,6 +34,7 @@ const EventForm = ({ onSubmit, defaultValues, isUpdating }: EventFormProps) => {
     handleSubmit,
     handleAddTag,
     handleRemoveTag,
+    minStartDate,
   } = useCreateEvent({ defaultValues });
 
   return (
@@ -48,7 +48,7 @@ const EventForm = ({ onSubmit, defaultValues, isUpdating }: EventFormProps) => {
           </p>
         </div>
       </div>
-      <div className={'space-y-5 ml-[70px] mt-10 mb-20'}>
+      <div className={clsx('space-y-5 lg:ml-[70px] mt-10 mb-20 ')}>
         <FormInput
           label="nazwa"
           register={register}
@@ -103,7 +103,7 @@ const EventForm = ({ onSubmit, defaultValues, isUpdating }: EventFormProps) => {
               <p className={'text-gray-600'}>Pomóż innym odnaleźć twoje wydarzenie</p>
             </div>
           </div>
-          <div className={'space-y-5 ml-[70px] mt-10 mb-20'}>
+          <div className={'space-y-5 lg:ml-[70px] mt-10 mb-20'}>
             <Map markers={locationMarker} />
             <div className={'grid grid-cols-2 gap-3'}>
               <FormInput
@@ -149,14 +149,14 @@ const EventForm = ({ onSubmit, defaultValues, isUpdating }: EventFormProps) => {
           </p>
         </div>
       </div>
-      <div className={'grid grid-cols-2 ml-[70px] mt-10 mb-20 gap-3'}>
+      <div className={'grid grid-cols-2 lg:ml-[70px] mt-10 mb-20 gap-3'}>
         <div className="relative w-full">
           <input
             id={'startDate'}
             type="datetime-local"
             {...register('startDate')}
             // value={'2022-11-22T16:00'}
-            min={currentDate}
+            min={minStartDate}
             className="bg-primary-100 peer block w-full appearance-none rounded-lg border-2 border-gray-300 px-2 pb-2.5 pt-4 text-sm text-gray-900 focus:border-blue-300"
           />
           <label
@@ -173,7 +173,7 @@ const EventForm = ({ onSubmit, defaultValues, isUpdating }: EventFormProps) => {
             type="datetime-local"
             {...register('endDate')}
             // value={'2022-11-22T16:00'}
-            min={currentDate}
+            min={minStartDate}
             className="bg-primary-100 peer block w-full appearance-none rounded-lg border-2 border-gray-300 px-2 pb-2.5 pt-4 text-sm text-gray-900 focus:border-blue-300"
           />
           <label

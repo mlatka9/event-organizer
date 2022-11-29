@@ -263,6 +263,7 @@ const getAll = async (req: Request, res: Response) => {
     longitude: event.longitude ? Number(event.longitude) : null,
     bannerImage: event.bannerImage || null,
     visibilityStatus: event.eventVisibilityStatus,
+    locationStatus: event.eventLocationStatus,
   }));
 
   const publicEvents = formattedEvents.filter(isPublicEvent);

@@ -87,7 +87,7 @@ const UpdateUserModal = ({
 
   return (
     <ModalWrapper title={'Edytuj profil'} handleCloseModal={handleCloseModal}>
-      <form onSubmit={handleSubmit(onSubmit)} className={'p-5 space-y-3 flex flex-col'}>
+      <form onSubmit={handleSubmit(onSubmit)} className={'space-y-3 flex flex-col'}>
         <FormInput label={'name'} name={'name'} register={register} error={errors.name} />
         <FormInput label={'image'} name={'image'} register={register} error={errors.image} />
         <div className={'!mt-10'}>

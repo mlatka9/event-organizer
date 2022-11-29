@@ -6,6 +6,9 @@ import { useCategoriesQuery } from '../../../hooks/query/categories';
 import axios from 'axios';
 import dayjs from 'dayjs';
 
+import minMax from 'dayjs/plugin/minMax';
+dayjs.extend(minMax);
+
 const CreateEventFormSchema = createEventSchema
   .omit({ startDate: true, endDate: true })
   .extend({
@@ -75,6 +78,12 @@ const useCreateEvent = ({ defaultValues }: UseCreateEventProps = {}) => {
           : undefined,
     },
   });
+
+  const arr = [dayjs()];
+  if (defaultValues?.startDate) {
+    arr.push(dayjs(defaultValues?.startDate));
+  }
+  const minStartDate = dayjs.min(arr).format('YYYY-MM-DD[T]hh:mm');
 
   const { data, isSuccess } = useCategoriesQuery();
 
@@ -170,6 +179,7 @@ const useCreateEvent = ({ defaultValues }: UseCreateEventProps = {}) => {
     register,
     handleSubmit,
     errors,
+    minStartDate,
     resetForm: reset,
   };
 };

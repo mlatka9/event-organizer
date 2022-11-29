@@ -6,6 +6,7 @@ import Button from './button';
 import AvatarFallback from '../../assets/images/avatar-fallback.svg';
 import SettingsIcon from '../icons/settings-icon';
 import clsx from 'clsx';
+import Hamburger from './hamburger';
 
 interface HeaderProps {
   hasLoginButtons?: boolean;
@@ -15,6 +16,7 @@ const Header = ({ hasLoginButtons = true }: HeaderProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
   const [isDownDownOpen, setIsDownDownOpen] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -27,13 +29,18 @@ const Header = ({ hasLoginButtons = true }: HeaderProps) => {
     <>
       <div
         className={clsx(
-          ' bg-blue-800 p-5 flex flex-col shadow-md z-[999] w-[80%] lg:w-[200px] xl:w-[260px] h-full fixed translate-x-0 transition-transform lg:!translate-x-0',
-          isMenuOpen && '-translate-x-[100%]'
+          ' bg-blue-800 p-5 flex flex-col shadow-md z-[999] w-[80%] lg:w-[200px] xl:w-[260px] h-full fixed transition-transform -translate-x-[100%] lg:!translate-x-0 duration-300',
+          isMenuOpen && '!translate-x-0'
         )}
       >
-        <button className={'absolute -right-10 ring lg:hidden'} onClick={toggleMenu}>
-          {'XX'}
-        </button>
+        <div
+          className={clsx(
+            'absolute top-3 -right-10 lg:hidden translate-x-[12px] md:translate-x-[32px] transition-transform',
+            isMenuOpen && '!-translate-x-[50px]'
+          )}
+        >
+          <Hamburger isMenuOpen={isMenuOpen} onClick={toggleMenu} />
+        </div>
         <Link to={'/'} className={'text-xl font-semibold text-white'}>
           Organizator
         </Link>
@@ -72,7 +79,7 @@ const Header = ({ hasLoginButtons = true }: HeaderProps) => {
           )}
         </div>
       </div>
-      <div />
+      <div className={'hidden lg:block'} />
     </>
   );
 };

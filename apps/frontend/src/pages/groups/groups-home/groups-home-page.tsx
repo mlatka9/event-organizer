@@ -7,6 +7,7 @@ import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { z } from 'zod';
 import { useInView } from 'react-intersection-observer';
 import PlusIcon from '../../../components/icons/plus-icons';
+import { useAuth } from '../../../hooks/use-auth';
 
 const searchParamsSchema = z.object({
   visibility: z.enum(['PRIVATE', 'PUBLIC']).optional(),
@@ -16,6 +17,7 @@ const searchParamsSchema = z.object({
 type SearchParamsType = z.infer<typeof searchParamsSchema>;
 
 const GroupsHomePage = () => {
+  const { user } = useAuth();
   const { ref, inView } = useInView({});
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -75,16 +77,18 @@ const GroupsHomePage = () => {
   const onChangeSearch = (e: React.ChangeEvent<HTMLInputElement>) => updateParam({ search: e.target.value });
 
   return (
-    <div className={'pt-10 w-full'}>
-      <div className={'flex items-baseline mb-20'}>
+    <div className={'pt-5 w-full'}>
+      <div className={'flex-row-reverse lg:flex-row flex items-center mb-20 gap-3'}>
         <Heading>Grupy</Heading>
-        <Link
-          className={'flex items-center px-3 ml-5 text-sm bg-blue-600 text-white font-semibold py-2 rounded-md'}
-          to={'/groups/create'}
-        >
-          <PlusIcon height={12} width={12} className={'fill-white'} />
-          <span className={'ml-2'}>Utwórz nową</span>
-        </Link>
+        {user && (
+          <Link
+            className={'flex items-center px-3 ml-5 text-sm bg-blue-600 text-white font-semibold py-2 rounded-md'}
+            to={'/groups/create'}
+          >
+            <PlusIcon height={12} width={12} className={'fill-white'} />
+            <span className={'ml-2'}>Utwórz nową</span>
+          </Link>
+        )}
       </div>
       <GroupsFilters
         onChangeSearch={onChangeSearch}
@@ -102,10 +106,10 @@ const GroupsHomePage = () => {
               ))}
             </Fragment>
           ))}
-          <div ref={ref} className={'h-10 w-full bg-pink-500'} />
+          <div ref={ref} className={'h-10 w-full '} />
         </div>
       ) : (
-        <div className={'h-[1000px] bg-pink-400'} />
+        <div className={'h-[1000px]'} />
       )}
     </div>
   );

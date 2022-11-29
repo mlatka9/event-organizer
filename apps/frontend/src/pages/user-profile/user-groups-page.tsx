@@ -63,7 +63,7 @@ const UserGroupsPage = () => {
         {isGroupsSuccess &&
           groupsData.map((group) => (
             <Link to={`/groups/${group.id}`} key={group.id}>
-              <GroupCard group={group} isHorizontal />
+              <GroupCard group={group} isHorizontal isSmall />
             </Link>
           ))}
       </div>

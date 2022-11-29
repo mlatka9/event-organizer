@@ -1,7 +1,10 @@
 import ChevronDownIcon from '../../components/icons/chevron-down-icon';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
-import { useCalendar, VisibleMonthType } from './use-calendar';
+import { useCalendar } from './use-calendar';
+import useBreakpoint from 'use-breakpoint';
+
+const BREAKPOINTS = { sm: 0, md: 768, lg: 1024, xl: 1280 };
 
 interface CalendarBoardProps {
   setSelectedDate: (date: string | undefined) => void;
@@ -11,6 +14,9 @@ interface CalendarBoardProps {
 const WEEKDAYS_NAMES = ['pn', 'wt', 'śr', 'cz', 'pt', 'so', 'nd'];
 
 const CalendarBoard = ({ setSelectedDate, selectedDate }: CalendarBoardProps) => {
+  const { breakpoint } = useBreakpoint(BREAKPOINTS);
+
+  console.log('CURRENT BREAK POINT ', breakpoint);
   const { visibleMonth, handlePrevMonthClick, handleNextMonthClick, isEventsLoading } = useCalendar();
 
   const currentDate = dayjs();
@@ -21,9 +27,12 @@ const CalendarBoard = ({ setSelectedDate, selectedDate }: CalendarBoardProps) =>
   };
 
   const offsetArray = Array(visibleMonth.daysOffset).fill(0);
+
+  const isMobileBreakpoint = breakpoint === 'sm';
+
   return (
     <div className={'bg-white rounded-md shadow-md'}>
-      <div className={'py-5 flex justify-between px-8 items-center'}>
+      <div className={'py-5 flex justify-between px-2 lg:px-8 items-center'}>
         <div className={'font-semibold text-xl'}>{visibleMonth.monthName}</div>
         <div className={'space-x-3'}>
           <button
@@ -70,7 +79,7 @@ const CalendarBoard = ({ setSelectedDate, selectedDate }: CalendarBoardProps) =>
             <div
               key={date.date.date()}
               className={clsx(
-                'cursor-pointer w-full h-[150px] flex text-xl flex-col border-b border-r [&:nth-child(7n)]:border-r-0 border-neutral-100',
+                'cursor-pointer w-full h-[100px] md:h-[150px] flex text-xl flex-col border-b border-r [&:nth-child(7n)]:border-r-0 border-neutral-100',
                 isPastDate && 'text-gray-300',
                 isSelectedDate && 'outline outline-2 bg-indigo-50 !text-indigo-900 outline-indigo-500 z-10'
               )}
@@ -85,7 +94,7 @@ const CalendarBoard = ({ setSelectedDate, selectedDate }: CalendarBoardProps) =>
                 {date.date.date()}
               </div>
               <div className={'mt-auto'}>
-                {date.events.slice(0, 2).map((event) => (
+                {date.events.slice(0, isMobileBreakpoint ? 0 : 2).map((event) => (
                   <div
                     key={event.id}
                     className={clsx(
@@ -102,13 +111,13 @@ const CalendarBoard = ({ setSelectedDate, selectedDate }: CalendarBoardProps) =>
                     ></div>
                   </div>
                 ))}
-                {date.events.length > 2 && (
+                {date.events.length > (isMobileBreakpoint ? 0 : 2) && (
                   <div
                     className={clsx(
                       'text-xs rounded-sm bg-red-50 text-red-500 font-semibold p-1 pl-2 m-1 relative overflow-hidden'
                     )}
                   >
-                    {date.events.length - 2} wiecej
+                    {date.events.length - (isMobileBreakpoint ? 0 : 2)} {!isMobileBreakpoint && 'wiecej'}
                     <div className={'absolute w-[2px] h-full left-0 top-0 bg-red-300'}></div>
                   </div>
                 )}

@@ -106,13 +106,13 @@ const EventsPage = () => {
   if (!isCategoriesSuccess || !isEventsSuccess) return <div>Loading..</div>;
 
   return (
-    <div className={'mt-10'}>
-      <div className={'flex items-center justify-between mb-20'}>
+    <div className={'mt-5 lg:mt-10'}>
+      <div className={'flex items-center flex-row-reverse gap-3 lg:flex-row mb-20'}>
         <h1 className={'font-semibold text-3xl '}>Wydarzenia</h1>
         {user && (
           <Link
             to={'/events/create'}
-            className={'block flex bg-blue-600 text-white hover:bg-blue-500 items-center px-4 py-2 rounded-md'}
+            className={'flex items-center px-3 ml-5 text-sm bg-blue-600 text-white font-semibold py-2 rounded-md'}
           >
             <PlusIcon width={14} height={14} className={'mr-3 fill-white'} />
             Utwórz nowe
@@ -120,8 +120,8 @@ const EventsPage = () => {
         )}
       </div>
 
-      <div className={'flex mb-10 w-full items-center flex-wrap'}>
-        <div className={'z-1 w-[300px]'}>
+      <div className={'flex flex-col lg:flex-row lg:items-center mb-10 w-full flex-wrap space-y-2 lg:space-y-0'}>
+        <div className={'z-1 lg:w-[300px]'}>
           <AsyncSelect
             cacheOptions
             defaultOptions
@@ -134,7 +134,7 @@ const EventsPage = () => {
           />
         </div>
         <select
-          className={'border-2 rounded px-3 py-[6px] ml-3 cursor-pointer'}
+          className={'border-2 rounded px-3 py-[7px] cursor-pointer lg:ml-2'}
           value={selectedCategory}
           onChange={(v) => {
             updateParam('category', v.target.value === 'wszystkie kategorie' ? undefined : v.target.value);
@@ -145,39 +145,39 @@ const EventsPage = () => {
             <option key={c.name}>{c.name}</option>
           ))}
         </select>
-        <div className={'flex space-x-1 ml-2'}>
-          {locationStatus && (
-            <FilterTile
-              label={filtersMap.locationStatus[locationStatus]}
-              handleRemove={() => updateParam('locationStatus', undefined)}
-            />
-          )}
-          {timeRange && (
-            <FilterTile
-              label={filtersMap.timeRange[timeRange]}
-              handleRemove={() => updateParam('timeRange', undefined)}
-            />
-          )}
+        <div className={'flex items-center lg:flex-row-reverse lg:ml-auto'}>
+          <button
+            className={
+              'lg:ml-2 flex items-center mr-auto lg:ml-auto ring-1 bg-white rounded-full ring-gray-300 px-5 text-gray-500 py-3 hover:ring-gray-300 hover:text-gray-900 transition-all'
+            }
+            onClick={() => setIsFilterModalOpen(true)}
+          >
+            <FilterIcon width={15} height={15} /> <span className={'ml-2'}>więcej filtrów</span>
+          </button>
+          <div className={'flex space-x-1 ml-2'}>
+            {locationStatus && (
+              <FilterTile
+                label={filtersMap.locationStatus[locationStatus]}
+                handleRemove={() => updateParam('locationStatus', undefined)}
+              />
+            )}
+            {timeRange && (
+              <FilterTile
+                label={filtersMap.timeRange[timeRange]}
+                handleRemove={() => updateParam('timeRange', undefined)}
+              />
+            )}
+          </div>
         </div>
-
-        <button
-          className={
-            'flex items-center ml-auto ring-1 bg-white rounded-full ring-gray-300 px-5 text-gray-500 py-3 hover:ring-gray-300 hover:text-gray-900 transition-all'
-          }
-          onClick={() => setIsFilterModalOpen(true)}
-        >
-          <FilterIcon width={15} height={15} /> <span className={'ml-2'}>więcej filtrów</span>
-        </button>
         {isFilterModalOpen && (
           <FiltersModal
             defaultLocationStatus={locationStatus || 'all'}
-            // defaultVisibilityStatus={visibilityStatus || 'all'}
             defaultTimeRange={timeRange || 'all'}
             handleCloseModal={() => setIsFilterModalOpen(false)}
           />
         )}
       </div>
-      <div className={'grid grid-cols-2 gap-3'}>
+      <div className={'grid lg:grid-cols-2 gap-3'}>
         <div className={'space-y-3'}>
           {eventsData.events.map((event) => {
             return (
