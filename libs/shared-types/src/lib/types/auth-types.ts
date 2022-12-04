@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { credentialsSchema } from '../schemas';
+import { credentialsSchema, registerSchema } from '../schemas';
 
 export interface SessionUserType {
   userId: string;
@@ -14,3 +14,4 @@ export interface SessionType {
 }
 
 export type CredentialsType = z.infer<typeof credentialsSchema>;
+export type RegisterInputType = z.infer<typeof registerSchema>;

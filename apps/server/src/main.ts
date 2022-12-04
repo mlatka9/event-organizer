@@ -16,6 +16,8 @@ import * as morgan from 'morgan';
 import * as dotenv from 'dotenv';
 import { isLoggedMiddleware } from './middlewares/is-logged';
 
+import { Server } from 'socket.io';
+
 dotenv.config();
 
 const app = express();
@@ -61,5 +63,7 @@ const server = app.listen(port, () => {
   console.log(__dirname);
   console.log(`Listening at http://localhost:${port}/`);
 });
+
+const io = new Server(server, {});
 
 server.on('error', console.error);

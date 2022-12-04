@@ -28,3 +28,12 @@ export const createGroupInvitationSchema = z.object({
 export const shareEventSchema = z.object({
   eventId: z.string().min(1, 'eventId is required'),
 });
+
+export const getGroupMessagesQueryParamsSchema = z.object({
+  cursor: z.string().optional(),
+  limit: z.preprocess((val) => val && Number(val), z.number().positive().optional()),
+});
+
+export const createGroupMessageSchema = z.object({
+  content: z.string(),
+});

@@ -842,6 +842,11 @@ const getGroupsToShare = async (req: Request, res: Response) => {
         contains: body.phrase,
         mode: 'insensitive',
       },
+      members: {
+        some: {
+          userId: loggedUser,
+        },
+      },
       eventsShared: {
         none: {
           eventId,

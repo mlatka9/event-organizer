@@ -45,6 +45,7 @@ const getEvents = async (
       city: args.city,
       locationStatus: args.locationStatus,
       timeRange: args.timeRange,
+      limit: 4,
     },
   });
 

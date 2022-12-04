@@ -10,9 +10,11 @@ import { useRegisterMutation } from '../../hooks/mutation/auth';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import concertImage from '../../assets/images/concert.jpg';
 import { useAuth } from '../../hooks/use-auth';
+import { APIError } from '../../libs/api/types';
 
 const schema = z
   .object({
+    name: z.string().min(5, { message: 'Imię musi mieć co najmniej 5 znaków' }),
     email: z.string().email({ message: 'Wprowadz poprawny adres email' }),
     password: z.string().min(6, { message: 'Hasło musi miec co najmniej 6 znaków' }),
     confirmPassword: z.string().min(6, { message: 'Hasło musi miec co najmniej 6 znaków' }),
@@ -36,6 +38,7 @@ const RegisterPage = () => {
   } = useForm<RegisterFormInput>({
     resolver: zodResolver(schema),
     defaultValues: {
+      name: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -51,13 +54,19 @@ const RegisterPage = () => {
     },
     onError: (err) => {
       if (err.response?.status === 409) {
-        setError('email', { message: 'Użytkownik z takim adresem email już istnieje' }, { shouldFocus: true });
+        if (err.response.data.message?.includes('email')) {
+          setError('email', { message: 'Użytkownik z takim adresem email już istnieje' }, { shouldFocus: true });
+        }
+        if (err.response.data.message?.includes('name')) {
+          setError('name', { message: 'Użytkownik z taka mazwą już istnieje' }, { shouldFocus: true });
+        }
       }
     },
   });
 
   const onSubmit = async (data: RegisterFormInput) => {
     await registerUser({
+      name: data.name,
       email: data.email,
       password: data.password,
     });
@@ -84,6 +93,7 @@ const RegisterPage = () => {
             </Link>
           </p>
           <form onSubmit={handleSubmit(onSubmit)} className={'flex flex-col space-y-3'}>
+            <FormInput label={'nazwa użytkownika'} name={'name'} register={register} error={errors.name} />
             <FormInput
               label={'email'}
               name={'email'}

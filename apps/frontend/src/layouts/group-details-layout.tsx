@@ -39,7 +39,7 @@ const GroupDetailsLayout = () => {
           {user ? (
             <JoinGroupRequestModal groupId={groupId} userId={user.userId} />
           ) : (
-            <div>Wydarzenie jest prywatne musisz się zalogowac</div>
+            <div>Grupa jest prywatna musisz się zalogować</div>
           )}
         </div>
       </div>
@@ -59,7 +59,7 @@ const GroupDetailsLayout = () => {
     return (
       <div>
         <Header />
-        <div className={'mt-40 mx-auto w-full'}>loading... 123123</div>
+        <div className={'mx-auto w-full'}>loading... 123123</div>
       </div>
     );
 

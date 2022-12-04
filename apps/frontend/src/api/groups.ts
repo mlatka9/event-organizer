@@ -1,9 +1,12 @@
 import {
   CreateEventInvitationInputType,
   CreateGroupInputType,
+  createGroupMessageInputType,
   EventInvitationType,
   GetAllGroupsQueryParamsType,
   GetAllGroupsReturnType,
+  GetGroupMessagesQueryParamsType,
+  GetGroupMessagesReturnType,
   GroupDetailsType,
   GroupInvitationType,
   GroupMember,
@@ -28,6 +31,17 @@ const getGroups = async (params: GetAllGroupsQueryParamsType): Promise<GetAllGro
   return data;
 };
 
+const getGroupMessages = async ({
+  groupId,
+  ...params
+}: GetGroupMessagesQueryParamsType & { groupId: string }): Promise<GetGroupMessagesReturnType> => {
+  const { data } = await api.get(`/groups/${groupId}/messages`, {
+    params,
+    withCredentials: true,
+  });
+  return data;
+};
+
 const getGroupDetails = async (groupId: string): Promise<GroupDetailsType> => {
   const { data } = await api.get(`/groups/${groupId}`, {
     withCredentials: true,
@@ -39,6 +53,19 @@ const joinGroup = async ({ groupId, userId }: { groupId: string; userId: string 
   const { data } = await api.post(`/groups/${groupId}/users/${userId}`, null, {
     withCredentials: true,
   });
+  return data;
+};
+
+const createGroupMessage = async ({ content, groupId }: createGroupMessageInputType & { groupId: string }) => {
+  const { data } = await api.post(
+    `/groups/${groupId}/messages`,
+    {
+      content,
+    },
+    {
+      withCredentials: true,
+    }
+  );
   return data;
 };
 
@@ -139,6 +166,8 @@ const groupsAPI = {
   getAllGroupInvitation,
   getSharedEvents,
   shareEvent,
+  getGroupMessages,
+  createGroupMessage,
 };
 
 export default groupsAPI;

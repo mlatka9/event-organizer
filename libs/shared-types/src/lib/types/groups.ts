@@ -1,9 +1,17 @@
 import { z } from 'zod';
-import { createGroupSchema, getAllGroupsQueryParamsSchema, shareEventSchema } from '../schemas/groups';
+import {
+  createGroupMessageSchema,
+  createGroupSchema,
+  getAllGroupsQueryParamsSchema,
+  getGroupMessagesQueryParamsSchema,
+  shareEventSchema,
+} from '../schemas/groups';
 
 export type CreateGroupInputType = z.infer<typeof createGroupSchema>;
 export type GetAllGroupsQueryParamsType = z.infer<typeof getAllGroupsQueryParamsSchema>;
 export type ShareEventInputType = z.infer<typeof shareEventSchema>;
+export type GetGroupMessagesQueryParamsType = z.infer<typeof getGroupMessagesQueryParamsSchema>;
+export type createGroupMessageInputType = z.infer<typeof createGroupMessageSchema>;
 
 export interface GroupShowcaseType {
   id: string;
@@ -26,6 +34,22 @@ export interface GroupType {
 
 export interface GetAllGroupsReturnType {
   groups: GroupShowcaseType[];
+  cursor: string | null;
+}
+
+export interface GroupMessageType {
+  id: string;
+  content: string;
+  createdAt: string;
+  author: {
+    id: string;
+    name: string;
+    image: string | null;
+  };
+}
+
+export interface GetGroupMessagesReturnType {
+  messages: GroupMessageType[];
   cursor: string | null;
 }
 

@@ -5,6 +5,7 @@ import Button from '../../../components/common/button';
 import { useCreateEventInvitationMutation } from '../../../hooks/mutation/events';
 import { useSearchUsersToInviteQuery } from '../../../hooks/query/events';
 import CloseIcon from '../../../components/icons/close-icon';
+import AvatarFallback from '../../../assets/images/avatar-fallback.svg';
 
 interface EventInviteModalProps {
   handleCloseModal: () => void;
@@ -50,13 +51,13 @@ const EventInviteModal = ({ handleCloseModal, eventId }: EventInviteModalProps) 
             onChange={({ target }) => setInputValue(target.value)}
             className={'border w-full mb-3'}
           />
-          <div>
+          <div className={'flex flex-col space-y-3'}>
             {isSuccess &&
               data.map((user) => {
                 const isUserSelected = selectedUsers.some((u) => u.id === user.id);
                 return (
                   <div key={user.id} className={'flex items-center'}>
-                    <img src={user.image || '/images/avatar-fallback.svg'} className={'w-10 h-10 rounded-full'} />
+                    <img src={user.image || AvatarFallback} className={'w-10 h-10 rounded-full'} />
                     <p className={'ml-3'}>{user.name}</p>
                     <Button
                       isSmall
@@ -73,10 +74,10 @@ const EventInviteModal = ({ handleCloseModal, eventId }: EventInviteModalProps) 
         </div>
         <div>
           <p className={'mb-3'}>Wybrano {selectedUsers.length} osób</p>
-          <div>
+          <div className={'space-y-3'}>
             {selectedUsers.map((user) => (
-              <div key={user.id} className={'flex items-center'}>
-                <img src={user.image || '/images/avatar-fallback.svg'} className={'w-10 h-10 rounded-full'} />
+              <div key={user.id} className={'flex items-center '}>
+                <img src={user.image || AvatarFallback} className={'w-10 h-10 rounded-full'} />
                 <p className={'ml-3'}>{user.name}</p>
                 <button onClick={() => handleUnselectUser(user.id)} className={'ml-auto'}>
                   <CloseIcon />

@@ -2,6 +2,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import groupsAPI from '../../api/groups';
 import {
   GetAllGroupsQueryParamsType,
+  GetGroupMessagesQueryParamsType,
   GroupDetailsType,
   SearchUserToEventInvitationInputType,
 } from '@event-organizer/shared-types';
@@ -21,6 +22,39 @@ export const useGroupsQuery = ({
       });
     },
     {
+      getNextPageParam: (lastPage) => lastPage.cursor,
+      retry: false,
+      keepPreviousData: true,
+      enabled,
+    }
+  );
+};
+
+export const useGroupMessagesQuery = ({
+  enabled,
+  limit,
+  groupId,
+  onSuccess,
+}: Omit<GetGroupMessagesQueryParamsType, 'cursor'> & {
+  enabled?: boolean;
+  groupId: string;
+  onSuccess?: () => void;
+}) => {
+  return useInfiniteQuery(
+    ['group-messages', limit],
+    ({ pageParam }) => {
+      return groupsAPI.getGroupMessages({
+        groupId,
+        limit,
+        cursor: pageParam,
+      });
+    },
+    {
+      // select: (data) => ({
+      //   pages: [...data.pages].reverse(),
+      //   pageParams: [...data.pageParams].reverse(),
+      // }),
+      onSuccess,
       getNextPageParam: (lastPage) => lastPage.cursor,
       retry: false,
       keepPreviousData: true,

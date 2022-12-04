@@ -24,6 +24,7 @@ model User {
   pendingEventInvitations EventInvitation[]
   pendingGroupInvitations GroupInvitation[]
   eventsSharedInGroups    EventSharedInGroup[]
+  GroupMessages           GroupMessage[]
 }
 
 model UserFavouriteCategories {
@@ -71,6 +72,7 @@ model Group {
   category                 Category             @relation(fields: [categoryId], references: [id])
   visibility               GroupVisibility
   pendingMemberInvitations GroupInvitation[]
+  GroupMessages            GroupMessage[]
 }
 
 model EventSharedInGroup {
@@ -118,6 +120,16 @@ model Category {
   events            Event[]
   favouritedByUsers UserFavouriteCategories[]
   group             Group[]
+}
+
+model GroupMessage {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+  groupId   String
+  group     Group    @relation(fields: [groupId], references: [id])
 }
 
 model EventInvitation {

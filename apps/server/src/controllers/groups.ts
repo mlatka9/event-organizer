@@ -1,18 +1,17 @@
 import { Request, Response } from 'express';
 import {
-  CreateEventInvitationInputType,
-  createEventInvitationSchema,
   createGroupInvitationSchema,
+  createGroupMessageSchema,
   createGroupSchema,
-  EventInvitationType,
-  EventShowcaseType,
   getAllGroupsQueryParamsSchema,
   GetAllGroupsReturnType,
+  getGroupMessagesQueryParamsSchema,
+  GetGroupMessagesReturnType,
   GroupDetailsType,
   GroupInvitationType,
   GroupMember,
+  GroupMessageType,
   GroupShowcaseType,
-  PublicEventType,
   searchUserToEventInvitationSchema,
   SharedEventType,
   shareEventSchema,
@@ -26,8 +25,6 @@ import { ConflictError } from '../errors/conflict';
 import { NotFoundError } from '../errors/not-found';
 import { formatDisplayAddress } from '../lib/format-display-address';
 import { getLoginSession } from '@event-organizer/auth';
-import { log } from 'util';
-import user from '../routes/user';
 
 const getAllGroups = async (req: Request, res: Response) => {
   const validation = getAllGroupsQueryParamsSchema.safeParse(req.query);
@@ -35,6 +32,7 @@ const getAllGroups = async (req: Request, res: Response) => {
     const errorMessage = generateErrorMessage(validation.error.issues);
     throw new ValidationError(errorMessage);
   }
+
   const {
     data: { name, cursor, limit = 4, visibility },
   } = validation;
@@ -337,10 +335,10 @@ const removeMember = async (req: Request, res: Response) => {
 };
 
 const getGroupMembers = async (req: Request, res: Response) => {
-  const loggedUserId = req.userId;
-  if (!loggedUserId) {
-    throw new Error('No userId in req object');
-  }
+  // const loggedUserId = req.userId;
+  // if (!loggedUserId) {
+  //   throw new Error('No userId in req object');
+  // }
 
   const groupId = req.params.groupId;
 
@@ -809,6 +807,114 @@ const getAllSharedEvents = async (req: Request, res: Response) => {
   res.json(result);
 };
 
+const getGroupMessages = async (req: Request, res: Response) => {
+  const groupId = req.params.groupId;
+
+  const groupCount = await prisma.group.count({
+    where: {
+      id: groupId,
+    },
+  });
+
+  if (!groupCount) {
+    throw new ValidationError(`No group with id ${groupId}`);
+  }
+
+  const validation = getGroupMessagesQueryParamsSchema.safeParse(req.query);
+
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+
+  const { limit = 10, cursor } = validation.data;
+
+  const messages = await prisma.groupMessage.findMany({
+    take: limit + 1,
+    cursor: cursor
+      ? {
+          id: cursor,
+        }
+      : undefined,
+    where: {
+      groupId,
+    },
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+        },
+      },
+    },
+    orderBy: [
+      {
+        createdAt: 'desc',
+      },
+    ],
+  });
+
+  const isNextPage = messages.length > limit;
+  const messagesToFormat = isNextPage ? messages.slice(0, -1) : messages;
+  const nextCursor = isNextPage ? messages[messages.length - 1]?.id : null;
+
+  const formattedMessages: GroupMessageType[] = messagesToFormat.map((m) => ({
+    id: m.id,
+    content: m.content,
+    createdAt: new Date(m.createdAt).toISOString(),
+    author: {
+      id: m.author.id,
+      name: m.author.name,
+      image: m.author.image,
+    },
+  }));
+
+  const result: GetGroupMessagesReturnType = {
+    messages: formattedMessages,
+    cursor: nextCursor,
+  };
+
+  res.json(result);
+};
+
+const createGroupMessage = async (req: Request, res: Response) => {
+  const loggedUserId = req.userId;
+  if (!loggedUserId) {
+    throw new Error('no userId in req object');
+  }
+  const groupId = req.params.groupId;
+
+  const groupCount = await prisma.group.count({
+    where: {
+      id: groupId,
+    },
+  });
+
+  if (!groupCount) {
+    throw new ValidationError(`No group with id ${groupId}`);
+  }
+
+  const validation = createGroupMessageSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+
+  const { content } = validation.data;
+
+  const message = await prisma.groupMessage.create({
+    data: {
+      groupId,
+      content,
+      authorId: loggedUserId,
+    },
+  });
+
+  res.status(201).json(message);
+};
+
 export default {
   getGroupMembers,
   getGroupDetails,
@@ -823,4 +929,6 @@ export default {
   getAllGroupInvitation,
   shareEvent,
   getAllSharedEvents,
+  getGroupMessages,
+  createGroupMessage,
 };

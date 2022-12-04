@@ -17,9 +17,8 @@ export const useAddParticipantMutation = (eventId: string, onSuccess?: () => voi
   const queryClient = useQueryClient();
   return useMutation(eventsAPI.addParticipant, {
     onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ['event', eventId],
-      });
+      await queryClient.invalidateQueries(['event', eventId]);
+      await queryClient.invalidateQueries(['event-participants']);
       onSuccess && onSuccess();
     },
   });
@@ -30,9 +29,8 @@ export const useRemoveParticipantMutation = (eventId: string, onSuccess?: () => 
   const queryClient = useQueryClient();
   return useMutation(eventsAPI.removeParticipant, {
     onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ['event', eventId],
-      });
+      await queryClient.invalidateQueries(['event', eventId]);
+      await queryClient.invalidateQueries(['event-participants']);
       onSuccess && onSuccess();
     },
   });

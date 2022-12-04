@@ -5,7 +5,7 @@ import { removeTokenCookie } from '@event-organizer/auth';
 import { prisma } from '@event-organizer/prisma-client';
 import { createUser } from '../lib/user';
 import { UnauthenticatedError, ValidationError } from '../errors';
-import { SessionType, SessionUserType } from '@event-organizer/shared-types';
+import { registerSchema, SessionType, SessionUserType } from '@event-organizer/shared-types';
 import { credentialsSchema } from '@event-organizer/shared-types';
 import { generateErrorMessage } from 'zod-error';
 
@@ -21,15 +21,15 @@ const authenticate = (method: string, req: Request, res: Response) =>
   });
 
 const register = async (req: Request, res: Response) => {
-  const validation = credentialsSchema.safeParse(req.body);
+  const validation = registerSchema.safeParse(req.body);
 
   if (!validation.success) {
     const errorMessage = generateErrorMessage(validation.error.issues);
     throw new ValidationError(errorMessage);
   }
 
-  const { email, password } = validation.data;
-  await createUser(email, password);
+  const { email, password, name } = validation.data;
+  await createUser(email, password, name);
   res.status(201).end();
 };
 

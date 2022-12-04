@@ -16,16 +16,20 @@ const SharedEventCard = ({ event }: SharedEventCardProps) => {
         </p>
         <h2 className={'font-semibold '}>{event.name}</h2>
         <p className={'text-sm'}>{event.displayAddress}</p>
-        <div className={'flex justify-between mt-auto'}>
+        <div className={'lg:flex justify-between mt-auto'}>
           <p className={'text-sm '}>bierze udział: {event.participantsCount}</p>
-          <div className={'flex items-center'}>
-            <span className={'mr-3'}>Udostępnił</span>
-            {event.sharedBy.map((user) => (
-              <div className={'flex items-center'}>
-                <img src={user.image || ImageFallback} alt={user.name} className={'w-6 h-6 rounded-full mr-1'} />
-                <span>{user.name}</span>
+          <div className={'flex items-center gap-x-1 text-sm flex-wrap'}>
+            <span>Udostępnił: </span>
+            {event.sharedBy.slice(0, 2).map((user) => (
+              <div className={'flex items-center'} key={user.id}>
+                <img src={user.image || ImageFallback} alt={user.name} className={'w-6 h-6 rounded-full'} />
               </div>
             ))}
+            {event.sharedBy.length > 2 && (
+              <span className={'w-6 h-6 rounded-full bg-gray-800 text-white flex items-center justify-center'}>
+                +{event.sharedBy.length - 2}
+              </span>
+            )}
           </div>
         </div>
       </div>

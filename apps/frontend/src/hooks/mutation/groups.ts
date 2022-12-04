@@ -60,3 +60,13 @@ export const useShareEventMutation = (onSuccess?: () => void) => {
     },
   });
 };
+
+export const useCreateGroupMessageMutation = (onSuccess?: () => void) => {
+  const queryClient = useQueryClient();
+  return useMutation(groupsAPI.createGroupMessage, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['group-messages']);
+      onSuccess && onSuccess();
+    },
+  });
+};

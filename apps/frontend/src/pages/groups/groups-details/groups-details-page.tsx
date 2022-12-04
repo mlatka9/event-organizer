@@ -1,11 +1,14 @@
 import { useGroupDetails } from '../../../layouts/group-details-layout';
 import AvatarFallback from '../../../assets/images/avatar-fallback.svg';
+import GroupChat from './group-chat';
 
 const GroupsDetailsPage = () => {
   const { groupData } = useGroupDetails();
   return (
-    <div className={'grid grid-cols-[3fr_2fr]'}>
-      <div>content</div>
+    <div className={'grid lg:grid-cols-[3fr_2fr] gap-5 mb-20'}>
+      <div>
+        <GroupChat groupId={groupData.id} />
+      </div>
       <div>
         <div className={'rounded-2xl shadow-md bg-white'}>
           <div className={'p-3'}>

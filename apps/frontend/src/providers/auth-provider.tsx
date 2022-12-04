@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       .catch((e) => {
         setIsLoading(false);
       });
-  }, []);
+  }, [count]);
 
   const login = async ({
     onSuccess,

@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet, useOutletContext, useParams } from 'react-router-dom';
+import { NavLink, Outlet, useOutletContext, useParams } from 'react-router-dom';
 import { useAuth } from '../hooks/use-auth';
 import { useEventInfoQuery } from '../hooks/query/events';
 import { useAddParticipantMutation, useRemoveParticipantMutation } from '../hooks/mutation/events';
@@ -10,11 +10,17 @@ import { toast } from 'react-toastify';
 import ShareIcon from '../components/icons/share-icon';
 import { useState } from 'react';
 import ShareEventModal from '../pages/events/event-details/share-event-modal';
+import UserIcon from '../components/icons/user-icon';
+import LinkIcon from '../components/icons/link-icon';
+import { copyToClipboard } from '../libs/copy-to-clipboard';
 
 const EventLayout = () => {
   const params = useParams();
   const { user } = useAuth();
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isSharePopupOpen, setIsSharePopupOpen] = useState(false);
+
+  const toggleSharePopup = () => setIsSharePopupOpen(!isSharePopupOpen);
 
   const eventId = params['id'] as string;
 
@@ -36,6 +42,7 @@ const EventLayout = () => {
     eventId,
     onAddParticipantSuccess
   );
+
   const { mutate: removeParticipant, isLoading: isRemoveParticipantLoading } = useRemoveParticipantMutation(
     eventId,
     onRemoveParticipantSuccess
@@ -49,6 +56,15 @@ const EventLayout = () => {
   const handleRemoveParticipant = () => {
     if (!user?.userId) return;
     removeParticipant({ userId: user.userId, eventId });
+  };
+
+  const handleCopyToClipboard = async () => {
+    const isSuccess = await copyToClipboard(`${window.location.href.split('events')[0]}events/${eventId}`);
+    if (isSuccess) {
+      toast('Skopiowano link do wydarzenia do schowka', {
+        type: 'success',
+      });
+    }
   };
 
   if (isError && error?.response?.status === 401) {
@@ -75,7 +91,13 @@ const EventLayout = () => {
     );
   }
 
-  if (!isEventSuccess) return <div>'loading...'</div>;
+  if (!isEventSuccess)
+    return (
+      <div>
+        <Header />
+        <div className={'p-20 max-w-[1000px] mx-auto rounded-md'}>Ładowanie...</div>
+      </div>
+    );
 
   return (
     <div className={'grid lg:grid-cols-[200px_1fr] xl:grid-cols-[260px_1fr] min-h-screen'}>
@@ -140,11 +162,41 @@ const EventLayout = () => {
                   </NavLink>
                 )}
               </div>
-
-              <button className={'flex ml-auto mt-auto'} onClick={() => setIsShareModalOpen(true)}>
-                <ShareIcon />
-                <p className={'ml-2'}>Udostępnij</p>
-              </button>
+              <div className={'relative ml-auto'}>
+                <button className={'flex ml-auto mt-auto'} onClick={toggleSharePopup}>
+                  <ShareIcon />
+                  <p className={'ml-2'}>Udostępnij</p>
+                </button>
+                {isSharePopupOpen && (
+                  <div
+                    className={
+                      'absolute bg-white  rounded-md shadow-md w-[250px] -bottom-[120px] -right-5 lg:-right-10 overflow-hidden'
+                    }
+                  >
+                    <button
+                      className={'hover:bg-blue-50 p-3 w-full flex items-center group transition-colors'}
+                      onClick={handleCopyToClipboard}
+                    >
+                      <LinkIcon className={'group-hover:fill-blue-900 transition-all'} />
+                      <span className={'ml-2 text-gray-500 group-hover:text-blue-900 transition-all '}>
+                        pobierz link
+                      </span>
+                    </button>
+                    <button
+                      className={'hover:bg-blue-50 p-3 w-full flex items-center group transition-colors'}
+                      onClick={() => {
+                        setIsSharePopupOpen(false);
+                        setIsShareModalOpen(true);
+                      }}
+                    >
+                      <UserIcon className={'group-hover:fill-blue-900 transition-all'} />
+                      <span className={'ml-2 text-gray-500 group-hover:text-blue-900 transition-all'}>
+                        Udostępnij na grupie
+                      </span>
+                    </button>
+                  </div>
+                )}
+              </div>
               {isShareModalOpen && (
                 <ShareEventModal eventId={eventId} handleCloseModal={() => setIsShareModalOpen(false)} />
               )}

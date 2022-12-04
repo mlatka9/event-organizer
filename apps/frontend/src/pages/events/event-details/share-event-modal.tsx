@@ -29,7 +29,11 @@ const ShareEventModal = ({ handleCloseModal, eventId }: ShareEventModalProps) =>
           }}
         />
         <div>
-          <ul>{isSuccess && data.map((group) => <ShareEventItem eventId={eventId} group={group} key={group.id} />)}</ul>
+          <ul>
+            {isSuccess && data.length > 0
+              ? data.map((group) => <ShareEventItem eventId={eventId} group={group} key={group.id} />)
+              : 'Nie jesteś członkiem żadnych grup na których możesz udostępnić do wydarzenie'}
+          </ul>
         </div>
       </div>
     </ModalWrapper>

@@ -12,6 +12,8 @@ const GroupsMembersPage = () => {
 
   const { groupData } = useGroupDetails();
 
+  console.log('groupData', groupData);
+
   const { data: members, isSuccess: isMembersSuccess } = useGroupMembersQuery({ groupId });
 
   if (!isMembersSuccess) return <div>'members loading...'</div>;

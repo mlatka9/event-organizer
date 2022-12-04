@@ -1,10 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
-import { AxiosError } from 'axios';
 import authAPI from '../../api/auth';
+import { APIError } from '../../libs/api/types';
 
 interface UseRegisterMutationProps {
   onSuccess?: () => void;
-  onError?: (error: AxiosError) => void;
+  onError?: (error: APIError) => void;
 }
 
 export const useRegisterMutation = ({ onError, onSuccess }: UseRegisterMutationProps) => {
