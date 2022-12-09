@@ -23,6 +23,11 @@ protectedRouter.post('/:eventId/invitation/search-users', eventsRouter.searchUse
 protectedRouter.get('/:eventId/invitation', eventsRouter.getAllEventInvitation);
 
 protectedRouter.post('/:eventId/shared-events/group-list', eventsRouter.getGroupsToShare);
+protectedRouter.post('/:eventId/date-poll', eventsRouter.createDatePoll);
+protectedRouter.delete('/:eventId/date-poll', eventsRouter.hideDatePoll);
+protectedRouter.get('/:eventId/date-poll', eventsRouter.getDatePoll);
+protectedRouter.post('/:eventId/date-poll/:datePollId/create-option', eventsRouter.createDatePollOption);
+protectedRouter.patch('/:eventId/date-poll/:datePollId/toggle-select', eventsRouter.toggleDatePollOption);
 
 const router = {
   publicRouter,

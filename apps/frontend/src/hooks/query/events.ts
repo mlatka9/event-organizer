@@ -75,3 +75,10 @@ export const useGroupsToShareEventQuery = ({
     }
   );
 };
+
+export const useGetEventDatePoll = ({ eventId, enabled = true }: { eventId: string; enabled?: boolean }) => {
+  return useQuery(['event-date-poll', eventId], () => eventsAPI.getEventDatePoll({ eventId }), {
+    retry: false,
+    enabled,
+  });
+};

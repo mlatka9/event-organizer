@@ -1,10 +1,12 @@
 import { z } from 'zod';
 import {
+  createDatePollOptionSchema,
   createEventInvitationSchema,
   createEventSchema,
   getAllEventsSchema,
   searchGroupsToShareEventSchema,
   searchUserToEventInvitationSchema,
+  toggleDatePollSchema,
 } from '../schemas';
 import { EventRole } from '@prisma/client';
 
@@ -13,6 +15,8 @@ export type GetAllEventsInputType = z.infer<typeof getAllEventsSchema>;
 export type CreateEventInvitationInputType = z.infer<typeof createEventInvitationSchema>;
 export type SearchUserToEventInvitationInputType = z.infer<typeof searchUserToEventInvitationSchema>;
 export type SearchGroupsToShareEventInputType = z.infer<typeof searchGroupsToShareEventSchema>;
+export type ToggleDatePollSchemaInputType = z.infer<typeof toggleDatePollSchema>;
+export type CreateDatePollOptionInputType = z.infer<typeof createDatePollOptionSchema>;
 
 export interface PrivateEventType {
   id: string;
@@ -76,6 +80,7 @@ export interface EventDetailsType {
   tags: string[];
   eventVisibilityStatus: 'PRIVATE' | 'PUBLIC';
   eventLocationStatus: 'STATIONARY' | 'ONLINE';
+  isDatePollEnabled: boolean;
 }
 
 export interface EventInvitationType {
@@ -117,4 +122,23 @@ export interface EventParticipant {
   name: string;
   image: string | null;
   role: EventParticipantRole;
+}
+
+export interface EventDatePollOptionType {
+  id: string;
+  startDate: string;
+  endDate: string | null;
+  isSelected: boolean;
+  userCount: number;
+  showCaseUsers: {
+    id: string;
+    name: string;
+    image: string | null;
+  }[];
+}
+
+export interface EventDatePollType {
+  id: string;
+  isEnabled: boolean;
+  options: EventDatePollOptionType[];
 }

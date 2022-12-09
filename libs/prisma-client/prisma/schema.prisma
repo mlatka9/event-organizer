@@ -12,19 +12,20 @@ datasource db {
 }
 
 model User {
-  id                      String                    @id @default(cuid())
-  email                   String                    @unique
-  name                    String                    @unique
-  hashPassword            String
-  eventParticipants       EventParticipant[]
-  image                   String?
-  groups                  UsersInGroup[]
-  favouriteCategories     UserFavouriteCategories[]
-  joinedAt                DateTime                  @default(now())
-  pendingEventInvitations EventInvitation[]
-  pendingGroupInvitations GroupInvitation[]
-  eventsSharedInGroups    EventSharedInGroup[]
-  GroupMessages           GroupMessage[]
+  id                          String                        @id @default(cuid())
+  email                       String                        @unique
+  name                        String                        @unique
+  hashPassword                String
+  eventParticipants           EventParticipant[]
+  image                       String?
+  groups                      UsersInGroup[]
+  favouriteCategories         UserFavouriteCategories[]
+  joinedAt                    DateTime                      @default(now())
+  pendingEventInvitations     EventInvitation[]
+  pendingGroupInvitations     GroupInvitation[]
+  eventsSharedInGroups        EventSharedInGroup[]
+  GroupMessages               GroupMessage[]
+  usersSelectedDatePollOption UsersSelectedDatePollOption[]
 }
 
 model UserFavouriteCategories {
@@ -59,6 +60,7 @@ model Event {
   category                      Category              @relation(fields: [categoryId], references: [id])
   pendingParticipantInvitations EventInvitation[]
   sharedInGroups                EventSharedInGroup[]
+  eventDatePoll                 EventDatePoll?
 }
 
 model Group {
@@ -162,6 +164,32 @@ model EventTag {
   id     String  @id @default(cuid())
   name   String  @unique
   events Event[]
+}
+
+model EventDatePoll {
+  id        String  @id @default(cuid())
+  isEnabled Boolean @default(false)
+  event     Event   @relation(fields: [eventId], references: [id])
+  eventId   String @unique
+  eventDatePollOptions EventDatePollOption[]
+}
+
+model EventDatePollOption {
+  id                          String                        @id @default(cuid())
+  startDate                   DateTime
+  endDate                     DateTime?
+  usersSelectedDatePollOption UsersSelectedDatePollOption[]
+  eventDatePoll   EventDatePoll @relation(fields: [eventDatePollId], references: [id])
+  eventDatePollId String
+}
+
+model UsersSelectedDatePollOption {
+  participant           User                @relation(fields: [participantId], references: [id])
+  participantId         String
+  eventDatePollOption   EventDatePollOption @relation(fields: [eventDatePollOptionId], references: [id])
+  eventDatePollOptionId String
+
+  @@unique([participantId, eventDatePollOptionId])
 }
 
 enum EventRole {

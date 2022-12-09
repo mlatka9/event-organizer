@@ -28,7 +28,7 @@ const EventSettingsLayout = () => {
         </nav>
 
         <main>
-          <Outlet />
+          <Outlet context={{ event }} />
         </main>
       </div>
     </div>

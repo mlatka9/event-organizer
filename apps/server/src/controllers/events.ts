@@ -4,7 +4,6 @@ import { UnauthenticatedError, ValidationError } from '../errors';
 import { generateErrorMessage } from 'zod-error';
 import {
   createEventSchema,
-  CreateEventInputType,
   EventDetailsType,
   getAllEventsSchema,
   GetAllEventsInputType,
@@ -17,11 +16,16 @@ import {
   UserType,
   searchGroupsToShareEventSchema,
   GroupType,
+  EventDatePollType,
+  createDatePollOptionSchema,
+  toggleDatePollSchema,
 } from '@event-organizer/shared-types';
 import { NotFoundError } from '../errors/not-found';
 import { getLoginSession } from '@event-organizer/auth';
 import { formatDisplayAddress } from '../lib/format-display-address';
 import { isPublicEvent } from '../lib/events';
+import user from '../routes/user';
+import { optionsToId } from 'react-intersection-observer/observe';
 
 const addNormalizedCity = async (city: string | undefined) => {
   if (!city) return;
@@ -118,6 +122,11 @@ const getEventInfo = async (req: Request, res: Response) => {
       },
       category: true,
       tags: true,
+      eventDatePoll: {
+        select: {
+          isEnabled: true,
+        },
+      },
     },
   });
 
@@ -153,6 +162,7 @@ const getEventInfo = async (req: Request, res: Response) => {
       postCode: event.postCode || undefined,
       street: event.street || undefined,
       tags: event.tags.map((t) => t.name),
+      isDatePollEnabled: event.eventDatePoll?.isEnabled || false,
     };
     res.json(formattedEvent);
   } else {
@@ -767,6 +777,17 @@ const updateEvent = async (req: Request, res: Response) => {
 
   const normalizedCityId = await addNormalizedCity(eventData.normalizedCity);
 
+  await prisma.event.update({
+    where: {
+      id: eventId,
+    },
+    data: {
+      tags: {
+        set: [],
+      },
+    },
+  });
+
   const event = await prisma.event.update({
     where: {
       id: eventId,
@@ -784,7 +805,7 @@ const updateEvent = async (req: Request, res: Response) => {
       longitude: eventData.longitude,
       latitude: eventData.latitude,
       normalizedCityId: normalizedCityId,
-      bannerImage: eventData.bannerImage,
+      bannerImage: eventData.bannerImage || null,
       eventVisibilityStatus: eventData.eventVisibilityStatus,
       eventLocationStatus: eventData.eventLocationStatus,
       tags: {
@@ -865,6 +886,271 @@ const getGroupsToShare = async (req: Request, res: Response) => {
   res.json(formattedGroups);
 };
 
+const createDatePoll = async (req: Request, res: Response) => {
+  const loggedUser = req.userId;
+  const eventId = req.params.eventId;
+
+  if (!loggedUser) {
+    throw new Error('No userId in req object');
+  }
+
+  const isLoggedUserAdmin = await prisma.eventParticipant.count({
+    where: {
+      role: 'ADMIN',
+      userId: loggedUser,
+      eventId,
+    },
+  });
+
+  if (!isLoggedUserAdmin) {
+    throw new UnauthenticatedError(`You dont have permissions to create poll`);
+  }
+
+  // const validation = createDatePollSchema.safeParse(req.body);
+  // if (!validation.success) {
+  //   const errorMessage = generateErrorMessage(validation.error.issues);
+  //   throw new ValidationError(errorMessage);
+  // }
+  // const { data: body } = validation;
+
+  const eventCount = await prisma.event.count({
+    where: {
+      id: eventId,
+    },
+  });
+
+  if (!eventCount) {
+    throw new NotFoundError(`Event with id ${eventId} doesn't exists`);
+  }
+
+  const createdEventDatePoll = await prisma.eventDatePoll.upsert({
+    where: {
+      eventId,
+    },
+    update: {
+      isEnabled: true,
+    },
+    create: {
+      eventId,
+      isEnabled: true,
+    },
+  });
+
+  res.status(201).json(createdEventDatePoll);
+};
+
+const hideDatePoll = async (req: Request, res: Response) => {
+  const loggedUser = req.userId;
+  const { eventId } = req.params;
+
+  if (!loggedUser) {
+    throw new Error('No userId in req object');
+  }
+
+  const isLoggedUserAdmin = await prisma.eventParticipant.count({
+    where: {
+      role: 'ADMIN',
+      userId: loggedUser,
+      eventId,
+    },
+  });
+
+  if (!isLoggedUserAdmin) {
+    throw new UnauthenticatedError(`You dont have permissions to create poll`);
+  }
+
+  const datePoll = await prisma.eventDatePoll.findFirst({
+    where: {
+      event: {
+        id: eventId,
+      },
+    },
+  });
+
+  if (!datePoll) {
+    throw new NotFoundError(`There is no date poll for event with id  ${eventId}`);
+  }
+
+  const datePollId = datePoll.id;
+
+  await prisma.eventDatePoll.update({
+    where: {
+      id: datePollId,
+    },
+    data: {
+      isEnabled: false,
+    },
+  });
+
+  res.status(204).end();
+};
+
+const getDatePoll = async (req: Request, res: Response) => {
+  const loggedUser = req.userId;
+  if (!loggedUser) {
+    throw new Error('No userId in req object');
+  }
+  const { eventId } = req.params;
+
+  const eventDatePoll = await prisma.eventDatePoll.findFirst({
+    where: {
+      event: {
+        id: eventId,
+      },
+    },
+    include: {
+      eventDatePollOptions: {
+        select: {
+          _count: true,
+          startDate: true,
+          endDate: true,
+          id: true,
+          usersSelectedDatePollOption: {
+            select: {
+              participant: {
+                select: {
+                  id: true,
+                  name: true,
+                  image: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!eventDatePoll) {
+    throw new NotFoundError(`There is not date poll for event with id ${eventId}`);
+  }
+
+  const formattedEventDatePoll: EventDatePollType = {
+    id: eventDatePoll.id,
+    isEnabled: eventDatePoll.isEnabled,
+    options: eventDatePoll.eventDatePollOptions.map((option) => ({
+      id: option.id,
+      startDate: option.startDate.toISOString(),
+      endDate: option.endDate ? option.endDate.toISOString() : null,
+      isSelected: option.usersSelectedDatePollOption.some((participant) => participant.participant.id === loggedUser),
+      userCount: option._count.usersSelectedDatePollOption,
+      showCaseUsers: option.usersSelectedDatePollOption.map((participant) => ({
+        id: participant.participant.id,
+        name: participant.participant.name,
+        image: participant.participant.image,
+      })),
+    })),
+  };
+
+  res.json(formattedEventDatePoll);
+};
+
+const createDatePollOption = async (req: Request, res: Response) => {
+  const { eventId, datePollId } = req.params;
+  const loggedUser = req.userId;
+
+  if (!loggedUser) {
+    throw new Error('No userId in req object');
+  }
+
+  const isLoggedUserEventParticipant = await prisma.eventParticipant.count({
+    where: {
+      userId: loggedUser,
+      eventId,
+    },
+  });
+
+  if (!isLoggedUserEventParticipant) {
+    throw new UnauthenticatedError(`You dont have permissions to create event date poll option`);
+  }
+
+  const validation = createDatePollOptionSchema.safeParse(req.body);
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+  const { data: body } = validation;
+
+  const createdEventDatePollOption = await prisma.eventDatePollOption.create({
+    data: {
+      startDate: body.startDate,
+      endDate: body.endDate,
+      eventDatePollId: datePollId,
+    },
+  });
+
+  res.status(201).json(createdEventDatePollOption);
+};
+
+const toggleDatePollOption = async (req: Request, res: Response) => {
+  const { eventId } = req.params;
+  const loggedUserId = req.userId;
+
+  if (!loggedUserId) {
+    throw new Error('No userId in req object');
+  }
+
+  const validation = toggleDatePollSchema.safeParse(req.body);
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+  const { data: body } = validation;
+
+  const isLoggedUserEventParticipant = await prisma.eventParticipant.count({
+    where: {
+      eventId,
+      userId: loggedUserId,
+    },
+  });
+
+  if (!isLoggedUserEventParticipant) {
+    console.log('AAA');
+    throw new UnauthenticatedError('You dont have permission to toggle poll option');
+  }
+
+  const eventDatePollOption = await prisma.eventDatePollOption.findUnique({
+    where: {
+      id: body.optionId,
+    },
+    include: {
+      usersSelectedDatePollOption: {
+        select: {
+          participantId: true,
+        },
+      },
+    },
+  });
+
+  if (!eventDatePollOption) {
+    throw new NotFoundError(`DateEventOption with id ${body.optionId} dose not exists`);
+  }
+
+  const isOptionSelected = eventDatePollOption.usersSelectedDatePollOption.some(
+    (user) => user.participantId === loggedUserId
+  );
+
+  if (isOptionSelected) {
+    await prisma.usersSelectedDatePollOption.delete({
+      where: {
+        participantId_eventDatePollOptionId: {
+          participantId: loggedUserId,
+          eventDatePollOptionId: body.optionId,
+        },
+      },
+    });
+  } else {
+    await prisma.usersSelectedDatePollOption.create({
+      data: {
+        participantId: loggedUserId,
+        eventDatePollOptionId: body.optionId,
+      },
+    });
+  }
+
+  res.json(200);
+};
+
 export default {
   updateEvent,
   searchUsersToInvite,
@@ -880,4 +1166,9 @@ export default {
   addParticipant,
   removeParticipant,
   getGroupsToShare,
+  createDatePoll,
+  getDatePoll,
+  createDatePollOption,
+  toggleDatePollOption,
+  hideDatePoll,
 };

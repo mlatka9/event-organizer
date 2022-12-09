@@ -1,7 +1,9 @@
 import api from '../libs/api/api';
 import {
+  CreateDatePollOptionInputType,
   CreateEventInputType,
   CreateEventInvitationInputType,
+  EventDatePollType,
   EventDetailsType,
   EventInvitationType,
   EventParticipant,
@@ -10,6 +12,7 @@ import {
   GroupType,
   SearchGroupsToShareEventInputType,
   SearchUserToEventInvitationInputType,
+  ToggleDatePollSchemaInputType,
   UserType,
 } from '@event-organizer/shared-types';
 
@@ -141,7 +144,51 @@ const getGroupsToShareEvent = async ({
   return data;
 };
 
+const createEventDatePoll = async ({ eventId }: { eventId: string }) => {
+  const { data } = await api.post(`/events/${eventId}/date-poll`, null, {
+    withCredentials: true,
+  });
+  return data;
+};
+
+const hideEventDatePoll = async ({ eventId }: { eventId: string }) => {
+  const { data } = await api.delete(`/events/${eventId}/date-poll`, {
+    withCredentials: true,
+  });
+  return data;
+};
+
+const getEventDatePoll = async ({ eventId }: { eventId: string }): Promise<EventDatePollType> => {
+  const { data } = await api.get(`/events/${eventId}/date-poll`, {
+    withCredentials: true,
+  });
+  return data;
+};
+
+const toggleDatePollOption = async ({
+  eventId,
+  datePollId,
+  ...optionData
+}: ToggleDatePollSchemaInputType & { eventId: string; datePollId: string }) => {
+  const { data } = await api.patch(`/events/${eventId}/date-poll/${datePollId}/toggle-select`, optionData, {
+    withCredentials: true,
+  });
+  return data;
+};
+
+const createDatePollOption = async ({
+  eventId,
+  datePollId,
+  ...optionData
+}: CreateDatePollOptionInputType & { eventId: string; datePollId: string }) => {
+  const { data } = await api.post(`/events/${eventId}/date-poll/${datePollId}/create-option`, optionData, {
+    withCredentials: true,
+  });
+  return data;
+};
+
 const eventsAPI = {
+  getEventDatePoll,
   createEventInvitation,
   removeParticipant,
   addParticipant,
@@ -156,6 +203,10 @@ const eventsAPI = {
   declineEventInvitation,
   updateEvent,
   getGroupsToShareEvent,
+  createEventDatePoll,
+  hideEventDatePoll,
+  toggleDatePollOption,
+  createDatePollOption,
 };
 
 export default eventsAPI;

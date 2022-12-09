@@ -68,6 +68,7 @@ const useCreateEvent = ({ defaultValues }: UseCreateEventProps = {}) => {
       eventLocationStatus: 'STATIONARY',
       mapZoomLevel: 1,
       normalizedCity: undefined,
+      // bannerImage: defaultValues?.bannerImage,
       ...defaultValues,
       startDate: defaultValues?.startDate
         ? dayjs(new Date(defaultValues.startDate)).format('YYYY-MM-DD[T]HH:mm')
@@ -78,6 +79,16 @@ const useCreateEvent = ({ defaultValues }: UseCreateEventProps = {}) => {
           : undefined,
     },
   });
+
+  const addImage = (imageUrl: string) => {
+    setValue('bannerImage', imageUrl);
+  };
+
+  const removeImage = () => {
+    setValue('bannerImage', undefined);
+  };
+
+  const selectedImage = watch('bannerImage');
 
   const arr = [dayjs()];
   if (defaultValues?.startDate) {
@@ -181,6 +192,9 @@ const useCreateEvent = ({ defaultValues }: UseCreateEventProps = {}) => {
     errors,
     minStartDate,
     resetForm: reset,
+    addImage,
+    removeImage,
+    selectedImage,
   };
 };
 

@@ -9,10 +9,10 @@ import CalendarIcon from '../../../components/icons/calendar-icon';
 import Button from '../../../components/common/button';
 import React from 'react';
 import useCreateEvent, { CreateEventFormType } from './use-create-event';
-import dayjs from 'dayjs';
 import { CreateEventInputType } from '@event-organizer/shared-types';
 import FormErrorMessage from '../../../components/form/form-error-message';
 import clsx from 'clsx';
+import FormImageUploader from '../../../components/form/form-image-uploader';
 
 interface EventFormProps {
   onSubmit: (data: CreateEventFormType) => void;
@@ -35,6 +35,9 @@ const EventForm = ({ onSubmit, defaultValues, isUpdating }: EventFormProps) => {
     handleAddTag,
     handleRemoveTag,
     minStartDate,
+    addImage,
+    selectedImage,
+    removeImage,
   } = useCreateEvent({ defaultValues });
 
   return (
@@ -69,13 +72,7 @@ const EventForm = ({ onSubmit, defaultValues, isUpdating }: EventFormProps) => {
           options={eventVisibilityStatusOptions}
           error={errors.eventVisibilityStatus}
         />
-        <FormInput
-          label="obrazek"
-          register={register}
-          name="bannerImage"
-          onBlur={findGeologicalLocation}
-          error={errors.bannerImage}
-        />
+        <FormImageUploader addImage={addImage} removeImage={removeImage} selectedImage={selectedImage} />
         <div className={'grid grid-cols-2 gap-3'}>
           <FormSelect
             label={'lokalizacja'}
