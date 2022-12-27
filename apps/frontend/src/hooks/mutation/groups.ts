@@ -19,6 +19,17 @@ export const useCreateGroupMutation = ({ onError, onSuccess }: UseCreateGroupMut
   });
 };
 
+export const useUpdateGroupMutation = ({ onError, onSuccess }: UseCreateGroupMutationArgs = {}) => {
+  const queryClient = useQueryClient();
+  return useMutation(groupsAPI.updateGroup, {
+    onSuccess: (data) => {
+      queryClient.invalidateQueries();
+      onSuccess && onSuccess(data);
+    },
+    onError,
+  });
+};
+
 interface useJoinGroupMutationArgs {
   onSuccess?: (data: { id: string }) => void;
   onError?: (error: APIError) => void;

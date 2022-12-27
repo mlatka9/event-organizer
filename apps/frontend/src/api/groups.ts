@@ -23,6 +23,13 @@ const createGroup = async (groupData: CreateGroupInputType): Promise<{ id: strin
   return data;
 };
 
+const updateGroup = async ({ groupId, ...groupData }: CreateGroupInputType & { groupId: string }) => {
+  const { data } = await api.patch(`/groups/${groupId}`, groupData, {
+    withCredentials: true,
+  });
+  return data;
+};
+
 const getGroups = async (params: GetAllGroupsQueryParamsType): Promise<GetAllGroupsReturnType> => {
   const { data } = await api.get('/groups', {
     params,
@@ -168,6 +175,7 @@ const groupsAPI = {
   shareEvent,
   getGroupMessages,
   createGroupMessage,
+  updateGroup,
 };
 
 export default groupsAPI;

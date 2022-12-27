@@ -33,6 +33,7 @@ import GroupsMembersPage from './pages/groups/groups-details/groups-members-page
 import GroupsSettingsPage from './pages/groups/groups-details/groups-settings-page';
 import GroupsSharedEventsPage from './pages/groups/groups-details/groups-shared-events-page';
 import CalendarPage from './pages/calendar/calendar-page';
+import GroupSettingsLayout from './layouts/group-settings-layout';
 
 require('dayjs/locale/pl');
 dayjs.locale('pl');
@@ -82,8 +83,11 @@ const App = () => {
           <Route path={'/groups/:groupId'} element={<GroupDetailsLayout />}>
             <Route index element={<GroupsDetailsPage />} />
             <Route path={'members'} element={<GroupsMembersPage />} />
-            <Route path={'settings'} element={<GroupsSettingsPage />} />
             <Route path={'shared-events'} element={<GroupsSharedEventsPage />} />
+            {/*<Route path={'settings'} element={<GroupsSettingsPage />} />*/}
+            <Route path={'settings'} element={<GroupSettingsLayout />}>
+              <Route index element={<GroupsSettingsPage />} />
+            </Route>
           </Route>
           <Route path={'/users/:id'} element={<UserProfileLayout />}>
             <Route index element={<UserProfilePage />} />

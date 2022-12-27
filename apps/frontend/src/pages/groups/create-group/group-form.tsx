@@ -1,31 +1,22 @@
+import { CreateGroupInputType } from '@event-organizer/shared-types';
 import FileIcon from '../../../components/icons/file-icon';
 import FormInput from '../../../components/form/form-input';
 import FormTextarea from '../../../components/form/form-textarea';
 import FormSelect from '../../../components/form/form-select';
 import Button from '../../../components/common/button';
 import React from 'react';
+import useGroupForm from './use-group-form';
 import { useCategoriesQuery } from '../../../hooks/query/categories';
-import useGroupForm from '../create-group/use-group-form';
-import useUpdateGroup from '../create-group/use-update-group';
-import { useGroupDetails } from '../../../layouts/group-details-layout';
+import useCreateGroup from './use-create-group';
 
 const groupVisibilityOptions = [
   { label: 'publiczny', value: 'PUBLIC' },
   { label: 'prywatny', value: 'PRIVATE' },
 ];
 
-const GroupsSettingsPage = () => {
-  const { groupData } = useGroupDetails();
-  const { register, handleSubmit, errors } = useGroupForm({
-    defaultValues: {
-      groupVisibility: groupData.groupVisibility,
-      name: groupData.name,
-      bannerImage: groupData.bannerImage || undefined,
-      categoryId: groupData.category.id,
-      description: groupData.description,
-    },
-  });
-  const { onSubmit, isLoading } = useUpdateGroup();
+const GroupForm = () => {
+  const { register, handleSubmit, errors, handleSetError } = useGroupForm();
+  const { onSubmit, isLoading } = useCreateGroup({ setError: handleSetError });
 
   const { data, isSuccess } = useCategoriesQuery();
 
@@ -77,4 +68,4 @@ const GroupsSettingsPage = () => {
   );
 };
 
-export default GroupsSettingsPage;
+export default GroupForm;

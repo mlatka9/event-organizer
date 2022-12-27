@@ -10,6 +10,7 @@ publicRouter.get('/:groupId/messages', groupsRouter.getGroupMessages);
 publicRouter.get('/:groupId/users', groupsRouter.getGroupMembers);
 publicRouter.get('/:groupId/shared-events', groupsRouter.getAllSharedEvents);
 
+protectedRouter.patch('/:groupId', groupsRouter.updateGroup);
 protectedRouter.post('/:groupId/messages', groupsRouter.createGroupMessage);
 protectedRouter.post('/:groupId/users/:userId', groupsRouter.addMember);
 protectedRouter.delete('/:groupId/users/:userId', groupsRouter.removeMember);

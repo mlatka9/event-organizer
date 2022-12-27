@@ -136,6 +136,45 @@ const createGroup = async (req: Request, res: Response) => {
   }
 };
 
+const updateGroup = async (req: Request, res: Response) => {
+  const groupId = req.params.groupId;
+  const validation = createGroupSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+
+  const { data: body } = validation;
+
+  const loggedUserId = req.userId;
+  if (!loggedUserId) {
+    throw new Error('No user in req object');
+  }
+
+  try {
+    const createdGroup = await prisma.group.update({
+      where: {
+        id: groupId,
+      },
+      data: {
+        name: body.name,
+        description: body.description,
+        visibility: body.groupVisibility,
+        categoryId: body.categoryId,
+        bannerImage: body.bannerImage,
+      },
+    });
+
+    res.json({ id: createdGroup.id });
+  } catch (err) {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+      throw new ConflictError(`There is already group with name ${body.name}`);
+    }
+    throw err;
+  }
+};
+
 const getGroupDetails = async (req: Request, res: Response) => {
   const session = await getLoginSession(req);
 
@@ -931,4 +970,5 @@ export default {
   getAllSharedEvents,
   getGroupMessages,
   createGroupMessage,
+  updateGroup,
 };
