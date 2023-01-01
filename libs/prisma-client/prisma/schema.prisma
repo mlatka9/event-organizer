@@ -186,7 +186,7 @@ model EventDatePollOption {
 model UsersSelectedDatePollOption {
   participant           User                @relation(fields: [participantId], references: [id])
   participantId         String
-  eventDatePollOption   EventDatePollOption @relation(fields: [eventDatePollOptionId], references: [id])
+  eventDatePollOption   EventDatePollOption @relation(fields: [eventDatePollOptionId], references: [id], onDelete: Cascade)
   eventDatePollOptionId String
 
   @@unique([participantId, eventDatePollOptionId])

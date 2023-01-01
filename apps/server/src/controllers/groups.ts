@@ -15,6 +15,7 @@ import {
   searchUserToEventInvitationSchema,
   SharedEventType,
   shareEventSchema,
+  updateGroupSchema,
   UserType,
 } from '@event-organizer/shared-types';
 import { UnauthenticatedError, ValidationError } from '../errors';
@@ -138,7 +139,7 @@ const createGroup = async (req: Request, res: Response) => {
 
 const updateGroup = async (req: Request, res: Response) => {
   const groupId = req.params.groupId;
-  const validation = createGroupSchema.safeParse(req.body);
+  const validation = updateGroupSchema.safeParse(req.body);
 
   if (!validation.success) {
     const errorMessage = generateErrorMessage(validation.error.issues);

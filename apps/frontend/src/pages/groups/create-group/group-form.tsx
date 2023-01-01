@@ -8,6 +8,7 @@ import React from 'react';
 import useGroupForm from './use-group-form';
 import { useCategoriesQuery } from '../../../hooks/query/categories';
 import useCreateGroup from './use-create-group';
+import FormImageUploader from '../../../components/form/form-image-uploader';
 
 const groupVisibilityOptions = [
   { label: 'publiczny', value: 'PUBLIC' },
@@ -15,7 +16,7 @@ const groupVisibilityOptions = [
 ];
 
 const GroupForm = () => {
-  const { register, handleSubmit, errors, handleSetError } = useGroupForm();
+  const { register, handleSubmit, errors, handleSetError, removeImage, selectedImage, addImage } = useGroupForm();
   const { onSubmit, isLoading } = useCreateGroup({ setError: handleSetError });
 
   const { data, isSuccess } = useCategoriesQuery();
@@ -42,7 +43,9 @@ const GroupForm = () => {
         <div className={'space-y-5 ml-[70px] mt-10 mb-20'}>
           <FormInput label="nazwa" register={register} name="name" error={errors.name} />
           <FormTextarea label="description" register={register} name="description" error={errors.description} />
-          <FormInput label="obrazek" register={register} name="bannerImage" error={errors.bannerImage} />
+          {/*<FormInput label="obrazek" register={register} name="bannerImage" error={errors.bannerImage} />*/}
+
+          <FormImageUploader addImage={addImage} removeImage={removeImage} selectedImage={selectedImage} />
           <div className={'grid grid-cols-2 gap-3'}>
             <FormSelect
               label={'widoczność'}

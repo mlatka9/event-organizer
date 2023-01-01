@@ -50,6 +50,18 @@ const EventDetailsPage = () => {
               <p className={'text-lg ml-3'}>{dayjs(eventData.startDate).format('HH:mm')}</p>
             </div>
           </div>
+          {eventData.endDate && eventData.endDate !== eventData.startDate && (
+            <div className={'grid grid-cols-2 py-6 px-3'}>
+              <div className={'flex justify-center items-center'}>
+                <CalendarIcon width={35} height={35} />
+                <p className={'text-lg ml-3'}>{dayjs(eventData.endDate).format('DD MMMM YYYY')}</p>
+              </div>
+              <div className={'flex justify-center items-center'}>
+                <ClockIcon width={35} height={35} />
+                <p className={'text-lg ml-3'}>{dayjs(eventData.endDate).format('HH:mm')}</p>
+              </div>
+            </div>
+          )}
         </div>
         <div className={'rounded-2xl shadow-md bg-white'}>
           <div className={'p-3'}>

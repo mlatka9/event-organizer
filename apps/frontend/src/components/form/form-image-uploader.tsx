@@ -6,7 +6,7 @@ import uploadImage from '../../libs/cloudinary';
 interface FormImageUploaderProps {
   addImage: (tagName: string) => void;
   removeImage: () => void;
-  selectedImage: string | undefined;
+  selectedImage: string | null;
 }
 
 const FormImageUploader = ({ removeImage, selectedImage, addImage }: FormImageUploaderProps) => {

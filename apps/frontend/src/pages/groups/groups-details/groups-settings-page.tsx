@@ -8,6 +8,8 @@ import { useCategoriesQuery } from '../../../hooks/query/categories';
 import useGroupForm from '../create-group/use-group-form';
 import useUpdateGroup from '../create-group/use-update-group';
 import { useGroupDetails } from '../../../layouts/group-details-layout';
+import useUpdateGroupForm from '../create-group/use-update-group-form';
+import FormImageUploader from '../../../components/form/form-image-uploader';
 
 const groupVisibilityOptions = [
   { label: 'publiczny', value: 'PUBLIC' },
@@ -16,11 +18,11 @@ const groupVisibilityOptions = [
 
 const GroupsSettingsPage = () => {
   const { groupData } = useGroupDetails();
-  const { register, handleSubmit, errors } = useGroupForm({
+  const { register, handleSubmit, errors, selectedImage, removeImage, addImage } = useUpdateGroupForm({
     defaultValues: {
       groupVisibility: groupData.groupVisibility,
       name: groupData.name,
-      bannerImage: groupData.bannerImage || undefined,
+      bannerImage: groupData.bannerImage || null,
       categoryId: groupData.category.id,
       description: groupData.description,
     },
@@ -51,7 +53,9 @@ const GroupsSettingsPage = () => {
         <div className={'space-y-5 ml-[70px] mt-10 mb-20'}>
           <FormInput label="nazwa" register={register} name="name" error={errors.name} />
           <FormTextarea label="description" register={register} name="description" error={errors.description} />
-          <FormInput label="obrazek" register={register} name="bannerImage" error={errors.bannerImage} />
+
+          {/*<FormInput label="obrazek" register={register} name="bannerImage" error={errors.bannerImage} />*/}
+          <FormImageUploader addImage={addImage} removeImage={removeImage} selectedImage={selectedImage} />
           <div className={'grid grid-cols-2 gap-3'}>
             <FormSelect
               label={'widoczność'}

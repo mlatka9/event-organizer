@@ -13,6 +13,7 @@ import {
   SearchGroupsToShareEventInputType,
   SearchUserToEventInvitationInputType,
   ToggleDatePollSchemaInputType,
+  UpdateEventTimeInputType,
   UserType,
 } from '@event-organizer/shared-types';
 
@@ -187,6 +188,24 @@ const createDatePollOption = async ({
   return data;
 };
 
+const removeDatePollOption = async ({
+  eventId,
+  datePollId,
+  optionId,
+}: ToggleDatePollSchemaInputType & { eventId: string; datePollId: string }) => {
+  const { data } = await api.delete(`/events/${eventId}/date-poll/${datePollId}/options/${optionId}`, {
+    withCredentials: true,
+  });
+  return data;
+};
+
+const updateEventTime = async ({ eventId, ...eventData }: UpdateEventTimeInputType & { eventId: string }) => {
+  const { data } = await api.patch(`/events/${eventId}`, eventData, {
+    withCredentials: true,
+  });
+  return data;
+};
+
 const eventsAPI = {
   getEventDatePoll,
   createEventInvitation,
@@ -207,6 +226,8 @@ const eventsAPI = {
   hideEventDatePoll,
   toggleDatePollOption,
   createDatePollOption,
+  removeDatePollOption,
+  updateEventTime,
 };
 
 export default eventsAPI;

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { isISODate } from '../utils';
+import { createGroupSchema } from './groups';
 
 export const updateUserSchema = z.object({
   name: z
@@ -7,9 +8,13 @@ export const updateUserSchema = z.object({
     .min(3, { message: 'Nazwa musi składać się z conajmniej 3 znaków' })
     .max(20, { message: 'Nazwa może składać się z co najwyżej 20 znaków' })
     .optional(),
-  image: z.string().optional(),
+  image: z.string().nullable(),
   favouriteCategories: z.array(z.string()).optional(),
 });
+
+// export const updateGroupSchema = updateUserSchema.omit({ image: true }).extend({
+//   image: z.string().nullable(),
+// });
 
 export const eventUserInvitationSchema = z.object({
   limit: z.preprocess((val) => val && Number(val), z.number().min(1).optional()),

@@ -88,7 +88,7 @@ const useCreateEvent = ({ defaultValues }: UseCreateEventProps = {}) => {
     setValue('bannerImage', undefined);
   };
 
-  const selectedImage = watch('bannerImage');
+  const selectedImage = watch('bannerImage') || null;
 
   const arr = [dayjs()];
   if (defaultValues?.startDate) {

@@ -23,7 +23,6 @@ const GroupSettingsLayout = () => {
             </li>
           </ul>
         </nav>
-
         <main>
           <Outlet context={{ groupData }} />
         </main>

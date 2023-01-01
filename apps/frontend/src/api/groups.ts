@@ -12,6 +12,7 @@ import {
   GroupMember,
   SearchUserToEventInvitationInputType,
   SharedEventType,
+  UpdateGroupSchemaType,
   UserType,
 } from '@event-organizer/shared-types';
 import api from '../libs/api/api';
@@ -23,7 +24,7 @@ const createGroup = async (groupData: CreateGroupInputType): Promise<{ id: strin
   return data;
 };
 
-const updateGroup = async ({ groupId, ...groupData }: CreateGroupInputType & { groupId: string }) => {
+const updateGroup = async ({ groupId, ...groupData }: UpdateGroupSchemaType & { groupId: string }) => {
   const { data } = await api.patch(`/groups/${groupId}`, groupData, {
     withCredentials: true,
   });

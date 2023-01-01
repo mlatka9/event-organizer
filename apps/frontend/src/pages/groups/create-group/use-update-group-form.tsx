@@ -1,12 +1,17 @@
 import { useForm } from 'react-hook-form';
-import { CreateGroupInputType, createGroupSchema } from '@event-organizer/shared-types';
+import {
+  CreateGroupInputType,
+  createGroupSchema,
+  updateGroupSchema,
+  UpdateGroupSchemaType,
+} from '@event-organizer/shared-types';
 import { zodResolver } from '@hookform/resolvers/zod/dist/zod';
 
 interface useGroupFormProps {
-  defaultValues?: CreateGroupInputType;
+  defaultValues?: UpdateGroupSchemaType;
 }
 
-const useGroupForm = ({ defaultValues }: useGroupFormProps = {}) => {
+const useUpdateGroupForm = ({ defaultValues }: useGroupFormProps = {}) => {
   const {
     register,
     handleSubmit,
@@ -14,13 +19,15 @@ const useGroupForm = ({ defaultValues }: useGroupFormProps = {}) => {
     setValue,
     watch,
     formState: { errors },
-  } = useForm<CreateGroupInputType>({
-    resolver: zodResolver(createGroupSchema),
+  } = useForm<UpdateGroupSchemaType>({
+    resolver: zodResolver(updateGroupSchema),
     defaultValues: {
       groupVisibility: 'PUBLIC',
       ...defaultValues,
     },
   });
+
+  console.log('errors', errors);
 
   const handleSetError = (name: keyof CreateGroupInputType, message: string) => {
     setError(name, { message }, { shouldFocus: true });
@@ -31,10 +38,10 @@ const useGroupForm = ({ defaultValues }: useGroupFormProps = {}) => {
   };
 
   const removeImage = () => {
-    setValue('bannerImage', undefined);
+    setValue('bannerImage', null);
   };
 
-  const selectedImage = watch('bannerImage') || null;
+  const selectedImage = watch('bannerImage');
 
   console.log('selectedImage', selectedImage);
 
@@ -50,4 +57,4 @@ const useGroupForm = ({ defaultValues }: useGroupFormProps = {}) => {
   };
 };
 
-export default useGroupForm;
+export default useUpdateGroupForm;

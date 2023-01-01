@@ -14,6 +14,10 @@ export const createGroupSchema = z.object({
   groupVisibility: z.enum(['PRIVATE', 'PUBLIC']),
 });
 
+export const updateGroupSchema = createGroupSchema.omit({ bannerImage: true }).extend({
+  bannerImage: z.string().nullable(),
+});
+
 export const getAllGroupsQueryParamsSchema = z.object({
   cursor: z.string().optional(),
   limit: z.preprocess((val) => val && Number(val), z.number().positive().optional()),

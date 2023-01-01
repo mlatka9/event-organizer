@@ -69,3 +69,14 @@ export const createDatePollOptionSchema = z.object({
 export const toggleDatePollSchema = z.object({
   optionId: z.string().min(1, { message: 'Option id is required' }),
 });
+
+export const updateEventTimeSchema = z.object({
+  startDate: z
+    .string()
+    .min(1, { message: 'Data rozpoczęcia jest wymagana' })
+    .refine((date) => (date ? isISODate(date) : true), { message: 'Nieprawidłowy format daty 1' }),
+  endDate: z
+    .string()
+    .refine((date) => (date ? isISODate(date) : true), { message: 'Nieprawidłowy format daty' })
+    .optional(),
+});

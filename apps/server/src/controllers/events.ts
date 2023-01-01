@@ -19,6 +19,8 @@ import {
   EventDatePollType,
   createDatePollOptionSchema,
   toggleDatePollSchema,
+  updateEventTimeSchema,
+  ToggleDatePollSchemaInputType,
 } from '@event-organizer/shared-types';
 import { NotFoundError } from '../errors/not-found';
 import { getLoginSession } from '@event-organizer/auth';
@@ -221,8 +223,6 @@ const getAll = async (req: Request, res: Response) => {
       eventLocationStatus: locationStatus === 'STATIONARY' || locationStatus === 'ONLINE' ? locationStatus : undefined,
     },
   });
-
-  console.log('eventsCount', eventsCount);
 
   const events = await prisma.event.findMany({
     skip: (+page - 1) * +limit,
@@ -1151,6 +1151,63 @@ const toggleDatePollOption = async (req: Request, res: Response) => {
   res.json(200);
 };
 
+const updateEventTime = async (req: Request, res: Response) => {
+  const loggedUser = req.userId;
+  const eventId = req.params.eventId;
+
+  if (!loggedUser) {
+    throw new Error('No user in req object');
+  }
+
+  const validation = updateEventTimeSchema.safeParse(req.body);
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+  const { data: body } = validation;
+
+  await prisma.event.update({
+    where: {
+      id: eventId,
+    },
+    data: {
+      startDate: body.startDate,
+      endDate: body.endDate,
+    },
+  });
+
+  res.status(200).end();
+};
+
+const deleteDatePollOption = async (req: Request, res: Response) => {
+  const { eventId, optionId } = req.params;
+  const loggedUserId = req.userId;
+
+  if (!loggedUserId) {
+    throw new Error('No userId in req object');
+  }
+
+  const isLoggedUserEventAdmin = await prisma.eventParticipant.count({
+    where: {
+      role: 'ADMIN',
+      eventId,
+      userId: loggedUserId,
+    },
+  });
+
+  if (!isLoggedUserEventAdmin) {
+    throw new UnauthenticatedError('You dont have permission to remove poll option');
+  }
+
+  await prisma.eventDatePollOption.delete({
+    where: {
+      id: optionId,
+    },
+  });
+
+  res.status(201).end();
+};
+
 export default {
   updateEvent,
   searchUsersToInvite,
@@ -1171,4 +1228,6 @@ export default {
   createDatePollOption,
   toggleDatePollOption,
   hideDatePoll,
+  updateEventTime,
+  deleteDatePollOption,
 };

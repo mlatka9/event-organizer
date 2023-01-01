@@ -10,6 +10,8 @@ import { useUpdateUserMutation } from '../../hooks/mutation/users';
 import { toast } from 'react-toastify';
 import { APIError } from '../../libs/api/types';
 import { useAuth } from '../../hooks/use-auth';
+import FormImageUploader from '../../components/form/form-image-uploader';
+import React from 'react';
 
 interface UpdateUserModalProps {
   handleCloseModal: () => void;
@@ -85,11 +87,23 @@ const UpdateUserModal = ({
     );
   };
 
+  const addImage = (imageUrl: string) => {
+    setValue('image', imageUrl);
+  };
+
+  const removeImage = () => {
+    setValue('image', null);
+  };
+
+  const selectedImage = watch('image');
+
   return (
     <ModalWrapper title={'Edytuj profil'} handleCloseModal={handleCloseModal}>
       <form onSubmit={handleSubmit(onSubmit)} className={'space-y-3 flex flex-col'}>
         <FormInput label={'name'} name={'name'} register={register} error={errors.name} />
         <FormInput label={'image'} name={'image'} register={register} error={errors.image} />
+        <FormImageUploader addImage={addImage} removeImage={removeImage} selectedImage={selectedImage} />
+
         <div className={'!mt-10'}>
           <p className={'font-semibold mb-2'}>Ulubione kategorie</p>
           <div className={'flex flex-wrap space-x-2'}>

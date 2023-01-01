@@ -11,6 +11,7 @@ publicRouter.get('/:eventId/users', eventsRouter.getAllParticipants);
 
 protectedRouter.post('/', eventsRouter.create);
 protectedRouter.put('/:eventId', eventsRouter.updateEvent);
+protectedRouter.patch('/:eventId', eventsRouter.updateEventTime);
 
 protectedRouter.post('/:eventId/user/:userId', eventsRouter.addParticipant);
 protectedRouter.delete('/:eventId/user/:userId', eventsRouter.removeParticipant);
@@ -28,6 +29,7 @@ protectedRouter.delete('/:eventId/date-poll', eventsRouter.hideDatePoll);
 protectedRouter.get('/:eventId/date-poll', eventsRouter.getDatePoll);
 protectedRouter.post('/:eventId/date-poll/:datePollId/create-option', eventsRouter.createDatePollOption);
 protectedRouter.patch('/:eventId/date-poll/:datePollId/toggle-select', eventsRouter.toggleDatePollOption);
+protectedRouter.delete('/:eventId/date-poll/:datePollId/options/:optionId', eventsRouter.deleteDatePollOption);
 
 const router = {
   publicRouter,

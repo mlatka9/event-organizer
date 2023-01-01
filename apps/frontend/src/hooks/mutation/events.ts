@@ -144,3 +144,22 @@ export const useCreateDatePollOptionMutation = () => {
     },
   });
 };
+
+export const useRemoveDatePollOptionMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation(eventsAPI.removeDatePollOption, {
+    onSuccess: async () => {
+      queryClient.invalidateQueries(['event-date-poll']);
+    },
+  });
+};
+
+export const useUpdateEventTimeMutation = (onSuccess?: () => void) => {
+  const queryClient = useQueryClient();
+  return useMutation(eventsAPI.updateEventTime, {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries();
+      onSuccess && onSuccess();
+    },
+  });
+};

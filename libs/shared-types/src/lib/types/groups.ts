@@ -5,9 +5,12 @@ import {
   getAllGroupsQueryParamsSchema,
   getGroupMessagesQueryParamsSchema,
   shareEventSchema,
+  updateGroupSchema,
 } from '../schemas/groups';
 
 export type CreateGroupInputType = z.infer<typeof createGroupSchema>;
+export type UpdateGroupSchemaType = z.infer<typeof updateGroupSchema>;
+
 export type GetAllGroupsQueryParamsType = z.infer<typeof getAllGroupsQueryParamsSchema>;
 export type ShareEventInputType = z.infer<typeof shareEventSchema>;
 export type GetGroupMessagesQueryParamsType = z.infer<typeof getGroupMessagesQueryParamsSchema>;

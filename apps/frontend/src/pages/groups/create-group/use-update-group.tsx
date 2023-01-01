@@ -1,6 +1,6 @@
 import { useUpdateGroupMutation } from '../../../hooks/mutation/groups';
 import { toast } from 'react-toastify';
-import { CreateGroupInputType } from '@event-organizer/shared-types';
+import { UpdateGroupSchemaType } from '@event-organizer/shared-types';
 import { useGroupDetails } from '../../../layouts/group-details-layout';
 
 const useUpdateGroup = () => {
@@ -14,7 +14,8 @@ const useUpdateGroup = () => {
 
   const { mutate: updateGroup, isLoading } = useUpdateGroupMutation({ onSuccess });
 
-  const onSubmit = (data: CreateGroupInputType) => {
+  const onSubmit = (data: UpdateGroupSchemaType) => {
+    console.log('data', data);
     updateGroup({
       name: data.name,
       description: data.description,

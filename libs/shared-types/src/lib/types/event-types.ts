@@ -7,6 +7,7 @@ import {
   searchGroupsToShareEventSchema,
   searchUserToEventInvitationSchema,
   toggleDatePollSchema,
+  updateEventTimeSchema,
 } from '../schemas';
 import { EventRole } from '@prisma/client';
 
@@ -17,6 +18,7 @@ export type SearchUserToEventInvitationInputType = z.infer<typeof searchUserToEv
 export type SearchGroupsToShareEventInputType = z.infer<typeof searchGroupsToShareEventSchema>;
 export type ToggleDatePollSchemaInputType = z.infer<typeof toggleDatePollSchema>;
 export type CreateDatePollOptionInputType = z.infer<typeof createDatePollOptionSchema>;
+export type UpdateEventTimeInputType = z.infer<typeof updateEventTimeSchema>;
 
 export interface PrivateEventType {
   id: string;
