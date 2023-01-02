@@ -3,12 +3,15 @@ import {
   CreateDatePollOptionInputType,
   CreateEventInputType,
   CreateEventInvitationInputType,
+  createGroupMessageInputType,
   EventDatePollType,
   EventDetailsType,
   EventInvitationType,
   EventParticipant,
   EventShowcaseType,
   GetAllEventsInputType,
+  GetGroupMessagesQueryParamsType,
+  GetGroupMessagesReturnType,
   GroupType,
   SearchGroupsToShareEventInputType,
   SearchUserToEventInvitationInputType,
@@ -159,6 +162,20 @@ const hideEventDatePoll = async ({ eventId }: { eventId: string }) => {
   return data;
 };
 
+const createEventChat = async ({ eventId }: { eventId: string }) => {
+  const { data } = await api.post(`/events/${eventId}/chat`, null, {
+    withCredentials: true,
+  });
+  return data;
+};
+
+const hideEventChat = async ({ eventId }: { eventId: string }) => {
+  const { data } = await api.delete(`/events/${eventId}/chat`, {
+    withCredentials: true,
+  });
+  return data;
+};
+
 const getEventDatePoll = async ({ eventId }: { eventId: string }): Promise<EventDatePollType> => {
   const { data } = await api.get(`/events/${eventId}/date-poll`, {
     withCredentials: true,
@@ -206,6 +223,30 @@ const updateEventTime = async ({ eventId, ...eventData }: UpdateEventTimeInputTy
   return data;
 };
 
+const getEventChatMessages = async ({
+  eventId,
+  ...params
+}: GetGroupMessagesQueryParamsType & { eventId: string }): Promise<GetGroupMessagesReturnType> => {
+  const { data } = await api.get(`/events/${eventId}/chat/messages`, {
+    params,
+    withCredentials: true,
+  });
+  return data;
+};
+
+const createEventChatMessage = async ({ content, eventId }: createGroupMessageInputType & { eventId: string }) => {
+  const { data } = await api.post(
+    `/events/${eventId}/chat/messages`,
+    {
+      content,
+    },
+    {
+      withCredentials: true,
+    }
+  );
+  return data;
+};
+
 const eventsAPI = {
   getEventDatePoll,
   createEventInvitation,
@@ -228,6 +269,10 @@ const eventsAPI = {
   createDatePollOption,
   removeDatePollOption,
   updateEventTime,
+  createEventChat,
+  hideEventChat,
+  getEventChatMessages,
+  createEventChatMessage,
 };
 
 export default eventsAPI;

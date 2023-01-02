@@ -22,14 +22,19 @@ protectedRouter.delete('/:eventId/invitation/:invitationId', eventsRouter.declin
 
 protectedRouter.post('/:eventId/invitation/search-users', eventsRouter.searchUsersToInvite);
 protectedRouter.get('/:eventId/invitation', eventsRouter.getAllEventInvitation);
-
 protectedRouter.post('/:eventId/shared-events/group-list', eventsRouter.getGroupsToShare);
+
 protectedRouter.post('/:eventId/date-poll', eventsRouter.createDatePoll);
 protectedRouter.delete('/:eventId/date-poll', eventsRouter.hideDatePoll);
 protectedRouter.get('/:eventId/date-poll', eventsRouter.getDatePoll);
 protectedRouter.post('/:eventId/date-poll/:datePollId/create-option', eventsRouter.createDatePollOption);
 protectedRouter.patch('/:eventId/date-poll/:datePollId/toggle-select', eventsRouter.toggleDatePollOption);
 protectedRouter.delete('/:eventId/date-poll/:datePollId/options/:optionId', eventsRouter.deleteDatePollOption);
+
+protectedRouter.post('/:eventId/chat', eventsRouter.createEventChat);
+protectedRouter.delete('/:eventId/chat', eventsRouter.hideEventChat);
+protectedRouter.get('/:eventId/chat/messages', eventsRouter.getEventChatMessages);
+protectedRouter.post('/:eventId/chat/messages', eventsRouter.createEventChatMessage);
 
 const router = {
   publicRouter,

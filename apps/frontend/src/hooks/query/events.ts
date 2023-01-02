@@ -1,12 +1,14 @@
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import eventsAPI from '../../api/events';
 import {
   EventDetailsType,
   GetAllEventsInputType,
+  GetGroupMessagesQueryParamsType,
   SearchGroupsToShareEventInputType,
   SearchUserToEventInvitationInputType,
 } from '@event-organizer/shared-types';
 import { APIError } from '../../libs/api/types';
+import groupsAPI from '../../api/groups';
 
 export const useEventsQuery = ({
   enabled = true,
@@ -81,4 +83,37 @@ export const useGetEventDatePoll = ({ eventId, enabled = true }: { eventId: stri
     retry: false,
     enabled,
   });
+};
+
+export const useEventChatMessagesQuery = ({
+  enabled,
+  limit,
+  eventId,
+  onSuccess,
+}: Omit<GetGroupMessagesQueryParamsType, 'cursor'> & {
+  enabled?: boolean;
+  eventId: string;
+  onSuccess?: () => void;
+}) => {
+  return useInfiniteQuery(
+    ['event-chat-messages', limit, eventId],
+    ({ pageParam }) => {
+      return eventsAPI.getEventChatMessages({
+        eventId,
+        limit,
+        cursor: pageParam,
+      });
+    },
+    {
+      // select: (data) => ({
+      //   pages: [...data.pages].reverse(),
+      //   pageParams: [...data.pageParams].reverse(),
+      // }),
+      onSuccess,
+      getNextPageParam: (lastPage) => lastPage.cursor,
+      retry: false,
+      keepPreviousData: true,
+      enabled,
+    }
+  );
 };

@@ -83,6 +83,7 @@ export interface EventDetailsType {
   eventVisibilityStatus: 'PRIVATE' | 'PUBLIC';
   eventLocationStatus: 'STATIONARY' | 'ONLINE';
   isDatePollEnabled: boolean;
+  isEventChatEnabled: boolean;
 }
 
 export interface EventInvitationType {

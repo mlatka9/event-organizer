@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 import Map from '../../../components/map';
 import dayjs from 'dayjs';
 import EventDatePoll from './event-date-poll/event-date.poll';
+import { EventChat } from './event-chat';
 
 const EventDetailsPage = () => {
   const params = useParams();
@@ -18,6 +19,7 @@ const EventDetailsPage = () => {
   return (
     <div className={'grid lg:grid-cols-[3fr_2fr] gap-5'}>
       {eventData.isCurrentUserParticipant && eventData.isDatePollEnabled && <EventDatePoll eventId={eventId} />}
+      {eventData.isCurrentUserParticipant && eventData.isEventChatEnabled && <EventChat eventId={eventId} />}
       <div className={'h-[1000px] bg-blue-50'}>main content</div>
 
       <div className={'space-y-5 row-start-1 lg:col-start-2'}>

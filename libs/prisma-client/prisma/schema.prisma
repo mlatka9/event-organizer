@@ -26,6 +26,7 @@ model User {
   eventsSharedInGroups        EventSharedInGroup[]
   GroupMessages               GroupMessage[]
   usersSelectedDatePollOption UsersSelectedDatePollOption[]
+  eventChatMessages           EventChatMessage[]
 }
 
 model UserFavouriteCategories {
@@ -61,6 +62,7 @@ model Event {
   pendingParticipantInvitations EventInvitation[]
   sharedInGroups                EventSharedInGroup[]
   eventDatePoll                 EventDatePoll?
+  eventChat                     EventChat?
 }
 
 model Group {
@@ -166,11 +168,32 @@ model EventTag {
   events Event[]
 }
 
+model EventChat {
+  id                String             @id @default(cuid())
+  isEnabled         Boolean            @default(false)
+  event             Event              @relation(fields: [eventId], references: [id])
+  eventId           String             @unique
+  eventChatMessages EventChatMessage[]
+}
+
+model EventChatMessage {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String
+
+  eventChat   EventChat @relation(fields: [eventChatId], references: [id])
+  eventChatId String
+
+}
+
 model EventDatePoll {
-  id        String  @id @default(cuid())
-  isEnabled Boolean @default(false)
-  event     Event   @relation(fields: [eventId], references: [id])
-  eventId   String @unique
+  id                   String                @id @default(cuid())
+  isEnabled            Boolean               @default(false)
+  event                Event                 @relation(fields: [eventId], references: [id])
+  eventId              String                @unique
   eventDatePollOptions EventDatePollOption[]
 }
 
@@ -179,8 +202,8 @@ model EventDatePollOption {
   startDate                   DateTime
   endDate                     DateTime?
   usersSelectedDatePollOption UsersSelectedDatePollOption[]
-  eventDatePoll   EventDatePoll @relation(fields: [eventDatePollId], references: [id])
-  eventDatePollId String
+  eventDatePoll               EventDatePoll                 @relation(fields: [eventDatePollId], references: [id])
+  eventDatePollId             String
 }
 
 model UsersSelectedDatePollOption {

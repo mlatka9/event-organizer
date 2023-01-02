@@ -41,7 +41,7 @@ export const useGroupMessagesQuery = ({
   onSuccess?: () => void;
 }) => {
   return useInfiniteQuery(
-    ['group-messages', limit],
+    ['group-messages', limit, groupId],
     ({ pageParam }) => {
       return groupsAPI.getGroupMessages({
         groupId,

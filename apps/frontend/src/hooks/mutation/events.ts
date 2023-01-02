@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import eventsAPI from '../../api/events';
 import { EventDatePollType, ToggleDatePollSchemaInputType } from '@event-organizer/shared-types';
+import groupsAPI from '../../api/groups';
 
 export const useCreateEventMutation = (onSuccess?: (eventData: { eventId: string }) => void) => {
   return useMutation(eventsAPI.createEvent, {
@@ -107,6 +108,40 @@ export const useDeleteEventDatePoll = (eventId: string) => {
   });
 };
 
+export const useCreateEventChatMutation = (eventId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation(eventsAPI.createEventChat, {
+    onSuccess: async () => {
+      // queryClient.setQueriesData(['event', eventId], (oldData) =>
+      //   oldData
+      //     ? {
+      //       ...oldData,
+      //       isDatePollEnabled: true,
+      //     }
+      //     : oldData
+      // );
+      queryClient.invalidateQueries(['event']);
+    },
+  });
+};
+
+export const useDeleteEventChatMutation = (eventId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation(eventsAPI.hideEventChat, {
+    onSuccess: async () => {
+      // queryClient.setQueriesData(['event', eventId], (oldData) =>
+      //   oldData
+      //     ? {
+      //       ...oldData,
+      //       isDatePollEnabled: false,
+      //     }
+      //     : oldData
+      // );
+      queryClient.invalidateQueries(['event']);
+    },
+  });
+};
+
 export const useToggleDatePollOptionMutation = ({ optionId }: { optionId: string }) => {
   const queryClient = useQueryClient();
   return useMutation(eventsAPI.toggleDatePollOption, {
@@ -159,6 +194,16 @@ export const useUpdateEventTimeMutation = (onSuccess?: () => void) => {
   return useMutation(eventsAPI.updateEventTime, {
     onSuccess: async () => {
       await queryClient.invalidateQueries();
+      onSuccess && onSuccess();
+    },
+  });
+};
+
+export const useCreateEventChatMessageMutation = (onSuccess?: () => void) => {
+  const queryClient = useQueryClient();
+  return useMutation(eventsAPI.createEventChatMessage, {
+    onSuccess: () => {
+      queryClient.invalidateQueries(['event-chat-messages']);
       onSuccess && onSuccess();
     },
   });

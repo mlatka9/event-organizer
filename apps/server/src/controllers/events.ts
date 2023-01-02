@@ -21,6 +21,10 @@ import {
   toggleDatePollSchema,
   updateEventTimeSchema,
   ToggleDatePollSchemaInputType,
+  getGroupMessagesQueryParamsSchema,
+  GroupMessageType,
+  GetGroupMessagesReturnType,
+  createGroupMessageSchema,
 } from '@event-organizer/shared-types';
 import { NotFoundError } from '../errors/not-found';
 import { getLoginSession } from '@event-organizer/auth';
@@ -129,6 +133,11 @@ const getEventInfo = async (req: Request, res: Response) => {
           isEnabled: true,
         },
       },
+      eventChat: {
+        select: {
+          isEnabled: true,
+        },
+      },
     },
   });
 
@@ -165,6 +174,7 @@ const getEventInfo = async (req: Request, res: Response) => {
       street: event.street || undefined,
       tags: event.tags.map((t) => t.name),
       isDatePollEnabled: event.eventDatePoll?.isEnabled || false,
+      isEventChatEnabled: event.eventChat?.isEnabled || false,
     };
     res.json(formattedEvent);
   } else {
@@ -1208,6 +1218,217 @@ const deleteDatePollOption = async (req: Request, res: Response) => {
   res.status(201).end();
 };
 
+const createEventChat = async (req: Request, res: Response) => {
+  const loggedUser = req.userId;
+  const eventId = req.params.eventId;
+
+  if (!loggedUser) {
+    throw new Error('No userId in req object');
+  }
+
+  const isLoggedUserAdmin = await prisma.eventParticipant.count({
+    where: {
+      role: 'ADMIN',
+      userId: loggedUser,
+      eventId,
+    },
+  });
+
+  if (!isLoggedUserAdmin) {
+    throw new UnauthenticatedError(`You dont have permissions to create poll`);
+  }
+
+  // const validation = createDatePollSchema.safeParse(req.body);
+  // if (!validation.success) {
+  //   const errorMessage = generateErrorMessage(validation.error.issues);
+  //   throw new ValidationError(errorMessage);
+  // }
+  // const { data: body } = validation;
+
+  const eventCount = await prisma.event.count({
+    where: {
+      id: eventId,
+    },
+  });
+
+  if (!eventCount) {
+    throw new NotFoundError(`Event with id ${eventId} doesn't exists`);
+  }
+
+  const createdEventChat = await prisma.eventChat.upsert({
+    where: {
+      eventId,
+    },
+    update: {
+      isEnabled: true,
+    },
+    create: {
+      eventId,
+      isEnabled: true,
+    },
+  });
+
+  res.status(201).json(createdEventChat);
+};
+
+const hideEventChat = async (req: Request, res: Response) => {
+  const loggedUser = req.userId;
+  const { eventId } = req.params;
+
+  if (!loggedUser) {
+    throw new Error('No userId in req object');
+  }
+
+  const isLoggedUserAdmin = await prisma.eventParticipant.count({
+    where: {
+      role: 'ADMIN',
+      userId: loggedUser,
+      eventId,
+    },
+  });
+
+  if (!isLoggedUserAdmin) {
+    throw new UnauthenticatedError(`You dont have permissions to create poll`);
+  }
+
+  const eventChat = await prisma.eventChat.findFirst({
+    where: {
+      event: {
+        id: eventId,
+      },
+    },
+  });
+
+  if (!eventChat) {
+    throw new NotFoundError(`There is no chat for event with id  ${eventId}`);
+  }
+
+  const eventChatId = eventChat.id;
+
+  console.log('eventChatId', eventChatId);
+
+  await prisma.eventChat.update({
+    where: {
+      id: eventChatId,
+    },
+    data: {
+      isEnabled: false,
+    },
+  });
+
+  res.status(204).end();
+};
+
+const getEventChatMessages = async (req: Request, res: Response) => {
+  const eventId = req.params.eventId;
+
+  const eventCount = await prisma.event.count({
+    where: {
+      id: eventId,
+    },
+  });
+
+  if (!eventCount) {
+    throw new ValidationError(`No event with id ${eventId}`);
+  }
+
+  const validation = getGroupMessagesQueryParamsSchema.safeParse(req.query);
+
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+
+  const { limit = 10, cursor } = validation.data;
+
+  const messages = await prisma.eventChatMessage.findMany({
+    take: limit + 1,
+    cursor: cursor
+      ? {
+          id: cursor,
+        }
+      : undefined,
+    where: {
+      eventChat: {
+        eventId,
+      },
+    },
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+        },
+      },
+    },
+    orderBy: [
+      {
+        createdAt: 'desc',
+      },
+    ],
+  });
+
+  const isNextPage = messages.length > limit;
+  const messagesToFormat = isNextPage ? messages.slice(0, -1) : messages;
+  const nextCursor = isNextPage ? messages[messages.length - 1]?.id : null;
+
+  const formattedMessages: GroupMessageType[] = messagesToFormat.map((m) => ({
+    id: m.id,
+    content: m.content,
+    createdAt: new Date(m.createdAt).toISOString(),
+    author: {
+      id: m.author.id,
+      name: m.author.name,
+      image: m.author.image,
+    },
+  }));
+
+  const result: GetGroupMessagesReturnType = {
+    messages: formattedMessages,
+    cursor: nextCursor,
+  };
+
+  res.json(result);
+};
+
+const createEventChatMessage = async (req: Request, res: Response) => {
+  const loggedUserId = req.userId;
+  if (!loggedUserId) {
+    throw new Error('no userId in req object');
+  }
+  const eventId = req.params.eventId;
+
+  const eventChat = await prisma.eventChat.findUnique({
+    where: {
+      eventId,
+    },
+  });
+
+  if (!eventChat) {
+    throw new ValidationError(`No event chat with for event with id  ${eventId}`);
+  }
+
+  const validation = createGroupMessageSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+
+  const { content } = validation.data;
+
+  const message = await prisma.eventChatMessage.create({
+    data: {
+      content,
+      authorId: loggedUserId,
+      eventChatId: eventChat.id,
+    },
+  });
+
+  res.status(201).json(message);
+};
+
 export default {
   updateEvent,
   searchUsersToInvite,
@@ -1230,4 +1451,8 @@ export default {
   hideDatePoll,
   updateEventTime,
   deleteDatePollOption,
+  createEventChat,
+  hideEventChat,
+  getEventChatMessages,
+  createEventChatMessage,
 };
