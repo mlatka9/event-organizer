@@ -1,7 +1,7 @@
 import { AuthProvider } from './providers/auth-provider';
 import { Routes, Route } from 'react-router-dom';
 import MainLayout from './layouts/main-layout';
-import HomePage from './pages/home/home-page';
+import { LandingPage } from './pages/landing-page';
 import LoginPage from './pages/login/login-page';
 import EventsPage from './pages/events/events-home/events-page';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -45,8 +45,8 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Routes>
-          <Route path={'/'} element={<MainLayout />}>
-            <Route index element={<HomePage />} />
+          <Route path={'/'} element={<LandingPage />} />
+          <Route element={<MainLayout />}>
             <Route path={'events'} element={<EventsPage />} />
             <Route
               path={'events/create'}

@@ -6,7 +6,6 @@ export interface FormInputProps<V extends FieldValues> extends React.ComponentPr
   label: string;
   name: Path<V>;
   rules?: RegisterOptions;
-
   register: UseFormRegister<V>;
   error?: FieldError;
 }

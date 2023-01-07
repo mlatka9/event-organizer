@@ -1,4 +1,4 @@
-import { Navigate, Outlet, useParams } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import NavigationLink from '../components/common/navigation-link';
 import React from 'react';
 import { useGroupDetails } from './group-details-layout';
