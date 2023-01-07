@@ -1,5 +1,8 @@
 import { Router } from 'express';
 import eventsRouter from '../controllers/events';
+import eventsPrepareListRouter from '../controllers/event-prepare-list';
+import { isEventIdValid } from '../middlewares/is-event-id-valid';
+import { isUserEventAdmin } from '../middlewares/is-user-event-admin';
 
 const publicRouter = Router();
 const protectedRouter = Router();
@@ -35,6 +38,30 @@ protectedRouter.post('/:eventId/chat', eventsRouter.createEventChat);
 protectedRouter.delete('/:eventId/chat', eventsRouter.hideEventChat);
 protectedRouter.get('/:eventId/chat/messages', eventsRouter.getEventChatMessages);
 protectedRouter.post('/:eventId/chat/messages', eventsRouter.createEventChatMessage);
+
+protectedRouter.post(
+  '/:eventId/prepare-list',
+  isEventIdValid,
+  isUserEventAdmin,
+  eventsPrepareListRouter.createEventPrepareList
+); // dodaj liste w ustawieniach
+
+protectedRouter.delete(
+  '/:eventId/prepare-list',
+  isEventIdValid,
+  isUserEventAdmin,
+  eventsPrepareListRouter.hideEventPrepareList
+); // ukryj listę w ustawienaich
+
+protectedRouter.get('/:eventId/prepare-list/items', eventsPrepareListRouter.getEventPrepareListItems); // pobierz wszystkie itemy z listy
+protectedRouter.post('/:eventId/prepare-list/items', eventsPrepareListRouter.createEventPrepareListItem); // dodaj nowy item do listy
+protectedRouter.delete('/:eventId/prepare-list/items/:itemId', eventsPrepareListRouter.deleteEventPrepareListItem); // usuń item z listy (dla administratora)
+protectedRouter.post(
+  '/:eventId/prepare-list/items/:itemId/participants-declared-toggle',
+  eventsPrepareListRouter.toggleParticipantDeclaration
+); // toggle participant declaration
+
+protectedRouter.post('/:eventId/prepare-list/items/:itemId/toggle-is-done', eventsPrepareListRouter.toggleIsItemDone); // toggle participant declaration is done
 
 const router = {
   publicRouter,

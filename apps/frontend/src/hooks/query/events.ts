@@ -1,5 +1,7 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import eventsAPI from '../../api/events';
+import eventPrepareListsAPI from '../../api/event-prepare-lists';
+
 import {
   EventDetailsType,
   GetAllEventsInputType,
@@ -116,4 +118,10 @@ export const useEventChatMessagesQuery = ({
       enabled,
     }
   );
+};
+
+export const useGetEventPrepareListItemsQuery = ({ eventId }: { eventId: string }) => {
+  return useQuery(['event-prepare-list', eventId], () => eventPrepareListsAPI.getEventPrepareListItems({ eventId }), {
+    retry: false,
+  });
 };

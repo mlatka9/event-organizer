@@ -4,6 +4,7 @@ import ChatMessagesList from '../../../../components/chat/chat-messages-list';
 import { useAuth } from '../../../../hooks/use-auth';
 import { EventChatInput } from './index';
 import { useEventChatMessagesQuery } from '../../../../hooks/query/events';
+import EventModuleWrapper from '../event-module-wrapper';
 
 interface EventChatProps {
   eventId: string;
@@ -20,7 +21,7 @@ const EventChat = ({ eventId }: EventChatProps) => {
   } = useEventChatMessagesQuery({ eventId, limit: 3 });
 
   return (
-    <div className={'bg-white'}>
+    <EventModuleWrapper headerText={'Czat'}>
       {user && <EventChatInput eventId={eventId} />}
       <ChatMessagesList
         messages={groupMessages}
@@ -28,7 +29,7 @@ const EventChat = ({ eventId }: EventChatProps) => {
         isMoreMessages={Boolean(hasNextPage)}
         fetchMoreMessages={fetchNextPage}
       />
-    </div>
+    </EventModuleWrapper>
   );
 };
 

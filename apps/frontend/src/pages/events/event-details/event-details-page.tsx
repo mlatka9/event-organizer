@@ -7,6 +7,8 @@ import Map from '../../../components/map';
 import dayjs from 'dayjs';
 import EventDatePoll from './event-date-poll/event-date.poll';
 import { EventChat } from './event-chat';
+import { EventPrepareList } from '../event-prepare-list';
+import clsx from 'clsx';
 
 const EventDetailsPage = () => {
   const params = useParams();
@@ -16,12 +18,17 @@ const EventDetailsPage = () => {
 
   if (!isSuccess) return <div>'loading details ....'</div>;
 
-  return (
-    <div className={'grid lg:grid-cols-[3fr_2fr] gap-5'}>
-      {eventData.isCurrentUserParticipant && eventData.isDatePollEnabled && <EventDatePoll eventId={eventId} />}
-      {eventData.isCurrentUserParticipant && eventData.isEventChatEnabled && <EventChat eventId={eventId} />}
-      <div className={'h-[1000px] bg-blue-50'}>main content</div>
+  const showLayoutWithModules =
+    eventData.isCurrentUserParticipant &&
+    (eventData.isDatePollEnabled || eventData.isEventChatEnabled || eventData.isEventPrepareListEnabled);
 
+  return (
+    <div className={clsx(showLayoutWithModules && 'grid lg:grid-cols-[3fr_2fr] gap-10')}>
+      <div className={'space-y-5'}>
+        {eventData.isCurrentUserParticipant && eventData.isEventChatEnabled && <EventChat eventId={eventId} />}
+        {eventData.isCurrentUserParticipant && eventData.isDatePollEnabled && <EventDatePoll eventId={eventId} />}
+        {eventData.isCurrentUserParticipant && eventData.isEventPrepareListEnabled && <EventPrepareList />}
+      </div>
       <div className={'space-y-5 row-start-1 lg:col-start-2'}>
         <div className={'rounded-2xl shadow-md bg-white'}>
           <div className={'p-3'}>

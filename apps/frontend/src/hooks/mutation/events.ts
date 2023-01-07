@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import eventsAPI from '../../api/events';
+import eventPrepareListsAPI from '../../api/event-prepare-lists';
 import { EventDatePollType, ToggleDatePollSchemaInputType } from '@event-organizer/shared-types';
-import groupsAPI from '../../api/groups';
 
 export const useCreateEventMutation = (onSuccess?: (eventData: { eventId: string }) => void) => {
   return useMutation(eventsAPI.createEvent, {
@@ -205,6 +205,60 @@ export const useCreateEventChatMessageMutation = (onSuccess?: () => void) => {
     onSuccess: () => {
       queryClient.invalidateQueries(['event-chat-messages']);
       onSuccess && onSuccess();
+    },
+  });
+};
+
+export const useCreateEventPrepareListMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation(eventPrepareListsAPI.createEventPrepareList, {
+    onSuccess: async () => {
+      queryClient.invalidateQueries(['event']);
+    },
+  });
+};
+
+export const useDeleteEventPrepareListMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation(eventPrepareListsAPI.hideEventPrepareList, {
+    onSuccess: async () => {
+      queryClient.invalidateQueries(['event']);
+    },
+  });
+};
+
+export const useCreateEventPrepareListItemsMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation(eventPrepareListsAPI.createEventPrepareListItems, {
+    onSuccess: async () => {
+      queryClient.invalidateQueries(['event-prepare-list']);
+    },
+  });
+};
+
+export const useToggleParticipantDeclarationMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation(eventPrepareListsAPI.toggleParticipantDeclaration, {
+    onSuccess: async () => {
+      queryClient.invalidateQueries(['event-prepare-list']);
+    },
+  });
+};
+
+export const useToggleIsItemDoneMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation(eventPrepareListsAPI.toggleIsItemDone, {
+    onSuccess: async () => {
+      queryClient.invalidateQueries(['event-prepare-list']);
+    },
+  });
+};
+
+export const useDeleteEventPrepareListItemMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation(eventPrepareListsAPI.deleteEventPrepareListItem, {
+    onSuccess: async () => {
+      queryClient.invalidateQueries(['event-prepare-list']);
     },
   });
 };

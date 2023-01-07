@@ -138,6 +138,11 @@ const getEventInfo = async (req: Request, res: Response) => {
           isEnabled: true,
         },
       },
+      eventPrepareList: {
+        select: {
+          isEnabled: true,
+        },
+      },
     },
   });
 
@@ -175,6 +180,7 @@ const getEventInfo = async (req: Request, res: Response) => {
       tags: event.tags.map((t) => t.name),
       isDatePollEnabled: event.eventDatePoll?.isEnabled || false,
       isEventChatEnabled: event.eventChat?.isEnabled || false,
+      isEventPrepareListEnabled: event.eventPrepareList?.isEnabled || false,
     };
     res.json(formattedEvent);
   } else {
@@ -256,6 +262,7 @@ const getAll = async (req: Request, res: Response) => {
           : undefined,
       },
       eventLocationStatus: locationStatus === 'STATIONARY' || locationStatus === 'ONLINE' ? locationStatus : undefined,
+      eventVisibilityStatus: 'PUBLIC',
     },
     include: {
       _count: true,

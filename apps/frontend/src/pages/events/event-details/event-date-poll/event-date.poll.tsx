@@ -11,6 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useCreateDatePollOptionMutation } from '../../../../hooks/mutation/events';
 import { useEventDetails } from '../../../../layouts/events-layout';
+import EventModuleWrapper from '../event-module-wrapper';
 
 interface EventDatePollProps {
   eventId: string;
@@ -79,11 +80,7 @@ const EventDatePoll = ({ eventId }: EventDatePollProps) => {
   const minStartDate = dayjs(new Date()).format('YYYY-MM-DD[T]hh:mm');
 
   return (
-    <div className={'bg-white rounded-lg shadow-md h-fit'}>
-      <div className={'flex justify-between px-5 py-3 '}>
-        <p className={'font-semibold text-lg'}>Wybór terminu</p>
-      </div>
-      <hr />
+    <EventModuleWrapper headerText={'Wybór terminu'}>
       {selectedOption && (
         <div className={'p-5'}>
           <p className={'font-semibold mb-3 text-sm'}>Obecnie wybrana data wydarzenia</p>
@@ -158,7 +155,7 @@ const EventDatePoll = ({ eventId }: EventDatePollProps) => {
           <PlusIcon className={'fill-blue-600'} /> <span className={'ml-2'}>Dodaj nowy termin</span>
         </Button>
       </form>
-    </div>
+    </EventModuleWrapper>
   );
 };
 

@@ -80,3 +80,12 @@ export const updateEventTimeSchema = z.object({
     .refine((date) => (date ? isISODate(date) : true), { message: 'Nieprawidłowy format daty' })
     .optional(),
 });
+
+export const createEventPrepareItemInput = z.object({
+  description: z.string().min(1, { message: 'Opis jest wymagany' }),
+  participantsLimit: z.preprocess((val) => val && Number(val), z.number()),
+});
+
+export const toggleIsItemDoneInput = z.object({
+  participantId: z.string().min(1, { message: 'Id użytkownika jest wymagany' }),
+});

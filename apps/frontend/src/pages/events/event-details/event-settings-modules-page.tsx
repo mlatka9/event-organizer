@@ -2,20 +2,29 @@ import { useEventDetails } from '../../../layouts/events-layout';
 import {
   useCreateEventChatMutation,
   useCreateEventDatePoll,
-  useCreateEventMutation,
+  useCreateEventPrepareListMutation,
   useDeleteEventChatMutation,
   useDeleteEventDatePoll,
+  useDeleteEventPrepareListMutation,
 } from '../../../hooks/mutation/events';
 import Button from '../../../components/common/button';
 import EventDatePoll from './event-date-poll/event-date.poll';
+import { EventPrepareList } from '../event-prepare-list';
 
 const EventSettingsModulesPage = () => {
   const { event } = useEventDetails();
+
   const { mutate: createEventDatePoll, isLoading: isCreateLoading } = useCreateEventDatePoll(event.id);
   const { mutate: deleteEventDatePoll, isLoading: isDeleteLoading } = useDeleteEventDatePoll(event.id);
 
   const { mutate: createEventChat, isLoading: isCreateEventChatLoading } = useCreateEventChatMutation(event.id);
   const { mutate: deleteEventChat, isLoading: isDeleteEventChatLoading } = useDeleteEventChatMutation(event.id);
+
+  const { mutate: createEventPrepareList, isLoading: isCreateEventPrepareListLoading } =
+    useCreateEventPrepareListMutation();
+
+  const { mutate: deleteEventPrepareList, isLoading: isDeleteEventPrepareListLoading } =
+    useDeleteEventPrepareListMutation();
 
   const handleCreateEventDatePoll = () => {
     createEventDatePoll({
@@ -37,6 +46,18 @@ const EventSettingsModulesPage = () => {
 
   const handleDeleteEventChat = () => {
     deleteEventChat({
+      eventId: event.id,
+    });
+  };
+
+  const handleCreateEventPrepareList = () => {
+    createEventPrepareList({
+      eventId: event.id,
+    });
+  };
+
+  const handleDeleteEventPrepareList = () => {
+    deleteEventPrepareList({
       eventId: event.id,
     });
   };
@@ -68,6 +89,7 @@ const EventSettingsModulesPage = () => {
             </div>
           )}
         </div>
+
         <div>
           <div className={'flex items-start justify-between'}>
             <div>
@@ -86,6 +108,28 @@ const EventSettingsModulesPage = () => {
               </Button>
             )}
           </div>
+        </div>
+        <div>
+          <div className={'flex items-start justify-between'}>
+            <div>
+              <h3 className={'text-lg text-gray-600 font-semibold'}>Lista do przygotowania</h3>
+              <p className={'text-sm text-gray-400 '}>Każdy uczestnik może zaangażowac się w przygotowania.</p>
+            </div>
+            {event.isEventPrepareListEnabled ? (
+              <Button onClick={handleDeleteEventPrepareList} disabled={isDeleteEventPrepareListLoading}>
+                Dezaktywuj
+              </Button>
+            ) : (
+              <Button onClick={handleCreateEventPrepareList} disabled={isCreateEventPrepareListLoading}>
+                Aktywuj
+              </Button>
+            )}
+          </div>
+          {event.isEventPrepareListEnabled && (
+            <div className={'mt-10'}>
+              <EventPrepareList />
+            </div>
+          )}
         </div>
       </div>
     </div>

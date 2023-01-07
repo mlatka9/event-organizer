@@ -2,11 +2,13 @@ import { z } from 'zod';
 import {
   createDatePollOptionSchema,
   createEventInvitationSchema,
+  createEventPrepareItemInput,
   createEventSchema,
   getAllEventsSchema,
   searchGroupsToShareEventSchema,
   searchUserToEventInvitationSchema,
   toggleDatePollSchema,
+  toggleIsItemDoneInput,
   updateEventTimeSchema,
 } from '../schemas';
 import { EventRole } from '@prisma/client';
@@ -19,6 +21,8 @@ export type SearchGroupsToShareEventInputType = z.infer<typeof searchGroupsToSha
 export type ToggleDatePollSchemaInputType = z.infer<typeof toggleDatePollSchema>;
 export type CreateDatePollOptionInputType = z.infer<typeof createDatePollOptionSchema>;
 export type UpdateEventTimeInputType = z.infer<typeof updateEventTimeSchema>;
+export type CreateEventPrepareItemInputType = z.infer<typeof createEventPrepareItemInput>;
+export type ToggleIsItemDoneInputType = z.infer<typeof toggleIsItemDoneInput>;
 
 export interface PrivateEventType {
   id: string;
@@ -84,6 +88,7 @@ export interface EventDetailsType {
   eventLocationStatus: 'STATIONARY' | 'ONLINE';
   isDatePollEnabled: boolean;
   isEventChatEnabled: boolean;
+  isEventPrepareListEnabled: boolean;
 }
 
 export interface EventInvitationType {
@@ -144,4 +149,17 @@ export interface EventDatePollType {
   id: string;
   isEnabled: boolean;
   options: EventDatePollOptionType[];
+}
+
+export interface EventPrepareItem {
+  id: string;
+  description: string;
+  participantsLimit: number;
+  isItemDone: boolean;
+  declaredParticipants: {
+    isDone: boolean;
+    id: string;
+    name: string;
+    image: string | null;
+  }[];
 }

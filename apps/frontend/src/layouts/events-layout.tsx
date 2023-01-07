@@ -182,18 +182,21 @@ const EventLayout = () => {
                         pobierz link
                       </span>
                     </button>
-                    <button
-                      className={'hover:bg-blue-50 p-3 w-full flex items-center group transition-colors'}
-                      onClick={() => {
-                        setIsSharePopupOpen(false);
-                        setIsShareModalOpen(true);
-                      }}
-                    >
-                      <UserIcon className={'group-hover:fill-blue-900 transition-all'} />
-                      <span className={'ml-2 text-gray-500 group-hover:text-blue-900 transition-all'}>
-                        Udostępnij na grupie
-                      </span>
-                    </button>
+
+                    {event.eventVisibilityStatus === 'PUBLIC' && (
+                      <button
+                        className={'hover:bg-blue-50 p-3 w-full flex items-center group transition-colors'}
+                        onClick={() => {
+                          setIsSharePopupOpen(false);
+                          setIsShareModalOpen(true);
+                        }}
+                      >
+                        <UserIcon className={'group-hover:fill-blue-900 transition-all'} />
+                        <span className={'ml-2 text-gray-500 group-hover:text-blue-900 transition-all'}>
+                          Udostępnij na grupie
+                        </span>
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

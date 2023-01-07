@@ -53,6 +53,7 @@
     "socket.io": "^4.5.4",
     "tslib": "^2.3.0",
     "use-breakpoint": "^3.0.4",
+    "usehooks-ts": "^2.9.1",
     "uuid": "^9.0.0",
     "zod": "^3.19.1",
     "zod-error": "^1.0.5"

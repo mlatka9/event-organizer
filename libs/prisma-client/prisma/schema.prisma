@@ -63,6 +63,7 @@ model Event {
   sharedInGroups                EventSharedInGroup[]
   eventDatePoll                 EventDatePoll?
   eventChat                     EventChat?
+  eventPrepareList              EventPrepareList?
 }
 
 model Group {
@@ -103,11 +104,12 @@ model UsersInGroup {
 }
 
 model EventParticipant {
-  role    EventRole @default(USER)
-  user    User      @relation(fields: [userId], references: [id])
-  userId  String
-  event   Event     @relation(fields: [eventId], references: [id])
-  eventId String
+  role                           EventRole                        @default(USER)
+  user                           User                             @relation(fields: [userId], references: [id])
+  userId                         String
+  event                          Event                            @relation(fields: [eventId], references: [id])
+  eventId                        String
+  eventParticipantDeclaredToItem EventParticipantDeclaredToItem[]
 
   @@id([userId, eventId])
 }
@@ -213,6 +215,35 @@ model UsersSelectedDatePollOption {
   eventDatePollOptionId String
 
   @@unique([participantId, eventDatePollOptionId])
+}
+
+model EventPrepareList {
+  id                String             @id @default(cuid())
+  isEnabled         Boolean            @default(false)
+  event             Event              @relation(fields: [eventId], references: [id])
+  eventId           String             @unique
+  eventPrepareItems EventPrepareItem[]
+}
+
+model EventPrepareItem {
+  id                   String                           @id @default(cuid())
+  participantsLimit    Int
+  description          String
+  declaredParticipants EventParticipantDeclaredToItem[]
+  eventPrepareList     EventPrepareList                 @relation(fields: [eventPrepareListId], references: [id])
+  eventPrepareListId   String
+}
+
+model EventParticipantDeclaredToItem {
+  isDone               Boolean
+  eventParticipant EventParticipant @relation(fields: [participantId, eventId], references: [userId, eventId], onDelete: Cascade)
+  participantId    String
+  eventId          String
+
+  eventPrepareItem   EventPrepareItem @relation(fields: [eventPrepareItemId], references: [id], onDelete: Cascade)
+  eventPrepareItemId String
+
+  @@unique([participantId, eventId, eventPrepareItemId])
 }
 
 enum EventRole {
