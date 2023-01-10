@@ -66,6 +66,8 @@ const logout = async (req: Request, res: Response) => {
 const me = async (req: Request, res: Response) => {
   const session = await getLoginSession(req);
 
+  console.log('SESSION', session);
+
   if (!session) {
     res.status(401).end('Authentication token is invalid, please log in');
     return;

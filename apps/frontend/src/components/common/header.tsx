@@ -59,7 +59,11 @@ const Header = ({ hasLoginButtons = true }: HeaderProps) => {
         </div>
         <div className={'mt-auto'}>
           {user ? (
-            <div className={'flex items-center cursor-pointer relative'} onClick={toggleDownDownOpen}>
+            <div
+              className={'flex items-center cursor-pointer relative'}
+              onClick={toggleDownDownOpen}
+              data-cy="settings-button"
+            >
               <img src={user.image || AvatarFallback} className={'w-10 h-10 rounded-full mr-3 object-cover'} />
               <p className={'mr-3 text-white'}>{user.name}</p>
               <SettingsIcon width={'18'} height={'18'} className={'ml-auto fill-white'} />
@@ -68,10 +72,15 @@ const Header = ({ hasLoginButtons = true }: HeaderProps) => {
           ) : (
             hasLoginButtons && (
               <div className={'flex justify-between'}>
-                <Button className={'px-[8px]'} onClick={() => navigate('/login')}>
+                <Button className={'px-[8px]'} onClick={() => navigate('/login')} data-cy="login-button">
                   Zaloguj się
                 </Button>
-                <Button className={'px-[8px]'} kind={'secondary'} onClick={() => navigate('/register')}>
+                <Button
+                  className={'px-[8px]'}
+                  kind={'secondary'}
+                  onClick={() => navigate('/register')}
+                  data-cy="register-button"
+                >
                   Zarejestruj się
                 </Button>
               </div>

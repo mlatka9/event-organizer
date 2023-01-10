@@ -108,7 +108,9 @@ const EventsPage = () => {
   return (
     <div className={'mt-5 lg:mt-10'}>
       <div className={'flex items-center flex-row-reverse gap-3 lg:flex-row mb-20'}>
-        <h1 className={'font-semibold text-3xl '}>Wydarzenia</h1>
+        <h1 className={'font-semibold text-3xl'} data-cy="events-page-header">
+          Wydarzenia
+        </h1>
         {user && (
           <Link
             to={'/events/create'}

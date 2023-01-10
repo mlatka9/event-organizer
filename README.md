@@ -1,3 +1,6 @@
+npx env-cmd -f .env.test nx run server:serve
+nx e2e frontend-e2e
+
 # Organizator wydarzeń
 
 ## Opis

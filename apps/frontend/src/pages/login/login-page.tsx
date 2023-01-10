@@ -5,7 +5,7 @@ import FormInput from '../../components/form/form-input';
 import Button from '../../components/common/button';
 import { useAuth } from '../../hooks/use-auth';
 import fireCampImage from '../../assets/images/fire-camp.jpg';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 
 const schema = z.object({
   email: z.string().email({ message: 'Wprowadz poprawny adres email' }),
@@ -16,6 +16,7 @@ type LoginFormInput = z.infer<typeof schema>;
 
 const LoginPage = () => {
   const { login, user, isLoading } = useAuth();
+  const navigate = useNavigate();
 
   const {
     register,
@@ -33,6 +34,7 @@ const LoginPage = () => {
   const onSubmit = (data: LoginFormInput) => {
     login({
       credentials: { email: data.email, password: data.password },
+      onSuccess: () => navigate('/events'),
       onError: () => setError('password', { message: 'Niepoprawny email lub hasło' }),
     });
   };
@@ -80,7 +82,7 @@ const LoginPage = () => {
               type={'password'}
               error={errors.password}
             />
-            <Button type={'submit'} className={'ml-auto'}>
+            <Button type={'submit'} className={'ml-auto'} data-cy="submit">
               Potwierdź
             </Button>
           </form>

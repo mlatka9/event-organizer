@@ -37,7 +37,7 @@ const HomePage = () => {
   return (
     <div className={'overflow-hidden px-2'}>
       <div className={'flex justify-between lg:p-5'}>
-        <Link to={'/events'}>
+        <Link to={'/events'} data-cy="logo">
           <div className={'font-semibold text-blue-900 text-2xl'}>Organizator wydarzeń</div>
         </Link>
         {!user && (

@@ -10,6 +10,7 @@ const Hamburger = ({ isMenuOpen, onClick }: HamburgerProps) => {
     <div
       className="shadow-md lg:hidden z-40 flex items-center justify-center w-12 h-12 pb-[1px] transition-all duration-300 bg-white rounded-full cursor-pointer hover:bg-white-creamy-light"
       onClick={onClick}
+      data-cy="hamburger"
     >
       <button className={clsx([' shrink-0 w-6 h-5  flex justify-end items-center relative '])}>
         <span

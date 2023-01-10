@@ -237,6 +237,7 @@ const getAll = async (req: Request, res: Response) => {
           : undefined,
       },
       eventLocationStatus: locationStatus === 'STATIONARY' || locationStatus === 'ONLINE' ? locationStatus : undefined,
+      eventVisibilityStatus: 'PUBLIC',
     },
   });
 
@@ -277,7 +278,7 @@ const getAll = async (req: Request, res: Response) => {
     },
   });
 
-  console.log('events', events);
+  // console.log('events', events);
 
   const formattedEvents = events.map((event) => ({
     id: event.id,
@@ -295,11 +296,11 @@ const getAll = async (req: Request, res: Response) => {
 
   const publicEvents = formattedEvents.filter(isPublicEvent);
 
-  console.log('formattedEvents', formattedEvents);
-  console.log('publicEvents', publicEvents);
+  // console.log('formattedEvents', formattedEvents);
+  // console.log('publicEvents', publicEvents);
   // const privateEvents = formattedEvents.filter(isPrivateEvent);
 
-  const eventShowcases: EventShowcaseType[] = [...publicEvents];
+  const eventShowcases = [...publicEvents];
 
   res.status(200).json({ events: eventShowcases, currentPage: +page, pageCount: Math.ceil(eventsCount / +limit) });
 };
@@ -788,6 +789,19 @@ const updateEvent = async (req: Request, res: Response) => {
 
   if (!req.userId) {
     throw new Error('No userId in req object');
+  }
+
+  const eventParticipant = await prisma.eventParticipant.findUnique({
+    where: {
+      userId_eventId: {
+        eventId,
+        userId: req.userId,
+      },
+    },
+  });
+
+  if (!eventParticipant || eventParticipant.role !== 'ADMIN') {
+    throw new UnauthenticatedError('You dont have permission do update this event');
   }
 
   const eventData = validation.data;

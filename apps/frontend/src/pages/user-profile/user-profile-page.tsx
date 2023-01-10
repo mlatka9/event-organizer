@@ -37,7 +37,11 @@ const UserProfilePage = () => {
           <p className={'text-md lg:text-xl font-semibold mb-5'}>
             Dołączył {dayjs(user.joinedAt).format('DD.MM.YYYY')}
           </p>
-          {user.isMe && <Button onClick={toggleIsModalOpen}>Edytuj profil</Button>}
+          {user.isMe && (
+            <Button onClick={toggleIsModalOpen} data-cy="edit-profile-button">
+              Edytuj profil
+            </Button>
+          )}
         </div>
       </div>
       {user.favouriteCategories.length > 0 && (

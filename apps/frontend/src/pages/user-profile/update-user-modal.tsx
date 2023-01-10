@@ -41,7 +41,7 @@ const UpdateUserModal = ({
   } = useForm<UpdateUserFormType>({
     resolver: zodResolver(updateUserSchema),
     defaultValues: {
-      image: currentImage || undefined,
+      image: currentImage || null,
       name: currentName,
       favouriteCategories: currentFavouriteCategories.map((c) => c.name),
     },
@@ -54,6 +54,8 @@ const UpdateUserModal = ({
     });
     handleCloseModal();
   };
+
+  console.log('errors', errors);
 
   const onError = (error: APIError) => {
     if (error.response?.status === 409) {
@@ -101,7 +103,7 @@ const UpdateUserModal = ({
     <ModalWrapper title={'Edytuj profil'} handleCloseModal={handleCloseModal}>
       <form onSubmit={handleSubmit(onSubmit)} className={'space-y-3 flex flex-col'}>
         <FormInput label={'name'} name={'name'} register={register} error={errors.name} />
-        <FormInput label={'image'} name={'image'} register={register} error={errors.image} />
+        {/*<FormInput label={'image'} name={'image'} register={register} error={errors.image} />*/}
         <FormImageUploader addImage={addImage} removeImage={removeImage} selectedImage={selectedImage} />
 
         <div className={'!mt-10'}>
@@ -123,7 +125,7 @@ const UpdateUserModal = ({
                 ))}
           </div>
         </div>
-        <Button className={'ml-auto !mt-20'} disabled={isLoading} isLoading={isLoading}>
+        <Button className={'ml-auto !mt-20'} disabled={isLoading} isLoading={isLoading} data-cy="submit-button">
           Zatwierdź
         </Button>
       </form>

@@ -13,6 +13,8 @@ import {
 } from '../schemas';
 import { EventRole } from '@prisma/client';
 
+type a = z.infer<typeof createEventSchema>;
+
 export type CreateEventInputType = z.infer<typeof createEventSchema>;
 export type GetAllEventsInputType = z.infer<typeof getAllEventsSchema>;
 export type CreateEventInvitationInputType = z.infer<typeof createEventInvitationSchema>;
