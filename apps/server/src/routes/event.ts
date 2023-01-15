@@ -13,6 +13,7 @@ publicRouter.get('/:id', eventsRouter.getEventInfo);
 publicRouter.get('/:eventId/users', eventsRouter.getAllParticipants);
 
 protectedRouter.post('/', eventsRouter.create);
+protectedRouter.delete('/:eventId', eventsRouter.deleteEvent);
 protectedRouter.put('/:eventId', eventsRouter.updateEvent);
 protectedRouter.patch('/:eventId', eventsRouter.updateEventTime);
 

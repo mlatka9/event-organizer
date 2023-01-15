@@ -262,3 +262,13 @@ export const useDeleteEventPrepareListItemMutation = () => {
     },
   });
 };
+
+export const useDeleteEventMutation = (onSuccess: () => void) => {
+  const queryClient = useQueryClient();
+  return useMutation(eventsAPI.deleteEvent, {
+    onSuccess: async () => {
+      onSuccess();
+      queryClient.invalidateQueries();
+    },
+  });
+};

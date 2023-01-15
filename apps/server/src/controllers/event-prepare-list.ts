@@ -4,7 +4,6 @@ import { NotFoundError } from '../errors/not-found';
 import { createEventPrepareItemInput, EventPrepareItem, toggleIsItemDoneInput } from '@event-organizer/shared-types';
 import { generateErrorMessage } from 'zod-error';
 import { BadRequestError, ValidationError } from '../errors';
-import { ConflictError } from '../errors/conflict';
 
 const createEventPrepareList = async (req: Request, res: Response) => {
   const eventId = req.params.eventId;

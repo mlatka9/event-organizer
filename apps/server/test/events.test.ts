@@ -1,4 +1,4 @@
-import { clearDB, agent, createTestUser, loginAsUser } from './utils';
+import { clearDB, agent, createTestUsers, loginAsUser } from './utils';
 
 const newEventData = {
   name: 'Dzień sportu',
@@ -21,16 +21,14 @@ const newEventData = {
 
 describe('Events routes', () => {
   beforeAll((done) => {
-    // await clearDB();
-    // await createTestUser();
     clearDB()
-      .then(createTestUser)
+      .then(createTestUsers)
       .then(() => done());
   });
 
   test('POST /api/events - logged user can create new event', async () => {
     try {
-      await loginAsUser('test@test.test');
+      await loginAsUser('admin@test.test');
     } catch (err) {
       console.log(err);
     }
@@ -95,8 +93,10 @@ describe('Events routes', () => {
   });
 
   test('PUT /api/events - user who is not admin cannot update event', async () => {
-    await loginAsUser('test2@test.test');
+    await loginAsUser('normal@test.test');
     const allEventsResponse = await agent.get('/api/events');
+    console.log('AAA', allEventsResponse.body);
+
     const eventToUpdateId = allEventsResponse.body.events[0].id;
 
     const updateEventResponse = await agent

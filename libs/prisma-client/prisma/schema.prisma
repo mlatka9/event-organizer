@@ -83,7 +83,7 @@ model Group {
 model EventSharedInGroup {
   group     Group    @relation(fields: [groupId], references: [id])
   groupId   String
-  event     Event    @relation(fields: [eventId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId   String
   createdAt DateTime @default(now())
   userId    String
@@ -107,7 +107,7 @@ model EventParticipant {
   role                           EventRole                        @default(USER)
   user                           User                             @relation(fields: [userId], references: [id])
   userId                         String
-  event                          Event                            @relation(fields: [eventId], references: [id])
+  event                          Event                            @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId                        String
   eventParticipantDeclaredToItem EventParticipantDeclaredToItem[]
 
@@ -143,7 +143,7 @@ model EventInvitation {
   id              String   @id @default(cuid())
   user            User     @relation(fields: [userId], references: [id])
   userId          String
-  event           Event    @relation(fields: [eventId], references: [id])
+  event           Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId         String
   isUserAccepted  Boolean
   isAdminAccepted Boolean
@@ -173,7 +173,7 @@ model EventTag {
 model EventChat {
   id                String             @id @default(cuid())
   isEnabled         Boolean            @default(false)
-  event             Event              @relation(fields: [eventId], references: [id])
+  event             Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId           String             @unique
   eventChatMessages EventChatMessage[]
 }
@@ -186,7 +186,7 @@ model EventChatMessage {
   author   User   @relation(fields: [authorId], references: [id])
   authorId String
 
-  eventChat   EventChat @relation(fields: [eventChatId], references: [id])
+  eventChat   EventChat @relation(fields: [eventChatId], references: [id], onDelete: Cascade)
   eventChatId String
 
 }
@@ -194,7 +194,7 @@ model EventChatMessage {
 model EventDatePoll {
   id                   String                @id @default(cuid())
   isEnabled            Boolean               @default(false)
-  event                Event                 @relation(fields: [eventId], references: [id])
+  event                Event                 @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId              String                @unique
   eventDatePollOptions EventDatePollOption[]
 }
@@ -204,7 +204,7 @@ model EventDatePollOption {
   startDate                   DateTime
   endDate                     DateTime?
   usersSelectedDatePollOption UsersSelectedDatePollOption[]
-  eventDatePoll               EventDatePoll                 @relation(fields: [eventDatePollId], references: [id])
+  eventDatePoll               EventDatePoll                 @relation(fields: [eventDatePollId], references: [id], onDelete: Cascade)
   eventDatePollId             String
 }
 
@@ -220,7 +220,7 @@ model UsersSelectedDatePollOption {
 model EventPrepareList {
   id                String             @id @default(cuid())
   isEnabled         Boolean            @default(false)
-  event             Event              @relation(fields: [eventId], references: [id])
+  event             Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
   eventId           String             @unique
   eventPrepareItems EventPrepareItem[]
 }
@@ -230,7 +230,7 @@ model EventPrepareItem {
   participantsLimit    Int
   description          String
   declaredParticipants EventParticipantDeclaredToItem[]
-  eventPrepareList     EventPrepareList                 @relation(fields: [eventPrepareListId], references: [id])
+  eventPrepareList     EventPrepareList                 @relation(fields: [eventPrepareListId], references: [id], onDelete: Cascade)
   eventPrepareListId   String
 }
 
@@ -238,6 +238,7 @@ model EventParticipantDeclaredToItem {
   isDone               Boolean
   eventParticipant EventParticipant @relation(fields: [participantId, eventId], references: [userId, eventId], onDelete: Cascade)
   participantId    String
+
   eventId          String
 
   eventPrepareItem   EventPrepareItem @relation(fields: [eventPrepareItemId], references: [id], onDelete: Cascade)

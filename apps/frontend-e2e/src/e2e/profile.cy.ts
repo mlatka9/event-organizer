@@ -3,7 +3,7 @@ import { loginUser } from '../support/utils';
 describe('profile', () => {
   beforeEach(() => cy.visit('/'));
 
-  it('show login validation errors when passed wrong data', () => {
+  it('allow user to change username', () => {
     loginUser();
     cy.get('[data-cy="hamburger"]').click();
     cy.get('[data-cy="settings-button"]').click();

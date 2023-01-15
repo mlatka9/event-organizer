@@ -1,12 +1,21 @@
 import EventForm from '../create-event/event-form';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../../hooks/use-auth';
 import { toast } from 'react-toastify';
-import { useUpdateEventMutation } from '../../../hooks/mutation/events';
+import { useDeleteEventMutation, useUpdateEventMutation } from '../../../hooks/mutation/events';
 import { CreateEventFormType } from '../create-event/use-create-event';
-import React from 'react';
+import React, { useState } from 'react';
 import { useEventInfoQuery } from '../../../hooks/query/events';
+import Button from '../../../components/common/button';
+import ModalWrapper from '../../../components/common/modal-wrapper';
+import event from '../../../../../server/src/routes/event';
 const EventSettingsPage = () => {
+  const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
   const params = useParams();
   const eventId = params['id'] as string;
   const { user, isLoading: isUserLoading } = useAuth();
@@ -18,8 +27,14 @@ const EventSettingsPage = () => {
   };
 
   const { data: defaultValues, isSuccess: isEventInfoSuccess } = useEventInfoQuery(eventId);
-
   const { mutate: updateEvent, isLoading } = useUpdateEventMutation(onSuccess);
+  const { mutate: deleteEvent, isLoading: isDeleteLoading } = useDeleteEventMutation(() => navigate('/events'));
+
+  const handleDeleteEvent = () => {
+    deleteEvent({
+      eventId,
+    });
+  };
 
   const onSubmit = async (data: CreateEventFormType) => {
     updateEvent({
@@ -56,7 +71,18 @@ const EventSettingsPage = () => {
 
   return (
     <div>
+      <Button kind={'error'} onClick={() => setIsModalOpen(true)}>
+        Usuń wydarzenie
+      </Button>
       <EventForm onSubmit={onSubmit} defaultValues={defaultValues} isUpdating={isLoading} />
+      {isModalOpen && (
+        <ModalWrapper title={'Usuń wydarzenie'} handleCloseModal={closeModal}>
+          <p>Czy napewno chcesz usuńąć wydarzenie</p>
+          <Button kind={'error'} onClick={handleDeleteEvent} disabled={isDeleteLoading}>
+            Usuń
+          </Button>
+        </ModalWrapper>
+      )}
     </div>
   );
 };

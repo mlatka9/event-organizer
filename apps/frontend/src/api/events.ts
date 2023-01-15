@@ -247,6 +247,13 @@ const createEventChatMessage = async ({ content, eventId }: createGroupMessageIn
   return data;
 };
 
+const deleteEvent = async ({ eventId }: { eventId: string }) => {
+  const { data } = await api.delete(`/events/${eventId}`, {
+    withCredentials: true,
+  });
+  return data;
+};
+
 const eventsAPI = {
   getEventDatePoll,
   createEventInvitation,
@@ -273,6 +280,7 @@ const eventsAPI = {
   hideEventChat,
   getEventChatMessages,
   createEventChatMessage,
+  deleteEvent,
 };
 
 export default eventsAPI;

@@ -21,7 +21,6 @@ const FormSelect = <TFormValues extends FieldValues>({
   name,
   error,
   options,
-
   ...props
 }: FormSelectProps<TFormValues>) => {
   return (

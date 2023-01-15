@@ -800,6 +800,8 @@ const updateEvent = async (req: Request, res: Response) => {
     },
   });
 
+  console.log('eventParticipant', eventParticipant);
+
   if (!eventParticipant || eventParticipant.role !== 'ADMIN') {
     throw new UnauthenticatedError('You dont have permission do update this event');
   }
@@ -1450,6 +1452,35 @@ const createEventChatMessage = async (req: Request, res: Response) => {
   res.status(201).json(message);
 };
 
+const deleteEvent = async (req: Request, res: Response) => {
+  const loggedUserId = req.userId;
+  if (!loggedUserId) {
+    throw new Error('no userId in req object');
+  }
+  const eventId = req.params.eventId;
+
+  const eventParticipant = await prisma.eventParticipant.findUnique({
+    where: {
+      userId_eventId: {
+        eventId,
+        userId: loggedUserId,
+      },
+    },
+  });
+
+  if (!eventParticipant || eventParticipant.role !== 'ADMIN') {
+    throw new UnauthenticatedError('You dont have permission do delete this event');
+  }
+
+  await prisma.event.delete({
+    where: {
+      id: eventId,
+    },
+  });
+
+  res.status(204).end();
+};
+
 export default {
   updateEvent,
   searchUsersToInvite,
@@ -1476,4 +1507,5 @@ export default {
   hideEventChat,
   getEventChatMessages,
   createEventChatMessage,
+  deleteEvent,
 };

@@ -1,14 +1,17 @@
-import { clearDB, agent } from './utils';
+import { clearDB, agent, createTestUsers } from './utils';
 
 describe('Auth routes', () => {
   beforeAll((done) => {
-    clearDB().then(() => done());
+    clearDB()
+      .then(createTestUsers)
+      .then(() => done());
+    // clearDB().then(() => done());
   });
 
   test('/api/auth/register - User can register', async () => {
     const res = await agent
       .post('/api/auth/register')
-      .send({ email: 'test@test.test', password: 'test123', name: 'testuser' })
+      .send({ email: 'newtest@test.test', password: 'test123', name: 'newtestuser' })
       .set('Accept', 'application/json');
 
     expect(res.status).toEqual(201);
@@ -17,11 +20,11 @@ describe('Auth routes', () => {
   test('/api/auth/login - User can login with valid credentials', async () => {
     const res = await agent
       .post('/api/auth/login')
-      .send({ email: 'test@test.test', password: 'test123' })
+      .send({ email: 'normal@test.test', password: 'normal123' })
       .set('Accept', 'application/json');
 
     expect(res.status).toEqual(200);
-    expect(res.body.user.name).toEqual('testuser');
+    expect(res.body.user.name).toEqual('userNormal');
   });
 
   test('/api/auth/me User can get info about himself', async () => {
@@ -34,7 +37,7 @@ describe('Auth routes', () => {
         expiredAt: expect.any(String),
         user: expect.objectContaining({
           userId: expect.any(String),
-          name: 'testuser',
+          name: 'userNormal',
           image: null,
         }),
       })
@@ -44,7 +47,7 @@ describe('Auth routes', () => {
   test('/api/auth/logout User can logout', async () => {
     const MeRes = await agent.get('/api/auth/me').set('Accept', 'application/json');
     expect(MeRes.status).toEqual(200);
-    expect(MeRes.body.user.name).toEqual('testuser');
+    expect(MeRes.body.user.name).toEqual('userNormal');
 
     const res = await agent.get('/api/auth/logout');
     expect(res.status).toEqual(200);
