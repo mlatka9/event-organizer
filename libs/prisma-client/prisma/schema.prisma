@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch"]
 }
 
@@ -12,16 +12,21 @@ datasource db {
 }
 
 model User {
-  id                      String                    @id @default(cuid())
-  email                   String                    @unique
-  name                    String
-  hashPassword            String
-  eventParticipants       EventParticipant[]
-  image                   String?
-  groups                  UsersInGroup[]
-  favouriteCategories     UserFavouriteCategories[]
-  joinedAt                DateTime                  @default(now())
-  pendingEventInvitations EventInvitation[]
+  id                          String                        @id @default(cuid())
+  email                       String                        @unique
+  name                        String                        @unique
+  hashPassword                String
+  eventParticipants           EventParticipant[]
+  image                       String?
+  groups                      UsersInGroup[]
+  favouriteCategories         UserFavouriteCategories[]
+  joinedAt                    DateTime                      @default(now())
+  pendingEventInvitations     EventInvitation[]
+  pendingGroupInvitations     GroupInvitation[]
+  eventsSharedInGroups        EventSharedInGroup[]
+  GroupMessages               GroupMessage[]
+  usersSelectedDatePollOption UsersSelectedDatePollOption[]
+  eventChatMessages           EventChatMessage[]
 }
 
 model UserFavouriteCategories {
@@ -44,6 +49,7 @@ model Event {
   country                       String?
   postCode                      String?
   startDate                     DateTime?
+  endDate                       DateTime?
   latitude                      Decimal?
   longitude                     Decimal?
   bannerImage                   String?
@@ -54,15 +60,36 @@ model Event {
   categoryId                    String
   category                      Category              @relation(fields: [categoryId], references: [id])
   pendingParticipantInvitations EventInvitation[]
+  sharedInGroups                EventSharedInGroup[]
+  eventDatePoll                 EventDatePoll?
+  eventChat                     EventChat?
+  eventPrepareList              EventPrepareList?
 }
 
 model Group {
-  id          String         @id @default(cuid())
-  name        String
-  description String
-  memebrs     UsersInGroup[]
-  categoryId  String
-  category    Category       @relation(fields: [categoryId], references: [id])
+  id                       String               @id @default(cuid())
+  name                     String               @unique
+  description              String
+  members                  UsersInGroup[]
+  eventsShared             EventSharedInGroup[]
+  bannerImage              String?
+  categoryId               String
+  category                 Category             @relation(fields: [categoryId], references: [id])
+  visibility               GroupVisibility
+  pendingMemberInvitations GroupInvitation[]
+  GroupMessages            GroupMessage[]
+}
+
+model EventSharedInGroup {
+  group     Group    @relation(fields: [groupId], references: [id])
+  groupId   String
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId   String
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@id([groupId, eventId, userId])
 }
 
 model UsersInGroup {
@@ -77,11 +104,12 @@ model UsersInGroup {
 }
 
 model EventParticipant {
-  role    EventRole @default(USER)
-  user    User      @relation(fields: [userId], references: [id])
-  userId  String
-  event   Event     @relation(fields: [eventId], references: [id])
-  eventId String
+  role                           EventRole                        @default(USER)
+  user                           User                             @relation(fields: [userId], references: [id])
+  userId                         String
+  event                          Event                            @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId                        String
+  eventParticipantDeclaredToItem EventParticipantDeclaredToItem[]
 
   @@id([userId, eventId])
 }
@@ -90,6 +118,133 @@ model NormalizedCity {
   id     String  @id @default(cuid())
   name   String  @unique
   events Event[]
+}
+
+model Category {
+  id                String                    @id @default(cuid())
+  name              String
+  events            Event[]
+  favouritedByUsers UserFavouriteCategories[]
+  group             Group[]
+}
+
+model GroupMessage {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+  groupId   String
+  group     Group    @relation(fields: [groupId], references: [id])
+}
+
+model EventInvitation {
+  createdAt       DateTime @default(now())
+  id              String   @id @default(cuid())
+  user            User     @relation(fields: [userId], references: [id])
+  userId          String
+  event           Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId         String
+  isUserAccepted  Boolean
+  isAdminAccepted Boolean
+
+  @@unique([userId, eventId])
+}
+
+model GroupInvitation {
+  createdAt       DateTime @default(now())
+  id              String   @id @default(cuid())
+  user            User     @relation(fields: [userId], references: [id])
+  userId          String
+  group           Group    @relation(fields: [groupId], references: [id])
+  groupId         String
+  isUserAccepted  Boolean
+  isAdminAccepted Boolean
+
+  @@unique([userId, groupId])
+}
+
+model EventTag {
+  id     String  @id @default(cuid())
+  name   String  @unique
+  events Event[]
+}
+
+model EventChat {
+  id                String             @id @default(cuid())
+  isEnabled         Boolean            @default(false)
+  event             Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId           String             @unique
+  eventChatMessages EventChatMessage[]
+}
+
+model EventChatMessage {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String
+
+  eventChat   EventChat @relation(fields: [eventChatId], references: [id], onDelete: Cascade)
+  eventChatId String
+
+}
+
+model EventDatePoll {
+  id                   String                @id @default(cuid())
+  isEnabled            Boolean               @default(false)
+  event                Event                 @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId              String                @unique
+  eventDatePollOptions EventDatePollOption[]
+}
+
+model EventDatePollOption {
+  id                          String                        @id @default(cuid())
+  startDate                   DateTime
+  endDate                     DateTime?
+  usersSelectedDatePollOption UsersSelectedDatePollOption[]
+  eventDatePoll               EventDatePoll                 @relation(fields: [eventDatePollId], references: [id], onDelete: Cascade)
+  eventDatePollId             String
+}
+
+model UsersSelectedDatePollOption {
+  participant           User                @relation(fields: [participantId], references: [id])
+  participantId         String
+  eventDatePollOption   EventDatePollOption @relation(fields: [eventDatePollOptionId], references: [id], onDelete: Cascade)
+  eventDatePollOptionId String
+
+  @@unique([participantId, eventDatePollOptionId])
+}
+
+model EventPrepareList {
+  id                String             @id @default(cuid())
+  isEnabled         Boolean            @default(false)
+  event             Event              @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId           String             @unique
+  eventPrepareItems EventPrepareItem[]
+}
+
+model EventPrepareItem {
+  id                   String                           @id @default(cuid())
+  participantsLimit    Int
+  description          String
+  declaredParticipants EventParticipantDeclaredToItem[]
+  eventPrepareList     EventPrepareList                 @relation(fields: [eventPrepareListId], references: [id], onDelete: Cascade)
+  eventPrepareListId   String
+}
+
+model EventParticipantDeclaredToItem {
+  isDone               Boolean
+  eventParticipant EventParticipant @relation(fields: [participantId, eventId], references: [userId, eventId], onDelete: Cascade)
+  participantId    String
+
+  eventId          String
+
+  eventPrepareItem   EventPrepareItem @relation(fields: [eventPrepareItemId], references: [id], onDelete: Cascade)
+  eventPrepareItemId String
+
+  @@unique([participantId, eventId, eventPrepareItemId])
 }
 
 enum EventRole {
@@ -102,6 +257,11 @@ enum GroupRole {
   ADMIN
 }
 
+enum GroupVisibility {
+  PRIVATE
+  PUBLIC
+}
+
 enum EventVisibilityStatus {
   PRIVATE
   PUBLIC
@@ -110,30 +270,4 @@ enum EventVisibilityStatus {
 enum EventLocationStatus {
   STATIONARY
   ONLINE
-}
-
-model Category {
-  id                String                    @id @default(cuid())
-  name              String
-  events            Event[]
-  favouritedByUsers UserFavouriteCategories[]
-  group             Group[]
-}
-
-model EventInvitation {
-  id              String  @id @default(cuid())
-  user            User    @relation(fields: [userId], references: [id])
-  userId          String
-  event           Event   @relation(fields: [eventId], references: [id])
-  eventId         String
-  isUserAccepted  Boolean
-  isAdminAccepted Boolean
-
-  @@unique([userId, eventId])
-}
-
-model EventTag {
-  id     String  @id @default(cuid())
-  name   String  @unique
-  events Event[]
 }

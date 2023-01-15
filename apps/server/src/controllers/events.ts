@@ -1,10 +1,9 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { prisma } from '@event-organizer/prisma-client';
 import { UnauthenticatedError, ValidationError } from '../errors';
 import { generateErrorMessage } from 'zod-error';
 import {
   createEventSchema,
-  CreateEventInputType,
   EventDetailsType,
   getAllEventsSchema,
   GetAllEventsInputType,
@@ -15,14 +14,25 @@ import {
   EventParticipant,
   searchUserToEventInvitationSchema,
   UserType,
-  PrivateEventType,
-  PublicEventType,
+  searchGroupsToShareEventSchema,
+  GroupType,
+  EventDatePollType,
+  createDatePollOptionSchema,
+  toggleDatePollSchema,
+  updateEventTimeSchema,
+  ToggleDatePollSchemaInputType,
+  getGroupMessagesQueryParamsSchema,
+  GroupMessageType,
+  GetGroupMessagesReturnType,
+  createGroupMessageSchema,
 } from '@event-organizer/shared-types';
 import { NotFoundError } from '../errors/not-found';
 import { getLoginSession } from '@event-organizer/auth';
 import { formatDisplayAddress } from '../lib/format-display-address';
-import { use } from 'passport';
-import { isPrivateEvent, isPublicEvent } from '../lib/events';
+import { isPublicEvent } from '../lib/events';
+import user from '../routes/user';
+import { optionsToId } from 'react-intersection-observer/observe';
+import { ConflictError } from '../errors/conflict';
 
 const addNormalizedCity = async (city: string | undefined) => {
   if (!city) return;
@@ -40,7 +50,7 @@ const addNormalizedCity = async (city: string | undefined) => {
   return normalizedCity.id;
 };
 
-const create = async (req: Request, res: Response, next: NextFunction) => {
+const create = async (req: Request, res: Response) => {
   const validation = createEventSchema.safeParse(req.body);
 
   if (!validation.success) {
@@ -49,29 +59,30 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   }
 
   if (!req.userId) {
-    throw new Error('Bad middleware order');
+    throw new Error('No userId in req object');
   }
 
-  const body: CreateEventInputType = req.body;
+  const eventData = validation.data;
 
-  const normalizedCityId = await addNormalizedCity(body.normalizedCity);
+  const normalizedCityId = await addNormalizedCity(eventData.normalizedCity);
 
-  await prisma.event.create({
+  const event = await prisma.event.create({
     data: {
-      name: body.name,
-      description: body.description,
-      street: body.street,
-      city: body.city,
-      country: body.country,
-      postCode: body.postCode,
-      startDate: body.startDate,
-      categoryId: body.categoryId,
-      longitude: body.longitude,
-      latitude: body.latitude,
+      name: eventData.name,
+      description: eventData.description,
+      street: eventData.street,
+      city: eventData.city,
+      country: eventData.country,
+      postCode: eventData.postCode,
+      startDate: eventData.startDate,
+      endDate: eventData.endDate || eventData.startDate,
+      categoryId: eventData.categoryId,
+      longitude: eventData.longitude,
+      latitude: eventData.latitude,
       normalizedCityId: normalizedCityId,
-      bannerImage: body.bannerImage,
-      eventVisibilityStatus: body.eventVisibilityStatus,
-      eventLocationStatus: body.eventLocationStatus,
+      bannerImage: eventData.bannerImage,
+      eventVisibilityStatus: eventData.eventVisibilityStatus,
+      eventLocationStatus: eventData.eventLocationStatus,
       eventParticipants: {
         create: {
           role: 'ADMIN',
@@ -80,8 +91,8 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
       },
       tags: {
         connectOrCreate:
-          body.tags &&
-          body.tags.map((t) => ({
+          eventData.tags &&
+          eventData.tags.map((t) => ({
             create: {
               name: t,
             },
@@ -93,7 +104,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
     },
   });
 
-  res.status(201).end();
+  res.status(201).json({ eventId: event.id });
 };
 
 const getEventInfo = async (req: Request, res: Response) => {
@@ -118,6 +129,21 @@ const getEventInfo = async (req: Request, res: Response) => {
       },
       category: true,
       tags: true,
+      eventDatePoll: {
+        select: {
+          isEnabled: true,
+        },
+      },
+      eventChat: {
+        select: {
+          isEnabled: true,
+        },
+      },
+      eventPrepareList: {
+        select: {
+          isEnabled: true,
+        },
+      },
     },
   });
 
@@ -126,11 +152,7 @@ const getEventInfo = async (req: Request, res: Response) => {
     return;
   }
 
-  console.log(event.eventVisibilityStatus);
-
-  const isLoggedUserParticipant = event.eventParticipants.some((user) => user.userId === session?.userId);
-
-  console.log('isLoggedUserParticipant', isLoggedUserParticipant);
+  const isLoggedUserParticipant = event.eventParticipants.some((user) => user.userId === session?.user.userId);
 
   if (event.eventVisibilityStatus === 'PUBLIC' || isLoggedUserParticipant) {
     const formattedEvent: EventDetailsType = {
@@ -140,15 +162,26 @@ const getEventInfo = async (req: Request, res: Response) => {
       displayAddress: formatDisplayAddress([event.street, event.city, event.country, event.postCode]),
       participantsCount: event._count.eventParticipants,
       startDate: event.startDate ? event.startDate.toISOString() : undefined,
+      endDate: event.endDate ? event.endDate.toISOString() : undefined,
       latitude: event.latitude ? Number(event.latitude) : undefined,
       longitude: event.longitude ? Number(event.longitude) : undefined,
       categoryName: event.category.name,
       categoryId: event.category.id,
       bannerImage: event.bannerImage || undefined,
       isCurrentUserAdmin: event.eventParticipants.some(
-        (user) => user.role === 'ADMIN' && user.userId === session?.userId
+        (user) => user.role === 'ADMIN' && user.userId === session?.user.userId
       ),
-      isCurrentUserParticipant: event.eventParticipants.some((user) => user.userId === session?.userId),
+      isCurrentUserParticipant: event.eventParticipants.some((user) => user.userId === session?.user.userId),
+      city: event.city || undefined,
+      country: event.country || undefined,
+      eventLocationStatus: event.eventLocationStatus,
+      eventVisibilityStatus: event.eventVisibilityStatus,
+      postCode: event.postCode || undefined,
+      street: event.street || undefined,
+      tags: event.tags.map((t) => t.name),
+      isDatePollEnabled: event.eventDatePoll?.isEnabled || false,
+      isEventChatEnabled: event.eventChat?.isEnabled || false,
+      isEventPrepareListEnabled: event.eventPrepareList?.isEnabled || false,
     };
     res.json(formattedEvent);
   } else {
@@ -205,10 +238,9 @@ const getAll = async (req: Request, res: Response) => {
           : undefined,
       },
       eventLocationStatus: locationStatus === 'STATIONARY' || locationStatus === 'ONLINE' ? locationStatus : undefined,
+      eventVisibilityStatus: 'PUBLIC',
     },
   });
-
-  console.log('pre events');
 
   const events = await prisma.event.findMany({
     skip: (+page - 1) * +limit,
@@ -232,6 +264,7 @@ const getAll = async (req: Request, res: Response) => {
           : undefined,
       },
       eventLocationStatus: locationStatus === 'STATIONARY' || locationStatus === 'ONLINE' ? locationStatus : undefined,
+      eventVisibilityStatus: 'PUBLIC',
     },
     include: {
       _count: true,
@@ -246,22 +279,29 @@ const getAll = async (req: Request, res: Response) => {
     },
   });
 
+  // console.log('events', events);
+
   const formattedEvents = events.map((event) => ({
     id: event.id,
     name: event.name,
     displayAddress: formatDisplayAddress([event.street, event.city, event.country, event.postCode]) || null,
     participantsCount: event._count.eventParticipants || null,
     startDate: event.startDate ? event.startDate.toISOString() : null,
+    endDate: event.endDate ? event.endDate.toISOString() : null,
     latitude: event.latitude ? Number(event.latitude) : null,
     longitude: event.longitude ? Number(event.longitude) : null,
     bannerImage: event.bannerImage || null,
     visibilityStatus: event.eventVisibilityStatus,
+    locationStatus: event.eventLocationStatus,
   }));
 
   const publicEvents = formattedEvents.filter(isPublicEvent);
+
+  // console.log('formattedEvents', formattedEvents);
+  // console.log('publicEvents', publicEvents);
   // const privateEvents = formattedEvents.filter(isPrivateEvent);
 
-  const eventShowcases: EventShowcaseType[] = [...publicEvents];
+  const eventShowcases = [...publicEvents];
 
   res.status(200).json({ events: eventShowcases, currentPage: +page, pageCount: Math.ceil(eventsCount / +limit) });
 };
@@ -305,6 +345,17 @@ const addParticipant = async (req: Request, res: Response) => {
     throw new Error('No userId in protected route');
   }
 
+  const countEventParticipant = await prisma.eventParticipant.count({
+    where: {
+      userId,
+      eventId,
+    },
+  });
+
+  if (countEventParticipant) {
+    throw new ConflictError('User already event Participant');
+  }
+
   const [event, userToAdd] = await Promise.all([
     prisma.event.findUnique({
       where: {
@@ -324,6 +375,10 @@ const addParticipant = async (req: Request, res: Response) => {
 
   if (!userToAdd) {
     throw new NotFoundError(`User with id ${userId} dose not exists`);
+  }
+
+  if (currentUserId !== userId) {
+    throw new UnauthenticatedError('Only logged user can add himself to event');
   }
 
   // const eventAdmins = await prisma.eventParticipant.findMany({
@@ -558,8 +613,6 @@ const acceptEventInvitation = async (req: Request, res: Response) => {
     throw new NotFoundError(`Invitation with id ${invitationId} dose not exists`);
   }
 
-  console.log(invitation.userId, loggedUserId, invitation.isAdminAccepted);
-
   const isUserEligibleToJoinEvent =
     (invitation.userId === loggedUserId && invitation.isAdminAccepted) ||
     (eventAdminsIds.includes(loggedUserId) && invitation.isUserAccepted);
@@ -672,6 +725,7 @@ const getAllParticipants = async (req: Request, res: Response) => {
 
 const searchUsersToInvite = async (req: Request, res: Response) => {
   const loggedUserId = req.userId;
+
   if (!loggedUserId) {
     throw new Error('No userId in req object');
   }
@@ -739,7 +793,721 @@ const searchUsersToInvite = async (req: Request, res: Response) => {
   res.json(formattedUsers);
 };
 
+const updateEvent = async (req: Request, res: Response) => {
+  const eventId = req.params.eventId;
+
+  const validation = createEventSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+
+  if (!req.userId) {
+    throw new Error('No userId in req object');
+  }
+
+  const eventParticipant = await prisma.eventParticipant.findUnique({
+    where: {
+      userId_eventId: {
+        eventId,
+        userId: req.userId,
+      },
+    },
+  });
+
+  console.log('eventParticipant', eventParticipant);
+
+  if (!eventParticipant || eventParticipant.role !== 'ADMIN') {
+    throw new UnauthenticatedError('You dont have permission do update this event');
+  }
+
+  const eventData = validation.data;
+
+  const normalizedCityId = await addNormalizedCity(eventData.normalizedCity);
+
+  await prisma.event.update({
+    where: {
+      id: eventId,
+    },
+    data: {
+      tags: {
+        set: [],
+      },
+    },
+  });
+
+  const event = await prisma.event.update({
+    where: {
+      id: eventId,
+    },
+    data: {
+      name: eventData.name,
+      description: eventData.description,
+      street: eventData.street,
+      city: eventData.city,
+      country: eventData.country,
+      postCode: eventData.postCode,
+      startDate: eventData.startDate,
+      endDate: eventData.endDate || eventData.startDate,
+      categoryId: eventData.categoryId,
+      longitude: eventData.longitude,
+      latitude: eventData.latitude,
+      normalizedCityId: normalizedCityId,
+      bannerImage: eventData.bannerImage || null,
+      eventVisibilityStatus: eventData.eventVisibilityStatus,
+      eventLocationStatus: eventData.eventLocationStatus,
+      tags: {
+        connectOrCreate:
+          eventData.tags &&
+          eventData.tags.map((t) => ({
+            create: {
+              name: t,
+            },
+            where: {
+              name: t,
+            },
+          })),
+      },
+    },
+  });
+
+  res.status(200).end();
+};
+
+const getGroupsToShare = async (req: Request, res: Response) => {
+  const loggedUser = req.userId;
+  if (!loggedUser) {
+    throw new Error('No userId in req obj');
+  }
+  const eventId = req.params.eventId;
+
+  const validation = searchGroupsToShareEventSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+
+  const { data: body } = validation;
+
+  const eventToShare = await prisma.event.findUnique({
+    where: {
+      id: eventId,
+    },
+  });
+
+  if (!eventToShare) {
+    throw new ValidationError('Event dont exists');
+  }
+
+  if (eventToShare.eventVisibilityStatus === 'PRIVATE') {
+    throw new ValidationError('You cant share private events');
+  }
+
+  const groups = await prisma.group.findMany({
+    take: body.limit || 10,
+    where: {
+      name: {
+        contains: body.phrase,
+        mode: 'insensitive',
+      },
+      members: {
+        some: {
+          userId: loggedUser,
+        },
+      },
+      eventsShared: {
+        none: {
+          eventId,
+          userId: loggedUser,
+        },
+      },
+    },
+  });
+
+  const formattedGroups: GroupType[] = groups.map((group) => ({
+    id: group.id,
+    name: group.name,
+    bannerImage: group.bannerImage,
+  }));
+
+  res.json(formattedGroups);
+};
+
+const createDatePoll = async (req: Request, res: Response) => {
+  const loggedUser = req.userId;
+  const eventId = req.params.eventId;
+
+  if (!loggedUser) {
+    throw new Error('No userId in req object');
+  }
+
+  const isLoggedUserAdmin = await prisma.eventParticipant.count({
+    where: {
+      role: 'ADMIN',
+      userId: loggedUser,
+      eventId,
+    },
+  });
+
+  if (!isLoggedUserAdmin) {
+    throw new UnauthenticatedError(`You dont have permissions to create poll`);
+  }
+
+  // const validation = createDatePollSchema.safeParse(req.body);
+  // if (!validation.success) {
+  //   const errorMessage = generateErrorMessage(validation.error.issues);
+  //   throw new ValidationError(errorMessage);
+  // }
+  // const { data: body } = validation;
+
+  const eventCount = await prisma.event.count({
+    where: {
+      id: eventId,
+    },
+  });
+
+  if (!eventCount) {
+    throw new NotFoundError(`Event with id ${eventId} doesn't exists`);
+  }
+
+  const createdEventDatePoll = await prisma.eventDatePoll.upsert({
+    where: {
+      eventId,
+    },
+    update: {
+      isEnabled: true,
+    },
+    create: {
+      eventId,
+      isEnabled: true,
+    },
+  });
+
+  res.status(201).json(createdEventDatePoll);
+};
+
+const hideDatePoll = async (req: Request, res: Response) => {
+  const loggedUser = req.userId;
+  const { eventId } = req.params;
+
+  if (!loggedUser) {
+    throw new Error('No userId in req object');
+  }
+
+  const isLoggedUserAdmin = await prisma.eventParticipant.count({
+    where: {
+      role: 'ADMIN',
+      userId: loggedUser,
+      eventId,
+    },
+  });
+
+  if (!isLoggedUserAdmin) {
+    throw new UnauthenticatedError(`You dont have permissions to create poll`);
+  }
+
+  const datePoll = await prisma.eventDatePoll.findFirst({
+    where: {
+      event: {
+        id: eventId,
+      },
+    },
+  });
+
+  if (!datePoll) {
+    throw new NotFoundError(`There is no date poll for event with id  ${eventId}`);
+  }
+
+  const datePollId = datePoll.id;
+
+  await prisma.eventDatePoll.update({
+    where: {
+      id: datePollId,
+    },
+    data: {
+      isEnabled: false,
+    },
+  });
+
+  res.status(204).end();
+};
+
+const getDatePoll = async (req: Request, res: Response) => {
+  const loggedUser = req.userId;
+  if (!loggedUser) {
+    throw new Error('No userId in req object');
+  }
+  const { eventId } = req.params;
+
+  const eventDatePoll = await prisma.eventDatePoll.findFirst({
+    where: {
+      event: {
+        id: eventId,
+      },
+    },
+    include: {
+      eventDatePollOptions: {
+        select: {
+          _count: true,
+          startDate: true,
+          endDate: true,
+          id: true,
+          usersSelectedDatePollOption: {
+            select: {
+              participant: {
+                select: {
+                  id: true,
+                  name: true,
+                  image: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!eventDatePoll) {
+    throw new NotFoundError(`There is not date poll for event with id ${eventId}`);
+  }
+
+  const formattedEventDatePoll: EventDatePollType = {
+    id: eventDatePoll.id,
+    isEnabled: eventDatePoll.isEnabled,
+    options: eventDatePoll.eventDatePollOptions.map((option) => ({
+      id: option.id,
+      startDate: option.startDate.toISOString(),
+      endDate: option.endDate ? option.endDate.toISOString() : null,
+      isSelected: option.usersSelectedDatePollOption.some((participant) => participant.participant.id === loggedUser),
+      userCount: option._count.usersSelectedDatePollOption,
+      showCaseUsers: option.usersSelectedDatePollOption.map((participant) => ({
+        id: participant.participant.id,
+        name: participant.participant.name,
+        image: participant.participant.image,
+      })),
+    })),
+  };
+
+  res.json(formattedEventDatePoll);
+};
+
+const createDatePollOption = async (req: Request, res: Response) => {
+  const { eventId, datePollId } = req.params;
+  const loggedUser = req.userId;
+
+  if (!loggedUser) {
+    throw new Error('No userId in req object');
+  }
+
+  const isLoggedUserEventParticipant = await prisma.eventParticipant.count({
+    where: {
+      userId: loggedUser,
+      eventId,
+    },
+  });
+
+  if (!isLoggedUserEventParticipant) {
+    throw new UnauthenticatedError(`You dont have permissions to create event date poll option`);
+  }
+
+  const validation = createDatePollOptionSchema.safeParse(req.body);
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+  const { data: body } = validation;
+
+  const createdEventDatePollOption = await prisma.eventDatePollOption.create({
+    data: {
+      startDate: body.startDate,
+      endDate: body.endDate,
+      eventDatePollId: datePollId,
+    },
+  });
+
+  res.status(201).json(createdEventDatePollOption);
+};
+
+const toggleDatePollOption = async (req: Request, res: Response) => {
+  const { eventId } = req.params;
+  const loggedUserId = req.userId;
+
+  if (!loggedUserId) {
+    throw new Error('No userId in req object');
+  }
+
+  const validation = toggleDatePollSchema.safeParse(req.body);
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+  const { data: body } = validation;
+
+  const isLoggedUserEventParticipant = await prisma.eventParticipant.count({
+    where: {
+      eventId,
+      userId: loggedUserId,
+    },
+  });
+
+  if (!isLoggedUserEventParticipant) {
+    console.log('AAA');
+    throw new UnauthenticatedError('You dont have permission to toggle poll option');
+  }
+
+  const eventDatePollOption = await prisma.eventDatePollOption.findUnique({
+    where: {
+      id: body.optionId,
+    },
+    include: {
+      usersSelectedDatePollOption: {
+        select: {
+          participantId: true,
+        },
+      },
+    },
+  });
+
+  if (!eventDatePollOption) {
+    throw new NotFoundError(`DateEventOption with id ${body.optionId} dose not exists`);
+  }
+
+  const isOptionSelected = eventDatePollOption.usersSelectedDatePollOption.some(
+    (user) => user.participantId === loggedUserId
+  );
+
+  if (isOptionSelected) {
+    await prisma.usersSelectedDatePollOption.delete({
+      where: {
+        participantId_eventDatePollOptionId: {
+          participantId: loggedUserId,
+          eventDatePollOptionId: body.optionId,
+        },
+      },
+    });
+  } else {
+    await prisma.usersSelectedDatePollOption.create({
+      data: {
+        participantId: loggedUserId,
+        eventDatePollOptionId: body.optionId,
+      },
+    });
+  }
+
+  res.json(200);
+};
+
+const updateEventTime = async (req: Request, res: Response) => {
+  const loggedUser = req.userId;
+  const eventId = req.params.eventId;
+
+  if (!loggedUser) {
+    throw new Error('No user in req object');
+  }
+
+  const validation = updateEventTimeSchema.safeParse(req.body);
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+  const { data: body } = validation;
+
+  await prisma.event.update({
+    where: {
+      id: eventId,
+    },
+    data: {
+      startDate: body.startDate,
+      endDate: body.endDate,
+    },
+  });
+
+  res.status(200).end();
+};
+
+const deleteDatePollOption = async (req: Request, res: Response) => {
+  const { eventId, optionId } = req.params;
+  const loggedUserId = req.userId;
+
+  if (!loggedUserId) {
+    throw new Error('No userId in req object');
+  }
+
+  const isLoggedUserEventAdmin = await prisma.eventParticipant.count({
+    where: {
+      role: 'ADMIN',
+      eventId,
+      userId: loggedUserId,
+    },
+  });
+
+  if (!isLoggedUserEventAdmin) {
+    throw new UnauthenticatedError('You dont have permission to remove poll option');
+  }
+
+  await prisma.eventDatePollOption.delete({
+    where: {
+      id: optionId,
+    },
+  });
+
+  res.status(201).end();
+};
+
+const createEventChat = async (req: Request, res: Response) => {
+  const loggedUser = req.userId;
+  const eventId = req.params.eventId;
+
+  if (!loggedUser) {
+    throw new Error('No userId in req object');
+  }
+
+  const isLoggedUserAdmin = await prisma.eventParticipant.count({
+    where: {
+      role: 'ADMIN',
+      userId: loggedUser,
+      eventId,
+    },
+  });
+
+  if (!isLoggedUserAdmin) {
+    throw new UnauthenticatedError(`You dont have permissions to create poll`);
+  }
+
+  // const validation = createDatePollSchema.safeParse(req.body);
+  // if (!validation.success) {
+  //   const errorMessage = generateErrorMessage(validation.error.issues);
+  //   throw new ValidationError(errorMessage);
+  // }
+  // const { data: body } = validation;
+
+  const eventCount = await prisma.event.count({
+    where: {
+      id: eventId,
+    },
+  });
+
+  if (!eventCount) {
+    throw new NotFoundError(`Event with id ${eventId} doesn't exists`);
+  }
+
+  const createdEventChat = await prisma.eventChat.upsert({
+    where: {
+      eventId,
+    },
+    update: {
+      isEnabled: true,
+    },
+    create: {
+      eventId,
+      isEnabled: true,
+    },
+  });
+
+  res.status(201).json(createdEventChat);
+};
+
+const hideEventChat = async (req: Request, res: Response) => {
+  const loggedUser = req.userId;
+  const { eventId } = req.params;
+
+  if (!loggedUser) {
+    throw new Error('No userId in req object');
+  }
+
+  const isLoggedUserAdmin = await prisma.eventParticipant.count({
+    where: {
+      role: 'ADMIN',
+      userId: loggedUser,
+      eventId,
+    },
+  });
+
+  if (!isLoggedUserAdmin) {
+    throw new UnauthenticatedError(`You dont have permissions to create poll`);
+  }
+
+  const eventChat = await prisma.eventChat.findFirst({
+    where: {
+      event: {
+        id: eventId,
+      },
+    },
+  });
+
+  if (!eventChat) {
+    throw new NotFoundError(`There is no chat for event with id  ${eventId}`);
+  }
+
+  const eventChatId = eventChat.id;
+
+  console.log('eventChatId', eventChatId);
+
+  await prisma.eventChat.update({
+    where: {
+      id: eventChatId,
+    },
+    data: {
+      isEnabled: false,
+    },
+  });
+
+  res.status(204).end();
+};
+
+const getEventChatMessages = async (req: Request, res: Response) => {
+  const eventId = req.params.eventId;
+
+  const eventCount = await prisma.event.count({
+    where: {
+      id: eventId,
+    },
+  });
+
+  if (!eventCount) {
+    throw new ValidationError(`No event with id ${eventId}`);
+  }
+
+  const validation = getGroupMessagesQueryParamsSchema.safeParse(req.query);
+
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+
+  const { limit = 10, cursor } = validation.data;
+
+  const messages = await prisma.eventChatMessage.findMany({
+    take: limit + 1,
+    cursor: cursor
+      ? {
+          id: cursor,
+        }
+      : undefined,
+    where: {
+      eventChat: {
+        eventId,
+      },
+    },
+    include: {
+      author: {
+        select: {
+          id: true,
+          name: true,
+          image: true,
+        },
+      },
+    },
+    orderBy: [
+      {
+        createdAt: 'desc',
+      },
+    ],
+  });
+
+  const isNextPage = messages.length > limit;
+  const messagesToFormat = isNextPage ? messages.slice(0, -1) : messages;
+  const nextCursor = isNextPage ? messages[messages.length - 1]?.id : null;
+
+  const formattedMessages: GroupMessageType[] = messagesToFormat.map((m) => ({
+    id: m.id,
+    content: m.content,
+    createdAt: new Date(m.createdAt).toISOString(),
+    author: {
+      id: m.author.id,
+      name: m.author.name,
+      image: m.author.image,
+    },
+  }));
+
+  const result: GetGroupMessagesReturnType = {
+    messages: formattedMessages,
+    cursor: nextCursor,
+  };
+
+  res.json(result);
+};
+
+const createEventChatMessage = async (req: Request, res: Response) => {
+  const loggedUserId = req.userId;
+  if (!loggedUserId) {
+    throw new Error('no userId in req object');
+  }
+  const eventId = req.params.eventId;
+
+  const eventChat = await prisma.eventChat.findUnique({
+    where: {
+      eventId,
+    },
+  });
+
+  if (!eventChat) {
+    throw new ValidationError(`No event chat with for event with id  ${eventId}`);
+  }
+
+  const validation = createGroupMessageSchema.safeParse(req.body);
+
+  if (!validation.success) {
+    const errorMessage = generateErrorMessage(validation.error.issues);
+    throw new ValidationError(errorMessage);
+  }
+
+  const { content } = validation.data;
+
+  const message = await prisma.eventChatMessage.create({
+    data: {
+      content,
+      authorId: loggedUserId,
+      eventChatId: eventChat.id,
+    },
+  });
+
+  res.status(201).json(message);
+};
+
+const deleteEvent = async (req: Request, res: Response) => {
+  const loggedUserId = req.userId;
+  if (!loggedUserId) {
+    throw new Error('no userId in req object');
+  }
+  const eventId = req.params.eventId;
+
+  console.log('eventId', eventId);
+  console.log('loggedUserId', loggedUserId);
+
+  const eventParticipant = await prisma.eventParticipant.findUnique({
+    where: {
+      userId_eventId: {
+        eventId,
+        userId: loggedUserId,
+      },
+    },
+    include: {
+      user: true,
+    },
+  });
+
+  console.log('eventParticipant AAAAAAAAAAAA', eventParticipant, eventParticipant?.user);
+
+  if (!eventParticipant || eventParticipant.role !== 'ADMIN') {
+    console.log('COOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO');
+    throw new UnauthenticatedError('You dont have permission do delete this event');
+  }
+
+  await prisma.event.delete({
+    where: {
+      id: eventId,
+    },
+  });
+
+  res.status(204).end();
+};
+
 export default {
+  updateEvent,
   searchUsersToInvite,
   getAllParticipants,
   getAllEventInvitation,
@@ -752,4 +1520,17 @@ export default {
   getNormalizedCities,
   addParticipant,
   removeParticipant,
+  getGroupsToShare,
+  createDatePoll,
+  getDatePoll,
+  createDatePollOption,
+  toggleDatePollOption,
+  hideDatePoll,
+  updateEventTime,
+  deleteDatePollOption,
+  createEventChat,
+  hideEventChat,
+  getEventChatMessages,
+  createEventChatMessage,
+  deleteEvent,
 };

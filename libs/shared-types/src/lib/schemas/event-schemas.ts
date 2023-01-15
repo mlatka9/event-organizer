@@ -18,6 +18,10 @@ export const createEventSchema = z.object({
     .string()
     .refine((date) => (date ? isISODate(date) : true), { message: 'Nieprawidłowy format daty' })
     .optional(),
+  endDate: z
+    .string()
+    .refine((date) => (date ? isISODate(date) : true), { message: 'Nieprawidłowy format daty' })
+    .optional(),
   latitude: z.number().min(-90).max(90).optional(),
   longitude: z.number().min(-180).max(180).optional(),
   tags: z.array(z.string()),
@@ -40,4 +44,48 @@ export const getAllEventsSchema = z.object({
 
 export const createEventInvitationSchema = z.object({
   ids: z.array(z.string()),
+});
+
+export const searchGroupsToShareEventSchema = z.object({
+  phrase: z.string().optional(),
+  limit: z.preprocess((val) => val && Number(val), z.number()).optional(),
+});
+
+export const createDatePollOptionSchema = z.object({
+  startDate: z
+    .string()
+    .min(1, { message: 'Data rozpoczęcia jest wymagana' })
+    .refine((date) => (date ? isISODate(date) : true), { message: 'Nieprawidłowy format daty 1' }),
+  endDate: z
+    .string()
+    .refine((date) => (date ? isISODate(date) : true), { message: 'Nieprawidłowy format daty' })
+    .optional(),
+});
+
+// export const createDatePollSchema = z.object({
+//   options: z.array(createDatePollOptionSchema),
+// });
+
+export const toggleDatePollSchema = z.object({
+  optionId: z.string().min(1, { message: 'Option id is required' }),
+});
+
+export const updateEventTimeSchema = z.object({
+  startDate: z
+    .string()
+    .min(1, { message: 'Data rozpoczęcia jest wymagana' })
+    .refine((date) => (date ? isISODate(date) : true), { message: 'Nieprawidłowy format daty 1' }),
+  endDate: z
+    .string()
+    .refine((date) => (date ? isISODate(date) : true), { message: 'Nieprawidłowy format daty' })
+    .optional(),
+});
+
+export const createEventPrepareItemInput = z.object({
+  description: z.string().min(1, { message: 'Opis jest wymagany' }),
+  participantsLimit: z.preprocess((val) => val && Number(val), z.number()),
+});
+
+export const toggleIsItemDoneInput = z.object({
+  participantId: z.string().min(1, { message: 'Id użytkownika jest wymagany' }),
 });

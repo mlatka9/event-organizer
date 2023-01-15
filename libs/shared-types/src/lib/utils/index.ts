@@ -3,5 +3,6 @@ const isoDateRegExp = new RegExp(
 );
 
 export const isISODate = (str: string) => {
+  console.log('isISODate str', str);
   return isoDateRegExp.test(str);
 };
