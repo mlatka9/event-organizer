@@ -1,6 +1,3 @@
-npx env-cmd -f .env.test nx run server:serve
-nx e2e frontend-e2e
-
 # Organizator wydarzeń
 
 ## Opis
@@ -13,7 +10,7 @@ wszystkich, czy tylko ma być udostępnione wybranej grupie osób.
 
 Serwis dostarcza liczne opcjonalne moduły, które mają za zadanie ułatwić komunikację
 między organizatorem a odbiorcami. Są to między innymi podział wydatków grupowych,
-wybieranie wspólnego terminu wydarzenia, czat na żywo czy sekcja pytań i odpowiedzi.
+wybieranie wspólnego terminu wydarzenia czy czat.
 Organizator może dowolnie skonfigurować wydarzenie, wybierając tylko te moduły, które
 najbardziej odpowiadają jego potrzebom. To organizator decyduje, jak bardzo rozbudowane
 powinno być jego wydarzenie.
@@ -34,8 +31,7 @@ Dzięki wspólnej platformie mogą szybko porozumieć się i razem planować spo
 członków, dzięki czemu uczestnicy mogą się na niej bezpiecznie komunikować.
 Mogą oni planować z wyprzedzeniem wydarzenia takie jak wspólne wyjścia do kina
 czy ogniska. Dzięki modułom mogą oni bez najmniejszego problemu wybrać termin,
-który będzie dla wszystkich odpowiedni, a w razie potrzeby mogą po zakończonym
-wydarzeniu z łatwością podzielić między siebie wydatki.
+który będzie dla wszystkich odpowiedni.
 - Lokalny zespół muzyczny zamierza zorganizować swój pierwszy koncert. Mogą oni
 stworzyć wydarzenie, które udostępnią na grupie fanów muzyki rockowej w swoim
 mieście. Aplikacja daje im łatwy sposób na znalezienie odbiorców oraz promocję
@@ -44,13 +40,45 @@ uczestników, które pomogą im się rozwinąć.
 
 ## Diagram ERD
 
-![diagram](https://user-images.githubusercontent.com/72691985/202010304-8e6999af-292e-40b2-a53d-7ebaa9f267fb.jpg)
+![erd2](https://user-images.githubusercontent.com/72691985/212567675-9d6659c2-2c99-4c6e-82d8-b4fcb517b20c.jpg)
 
 
-## Podział prac
+## Wykorzystane technologie
 
-- Analiza wymagań biznesowych i analiza rynku: Mateusz Łątka
-- Implementacja aplikacji backendowej: Mateusz Łątka
-- Implementacja aplikacji frontendowej: Mateusz Łątka
-- Przeprowadzenie testów: Mateusz Łątka
-- Sporządzenie dokumentacji technicznej: Mateusz Łątka
+- TypeScript
+- React.js
+- TailwindCSS
+- Express.js
+- Prisma
+- PostgreSQL
+
+## Jak uruchomić
+
+W katalogu głównym projektu dodaj plik `.env` na podstawie pliku `.env.example`. Ma on zawierać zmienne środowiskowe 
+- `DATABASE_URL` - link do bazy danych produkcyjnej
+- `DATABASE_URL_TEST` - link do bazy danych testowej
+- `JWT_SECRET` - klucz wykorzystywany do podpisywania tokenu JWT
+- `NX_API_URL` - baza linku aplikacji serwerowej
+
+- `npm install` - pobiera wymagane zależności do całego projektu
+
+### Aplikacja serwerowa
+- `npx prisma db push` - generuje tabele bazy danych na podstawie schematu prismy
+- `npx nx serve server` - uruchamia aplikację
+
+### Aplikacja kliencka
+- `npx nx serve frontend` - uruchamia aplikację
+
+### Testy jednostkowe aplikacji serwerowej
+- `npx env-cmd -f .env.test` npx prisma db push - generuje tabele bazy danych na podstawie schematu prismy do bazy testowej
+- `npx nx test server` - uruchamia zestaw wszystkich testów
+
+### Testy e2e aplikacji klienckiej
+- `npx nx serve server` - uruchom aplikację serwerową
+- `npx nx e2e frontend-e2e` - uruchamia zestaw testów e2e
+
+## Autor
+
+Mateusz Łątka
+
+github [@mlatka9](https://github.com/mlatka9)
