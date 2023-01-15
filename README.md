@@ -52,6 +52,10 @@ uczestników, które pomogą im się rozwinąć.
 - Prisma
 - PostgreSQL
 
+## Dokumentacja aplikacji serwerowej
+
+- Swagger [https://app.swaggerhub.com/apis-docs/mlatka9/event-organizer/1.0](https://app.swaggerhub.com/apis-docs/mlatka9/event-organizer/1.0)
+
 ## Jak uruchomić
 
 W katalogu głównym projektu dodaj plik `.env` na podstawie pliku `.env.example`. Ma on zawierać zmienne środowiskowe 
