@@ -20,9 +20,13 @@ const clearDB = async () => {
     { id: '3', name: 'books' },
   ];
 
-  await prisma.category.createMany({
-    data: categoriesNames,
-  });
+  try {
+    await prisma.category.createMany({
+      data: categoriesNames,
+    });
+  } catch (err) {
+    console.log(err);
+  }
 
   console.log('clear db end');
 };

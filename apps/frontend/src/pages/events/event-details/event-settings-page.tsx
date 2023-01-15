@@ -8,7 +8,6 @@ import React, { useState } from 'react';
 import { useEventInfoQuery } from '../../../hooks/query/events';
 import Button from '../../../components/common/button';
 import ModalWrapper from '../../../components/common/modal-wrapper';
-import event from '../../../../../server/src/routes/event';
 const EventSettingsPage = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -28,7 +27,10 @@ const EventSettingsPage = () => {
 
   const { data: defaultValues, isSuccess: isEventInfoSuccess } = useEventInfoQuery(eventId);
   const { mutate: updateEvent, isLoading } = useUpdateEventMutation(onSuccess);
-  const { mutate: deleteEvent, isLoading: isDeleteLoading } = useDeleteEventMutation(() => navigate('/events'));
+  const { mutate: deleteEvent, isLoading: isDeleteLoading } = useDeleteEventMutation(() => {
+    navigate('/events');
+    toast.success('Pomyślnie usunięto wydarzenie');
+  });
 
   const handleDeleteEvent = () => {
     deleteEvent({
@@ -78,7 +80,12 @@ const EventSettingsPage = () => {
       {isModalOpen && (
         <ModalWrapper title={'Usuń wydarzenie'} handleCloseModal={closeModal}>
           <p>Czy napewno chcesz usuńąć wydarzenie</p>
-          <Button kind={'error'} onClick={handleDeleteEvent} disabled={isDeleteLoading}>
+          <Button
+            kind={'error'}
+            onClick={handleDeleteEvent}
+            disabled={isDeleteLoading}
+            data-cy={'confirm-delete-event-button'}
+          >
             Usuń
           </Button>
         </ModalWrapper>

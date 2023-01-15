@@ -32,6 +32,7 @@ import { formatDisplayAddress } from '../lib/format-display-address';
 import { isPublicEvent } from '../lib/events';
 import user from '../routes/user';
 import { optionsToId } from 'react-intersection-observer/observe';
+import { ConflictError } from '../errors/conflict';
 
 const addNormalizedCity = async (city: string | undefined) => {
   if (!city) return;
@@ -344,6 +345,17 @@ const addParticipant = async (req: Request, res: Response) => {
     throw new Error('No userId in protected route');
   }
 
+  const countEventParticipant = await prisma.eventParticipant.count({
+    where: {
+      userId,
+      eventId,
+    },
+  });
+
+  if (countEventParticipant) {
+    throw new ConflictError('User already event Participant');
+  }
+
   const [event, userToAdd] = await Promise.all([
     prisma.event.findUnique({
       where: {
@@ -363,6 +375,10 @@ const addParticipant = async (req: Request, res: Response) => {
 
   if (!userToAdd) {
     throw new NotFoundError(`User with id ${userId} dose not exists`);
+  }
+
+  if (currentUserId !== userId) {
+    throw new UnauthenticatedError('Only logged user can add himself to event');
   }
 
   // const eventAdmins = await prisma.eventParticipant.findMany({
@@ -1459,6 +1475,9 @@ const deleteEvent = async (req: Request, res: Response) => {
   }
   const eventId = req.params.eventId;
 
+  console.log('eventId', eventId);
+  console.log('loggedUserId', loggedUserId);
+
   const eventParticipant = await prisma.eventParticipant.findUnique({
     where: {
       userId_eventId: {
@@ -1466,9 +1485,15 @@ const deleteEvent = async (req: Request, res: Response) => {
         userId: loggedUserId,
       },
     },
+    include: {
+      user: true,
+    },
   });
 
+  console.log('eventParticipant AAAAAAAAAAAA', eventParticipant, eventParticipant?.user);
+
   if (!eventParticipant || eventParticipant.role !== 'ADMIN') {
+    console.log('COOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO');
     throw new UnauthenticatedError('You dont have permission do delete this event');
   }
 

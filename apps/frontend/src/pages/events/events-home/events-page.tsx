@@ -113,6 +113,7 @@ const EventsPage = () => {
         </h1>
         {user && (
           <Link
+            data-cy={'new-event-link'}
             to={'/events/create'}
             className={'flex items-center px-3 ml-5 text-sm bg-blue-600 text-white font-semibold py-2 rounded-md'}
           >
